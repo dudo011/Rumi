@@ -430,14 +430,10 @@ class _PadButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: label,
-      child: IconButton(
-        tooltip: label,
-        onPressed: onTap,
-        icon: Icon(icon, color: Colors.white, size: 31),
-      ),
+    return IconButton(
+      tooltip: label,
+      onPressed: onTap,
+      icon: Icon(icon, color: Colors.white, size: 31),
     );
   }
 }
@@ -449,23 +445,19 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: '조사하기',
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        width: 82,
-        height: 82,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: enabled ? const Color(0xFFFFD86E) : const Color(0x995A5064),
-          boxShadow: enabled ? const [BoxShadow(color: Color(0x88FFE38A), blurRadius: 20, spreadRadius: 3)] : null,
-        ),
-        child: IconButton(
-          tooltip: '조사하기',
-          onPressed: onPressed,
-          icon: Icon(Icons.search_rounded, color: enabled ? const Color(0xFF4A382A) : Colors.white54, size: 38),
-        ),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      width: 82,
+      height: 82,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: enabled ? const Color(0xFFFFD86E) : const Color(0x995A5064),
+        boxShadow: enabled ? const [BoxShadow(color: Color(0x88FFE38A), blurRadius: 20, spreadRadius: 3)] : null,
+      ),
+      child: IconButton(
+        tooltip: '조사하기',
+        onPressed: onPressed,
+        icon: Icon(Icons.search_rounded, color: enabled ? const Color(0xFF4A382A) : Colors.white54, size: 38),
       ),
     );
   }
