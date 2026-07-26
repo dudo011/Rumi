@@ -16,6 +16,32 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> solveChestPuzzle(WidgetTester tester) async {
+    await tester.tap(find.byKey(const Key('key-hotspot')));
+    await tester.pumpAndSettle();
+    expect(find.text('🔑 낡은 별열쇠 발견!'), findsOneWidget);
+
+    await tester.tap(find.text('열쇠 챙기기'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('chest-hotspot')));
+    await tester.pumpAndSettle();
+    expect(find.text('별빛 암호판'), findsOneWidget);
+
+    for (final value in [1, 2, 3, 4, 6]) {
+      await tester.tap(find.byKey(Key('factor-$value')));
+      await tester.pump();
+    }
+
+    await tester.tap(find.byKey(const Key('check-puzzle-answer')));
+    await tester.pumpAndSettle();
+    expect(find.text('✨ 새로운 단서 발견!'), findsOneWidget);
+    expect(find.text('상자 속 은빛 털'), findsOneWidget);
+
+    await tester.tap(find.textContaining('수첩에 저장'));
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('사건 현장의 핵심 단서 세 개를 수집하고 다음 장면으로 이동한다', (tester) async {
     tester.view.physicalSize = const Size(900, 1400);
     tester.view.devicePixelRatio = 1;
@@ -30,16 +56,16 @@ void main() {
     );
 
     expect(find.text('단서 0/3'), findsOneWidget);
-    expect(find.byTooltip('졸고 있는 개구리 조사'), findsOneWidget);
+    expect(find.byTooltip('반짝이는 꽃밭 조사'), findsOneWidget);
 
-    await tester.tap(find.byTooltip('졸고 있는 개구리 조사'));
-    await tester.pump();
-    expect(find.textContaining('아무것도 못 봤대요'), findsOneWidget);
+    await tester.tap(find.byTooltip('반짝이는 꽃밭 조사'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.textContaining('씨앗의 흔적은 없어요'), findsOneWidget);
     expect(find.text('단서 0/3'), findsOneWidget);
 
     await collectClue(tester, '빈 별받침대 조사', '오른쪽으로 난 긁힌 자국');
     await collectClue(tester, '작은 발자국 조사', '작고 둥근 발자국');
-    await collectClue(tester, '울타리의 은빛 털 조사', '울타리의 은빛 털');
+    await solveChestPuzzle(tester);
 
     expect(find.text('단서 3/3'), findsOneWidget);
     expect(find.text('단서 3개를 모두 찾았어요!'), findsOneWidget);
@@ -73,7 +99,8 @@ void main() {
 
     expect(find.byTooltip('빈 별받침대 조사'), findsOneWidget);
     expect(find.byTooltip('작은 발자국 조사'), findsOneWidget);
-    expect(find.byTooltip('울타리의 은빛 털 조사'), findsOneWidget);
+    expect(find.byTooltip('분수대의 잠긴 상자 조사'), findsOneWidget);
+    expect(find.byTooltip('작은 돌 아래 조사'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
