@@ -9,62 +9,49 @@ void main() {
     );
   }
 
-  testWidgets('열쇠를 찾기 전에는 상자가 열리지 않는다', (tester) async {
+  Future<void> start(WidgetTester tester) async {
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('start-investigation')));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('처음에는 핵심 진행 지점이 단계적으로 숨겨진다', (tester) async {
     await tester.pumpWidget(buildScreen());
+    await start(tester);
 
-    await tester.tap(find.byTooltip('분수대의 잠긴 상자 조사'));
-    await tester.pump(const Duration(milliseconds: 300));
-
-    expect(find.textContaining('별 모양 열쇠구멍'), findsOneWidget);
-    expect(find.text('별빛 암호판'), findsNothing);
+    expect(find.byTooltip('빈 별받침대 조사'), findsOneWidget);
+    expect(find.byTooltip('오른쪽 길의 작은 발자국 조사'), findsNothing);
+    expect(find.byTooltip('분수대의 잠긴 상자 조사'), findsNothing);
+    expect(find.byTooltip('한쪽으로 누운 꽃밭 조사'), findsOneWidget);
+    expect(find.byTooltip('연못의 떠다니는 잎 조사'), findsOneWidget);
   });
 
-  testWidgets('열쇠를 찾은 뒤 상자에서 약수 퍼즐을 풀 수 있다', (tester) async {
+  testWidgets('오답은 실패시키지 않고 이야기형 힌트를 제공한다', (tester) async {
     await tester.pumpWidget(buildScreen());
+    await start(tester);
+
+    await tester.tap(find.byTooltip('빈 별받침대 조사'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('scratch-option-0')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('scratch-check-answer')));
+    await tester.pump();
+
+    expect(find.byKey(const Key('scratch-feedback')), findsOneWidget);
+    expect(find.textContaining('12 ÷ 3'), findsOneWidget);
+    expect(find.text('증거 0/3'), findsOneWidget);
+  });
+
+  testWidgets('상자는 발자국을 추적하기 전에는 나타나지 않는다', (tester) async {
+    await tester.pumpWidget(buildScreen());
+    await start(tester);
+
+    expect(find.byTooltip('분수대의 잠긴 상자 조사'), findsNothing);
+    expect(find.byTooltip('작은 돌 아래 조사'), findsOneWidget);
 
     await tester.tap(find.byTooltip('작은 돌 아래 조사'));
-    await tester.pumpAndSettle();
-    expect(find.text('🔑 낡은 별열쇠 발견!'), findsOneWidget);
-
-    await tester.tap(find.text('열쇠 챙기기'));
-    await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.key_rounded), findsWidgets);
-
-    await tester.tap(find.byTooltip('분수대의 잠긴 상자 조사'));
-    await tester.pumpAndSettle();
-    expect(find.text('별빛 암호판'), findsOneWidget);
-    expect(find.text('12의 약수를 모두 선택하세요.'), findsOneWidget);
-
-    await tester.tap(find.byKey(const Key('factor-5')));
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('check-puzzle-answer')));
-    await tester.pump();
-    expect(find.byKey(const Key('puzzle-feedback')), findsOneWidget);
-
-    await tester.tap(find.byKey(const Key('factor-5')));
-    await tester.pump();
-    for (final value in [1, 2, 3, 4, 6]) {
-      await tester.tap(find.byKey(Key('factor-$value')));
-      await tester.pump();
-    }
-    await tester.tap(find.byKey(const Key('check-puzzle-answer')));
-    await tester.pumpAndSettle();
-
-    expect(find.text('✨ 새로운 단서 발견!'), findsOneWidget);
-    expect(find.text('상자 속 은빛 털'), findsOneWidget);
-  });
-
-  testWidgets('작은 화면에서도 탐색 화면이 넘치지 않는다', (tester) async {
-    tester.view.physicalSize = const Size(360, 640);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
-    await tester.pumpWidget(buildScreen());
-
-    expect(find.text('사라진 별빛 씨앗'), findsOneWidget);
-    expect(find.byTooltip('분수대의 잠긴 상자 조사'), findsOneWidget);
-    expect(find.byTooltip('작은 돌 아래 조사'), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(find.textContaining('평범한 돌'), findsOneWidget);
+    expect(find.text('🔑 낡은 별열쇠 발견!'), findsNothing);
   });
 }
