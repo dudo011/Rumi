@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-enum _Direction { up, down, left, right }
-
-enum _Discovery { rumi, pedestal, footprints }
+enum _Clue { scratch, footprints, silverFiber }
 
 class GardenExplorationScreen extends StatefulWidget {
   const GardenExplorationScreen({required this.onContinue, super.key});
@@ -11,231 +8,478 @@ class GardenExplorationScreen extends StatefulWidget {
   final ValueChanged<BuildContext> onContinue;
 
   @override
-  State<GardenExplorationScreen> createState() => _GardenExplorationScreenState();
+  State<GardenExplorationScreen> createState() =>
+      _GardenExplorationScreenState();
 }
 
 class _GardenExplorationScreenState extends State<GardenExplorationScreen> {
-  static const _step = 0.035;
-  static const _interactionDistance = 0.17;
-  static const _playerSize = 0.075;
+  final Set<_Clue> _clues = {};
+  final Set<String> _checkedObjects = {};
+  bool _showGuide = true;
 
-  final FocusNode _focusNode = FocusNode();
-  final Set<_Discovery> _discoveries = {};
-  Offset _player = const Offset(0.5, 0.79);
-  _Direction _facing = _Direction.up;
-  String? _message;
-
-  static const _targets = <_Discovery, Offset>{
-    _Discovery.rumi: Offset(0.5, 0.64),
-    _Discovery.pedestal: Offset(0.5, 0.39),
-    _Discovery.footprints: Offset(0.73, 0.29),
-  };
-
-  static const _blockedAreas = <Rect>[
-    Rect.fromLTWH(0.04, 0.08, 0.26, 0.22),
-    Rect.fromLTWH(0.69, 0.06, 0.27, 0.22),
-    Rect.fromLTWH(0.07, 0.52, 0.22, 0.18),
-    Rect.fromLTWH(0.76, 0.52, 0.18, 0.2),
-  ];
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    super.dispose();
-  }
-
-  KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
-    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
-      return KeyEventResult.ignored;
-    }
-    final key = event.logicalKey;
-    if (key == LogicalKeyboardKey.arrowUp || key == LogicalKeyboardKey.keyW) {
-      _move(_Direction.up);
-    } else if (key == LogicalKeyboardKey.arrowDown || key == LogicalKeyboardKey.keyS) {
-      _move(_Direction.down);
-    } else if (key == LogicalKeyboardKey.arrowLeft || key == LogicalKeyboardKey.keyA) {
-      _move(_Direction.left);
-    } else if (key == LogicalKeyboardKey.arrowRight || key == LogicalKeyboardKey.keyD) {
-      _move(_Direction.right);
-    } else if (key == LogicalKeyboardKey.space || key == LogicalKeyboardKey.enter) {
-      _interact();
-    } else {
-      return KeyEventResult.ignored;
-    }
-    return KeyEventResult.handled;
-  }
-
-  void _move(_Direction direction) {
-    final delta = switch (direction) {
-      _Direction.up => const Offset(0, -_step),
-      _Direction.down => const Offset(0, _step),
-      _Direction.left => const Offset(-_step, 0),
-      _Direction.right => const Offset(_step, 0),
-    };
-    final candidate = Offset(
-      (_player.dx + delta.dx).clamp(0.055, 0.945),
-      (_player.dy + delta.dy).clamp(0.075, 0.91),
-    );
-    final playerBounds = Rect.fromCenter(
-      center: candidate,
-      width: _playerSize,
-      height: _playerSize,
-    );
-    if (_blockedAreas.any((area) => area.overlaps(playerBounds))) {
-      setState(() {
-        _facing = direction;
-        _message = '꽃밭을 밟지 않도록 길을 따라가 볼까요?';
-      });
-      return;
-    }
-    setState(() {
-      _facing = direction;
-      _player = candidate;
-      _message = null;
-    });
-  }
-
-  _Discovery? get _nearbyDiscovery {
-    _Discovery? closest;
-    var closestDistance = _interactionDistance;
-    for (final entry in _targets.entries) {
-      final distance = (entry.value - _player).distance;
-      if (distance <= closestDistance) {
-        closest = entry.key;
-        closestDistance = distance;
-      }
-    }
-    return closest;
-  }
-
-  void _interact() {
-    final target = _nearbyDiscovery;
-    if (target == null) {
-      setState(() => _message = '조사할 대상에 조금 더 가까이 가보세요.');
-      return;
-    }
-    setState(() {
-      _discoveries.add(target);
-      _message = switch (target) {
-        _Discovery.rumi => '꽃루미: 기다렸어, 탐험가! 별받침대까지 함께 가보자.',
-        _Discovery.pedestal => '빈 별받침대에 오른쪽으로 길게 긁힌 자국이 있어. 씨앗이 밀려난 것 같아!',
-        _Discovery.footprints => '작고 둥근 발자국이 연못 쪽으로 이어져 있어. 보리와 닮았지만 아직 단정할 수 없어.',
+  static const _clueDetails =
+      <_Clue, ({IconData icon, String title, String text})>{
+        _Clue.scratch: (
+          icon: Icons.blur_on_rounded,
+          title: '오른쪽으로 난 긁힌 자국',
+          text: '별빛 씨앗은 누가 들고 간 게 아니라 강한 힘에 밀려난 것 같아요.',
+        ),
+        _Clue.footprints: (
+          icon: Icons.pets_rounded,
+          title: '작고 둥근 발자국',
+          text: '연못 쪽에서 온 발자국이 받침대를 지나 온실 방향으로 이어져요.',
+        ),
+        _Clue.silverFiber: (
+          icon: Icons.air_rounded,
+          title: '울타리의 은빛 털',
+          text: '차갑고 반짝이는 털 사이에 바람에 꺾인 잎이 끼어 있어요.',
+        ),
       };
+
+  bool get _complete => _clues.length == _clueDetails.length;
+
+  Future<void> _findClue(_Clue clue) async {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    if (_clues.contains(clue)) {
+      _openNotebook(focus: clue);
+      return;
+    }
+    setState(() {
+      _clues.add(clue);
+      _showGuide = false;
     });
+    final detail = _clueDetails[clue]!;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) =>
+          _ClueFoundDialog(number: _clues.length, detail: detail),
+    );
   }
 
-  void _moveToward(Offset destination) {
-    final delta = destination - _player;
-    if (delta.distance < _step) return;
-    if (delta.dx.abs() > delta.dy.abs()) {
-      _move(delta.dx > 0 ? _Direction.right : _Direction.left);
-    } else {
-      _move(delta.dy > 0 ? _Direction.down : _Direction.up);
-    }
+  void _inspectDecoy({
+    required String id,
+    required String title,
+    required String message,
+  }) {
+    setState(() {
+      _checkedObjects.add(id);
+      _showGuide = false;
+    });
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text('$title · $message'),
+          action: SnackBarAction(label: '알겠어', onPressed: () {}),
+        ),
+      );
+  }
+
+  void _openNotebook({_Clue? focus}) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) =>
+          _ClueNotebook(clues: _clues, details: _clueDetails, focus: focus),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final complete = _discoveries.length == _targets.length;
     return Scaffold(
-      backgroundColor: const Color(0xFF241D36),
+      backgroundColor: const Color(0xFF161329),
       body: SafeArea(
-        child: Focus(
-          autofocus: true,
-          focusNode: _focusNode,
-          onKeyEvent: _handleKey,
-          child: Column(
-            children: [
-              _MissionBar(
-                found: _discoveries.length,
-                onClose: () => Navigator.of(context).pop(),
+        child: Column(
+          children: [
+            _MissionBar(
+              found: _clues.length,
+              onClose: () => Navigator.of(context).pop(),
+              onNotebook: _openNotebook,
+            ),
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  const RepaintBoundary(
+                    child: CustomPaint(painter: _GardenScenePainter()),
+                  ),
+                  const Positioned(left: 18, top: 16, child: _SceneLabel()),
+                  _Hotspot(
+                    alignment: const Alignment(-0.12, -0.15),
+                    semanticLabel: '빈 별받침대 조사',
+                    discovered: _clues.contains(_Clue.scratch),
+                    icon: Icons.auto_awesome_rounded,
+                    color: const Color(0xFFFFDB72),
+                    onTap: () => _findClue(_Clue.scratch),
+                  ),
+                  _Hotspot(
+                    alignment: const Alignment(0.55, 0.23),
+                    semanticLabel: '작은 발자국 조사',
+                    discovered: _clues.contains(_Clue.footprints),
+                    icon: Icons.pets_rounded,
+                    color: const Color(0xFFEAB4DB),
+                    onTap: () => _findClue(_Clue.footprints),
+                  ),
+                  _Hotspot(
+                    alignment: const Alignment(0.76, -0.55),
+                    semanticLabel: '울타리의 은빛 털 조사',
+                    discovered: _clues.contains(_Clue.silverFiber),
+                    icon: Icons.air_rounded,
+                    color: const Color(0xFFC9E8F2),
+                    onTap: () => _findClue(_Clue.silverFiber),
+                  ),
+                  _Hotspot(
+                    alignment: const Alignment(-0.72, 0.36),
+                    semanticLabel: '졸고 있는 개구리 조사',
+                    checked: _checkedObjects.contains('frog'),
+                    icon: Icons.cruelty_free_rounded,
+                    color: const Color(0xFF9AD99D),
+                    onTap: () => _inspectDecoy(
+                      id: 'frog',
+                      title: '졸고 있는 개구리',
+                      message: '꾸벅꾸벅 졸고 있어요. 사건이 일어날 때는 아무것도 못 봤대요.',
+                    ),
+                  ),
+                  _Hotspot(
+                    alignment: const Alignment(-0.55, -0.48),
+                    semanticLabel: '쓰러진 물뿌리개 조사',
+                    checked: _checkedObjects.contains('can'),
+                    icon: Icons.water_drop_rounded,
+                    color: const Color(0xFF8CD5E3),
+                    onTap: () => _inspectDecoy(
+                      id: 'can',
+                      title: '쓰러진 물뿌리개',
+                      message: '물은 아직 따뜻해요. 씨앗이 사라진 것과는 관계없어 보여요.',
+                    ),
+                  ),
+                  if (_showGuide)
+                    const Positioned(
+                      left: 18,
+                      right: 18,
+                      bottom: 22,
+                      child: _GuideCard(),
+                    ),
+                  if (_complete)
+                    Positioned(
+                      left: 18,
+                      right: 18,
+                      bottom: 22,
+                      child: _ContinueCard(
+                        onNotebook: _openNotebook,
+                        onContinue: () => widget.onContinue(context),
+                      ),
+                    ),
+                ],
               ),
-              Expanded(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        GestureDetector(
-                          onTapUp: (details) {
-                            final destination = Offset(
-                              details.localPosition.dx / constraints.maxWidth,
-                              details.localPosition.dy / constraints.maxHeight,
-                            );
-                            _moveToward(destination);
-                            _focusNode.requestFocus();
-                          },
-                          child: CustomPaint(
-                            painter: _GardenPainter(
-                              discoveries: _discoveries,
-                              complete: complete,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MissionBar extends StatelessWidget {
+  const _MissionBar({
+    required this.found,
+    required this.onClose,
+    required this.onNotebook,
+  });
+  final int found;
+  final VoidCallback onClose;
+  final VoidCallback onNotebook;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: const Color(0xEE231D38),
+      padding: const EdgeInsets.fromLTRB(8, 8, 12, 10),
+      child: Row(
+        children: [
+          IconButton(
+            tooltip: '모험 나가기',
+            onPressed: onClose,
+            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+          ),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '사라진 별빛 씨앗',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                Text(
+                  '수상한 곳을 직접 눌러 단서를 찾아요',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: Color(0xFFCFC4DA), fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+          TextButton.icon(
+            onPressed: onNotebook,
+            icon: const Icon(Icons.menu_book_rounded, size: 18),
+            label: Text('단서 $found/3'),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFFFFE69A),
+              backgroundColor: const Color(0xFF453957),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SceneLabel extends StatelessWidget {
+  const _SceneLabel();
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xBB211A32),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0x55FFFFFF)),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 13, vertical: 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.location_on_rounded, color: Color(0xFFFFD778), size: 17),
+            SizedBox(width: 5),
+            Text(
+              '별정원 중앙 · 사건 현장',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Hotspot extends StatefulWidget {
+  const _Hotspot({
+    required this.alignment,
+    required this.semanticLabel,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+    this.discovered = false,
+    this.checked = false,
+  });
+  final Alignment alignment;
+  final String semanticLabel;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+  final bool discovered;
+  final bool checked;
+  @override
+  State<_Hotspot> createState() => _HotspotState();
+}
+
+class _HotspotState extends State<_Hotspot> {
+  bool _hovering = false;
+  @override
+  Widget build(BuildContext context) {
+    final resolved = widget.discovered || widget.checked;
+    return Align(
+      alignment: widget.alignment,
+      child: Semantics(
+        button: true,
+        label: widget.semanticLabel,
+        child: Tooltip(
+          message: widget.semanticLabel,
+          child: MouseRegion(
+            onEnter: (_) => setState(() => _hovering = true),
+            onExit: (_) => setState(() => _hovering = false),
+            child: AnimatedScale(
+              scale: _hovering ? 1.12 : 1,
+              duration: const Duration(milliseconds: 180),
+              child: InkResponse(
+                onTap: widget.onTap,
+                radius: 45,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: resolved
+                        ? const Color(0xEE392E49)
+                        : const Color(0x88342A42),
+                    border: Border.all(
+                      color: resolved
+                          ? const Color(0xFFFFE68F)
+                          : const Color(0x88FFFFFF),
+                      width: resolved ? 3 : 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: widget.color.withValues(
+                          alpha: resolved ? 0.7 : 0.35,
+                        ),
+                        blurRadius: resolved ? 24 : 14,
+                        spreadRadius: resolved ? 4 : 1,
+                      ),
+                    ],
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Icon(widget.icon, color: widget.color, size: 31),
+                      if (widget.discovered)
+                        const Align(
+                          alignment: Alignment(0.9, -0.9),
+                          child: CircleAvatar(
+                            radius: 10,
+                            backgroundColor: Color(0xFFFFE68F),
+                            child: Icon(
+                              Icons.check_rounded,
+                              size: 14,
+                              color: Color(0xFF493B2B),
                             ),
                           ),
                         ),
-                        _PositionedMapItem(
-                          position: _targets[_Discovery.rumi]!,
-                          child: _CharacterMarker(
-                            emoji: '🌸',
-                            label: '꽃루미',
-                            active: _nearbyDiscovery == _Discovery.rumi,
-                          ),
-                        ),
-                        _PositionedMapItem(
-                          position: _targets[_Discovery.pedestal]!,
-                          child: _ObjectMarker(
-                            icon: Icons.auto_awesome_rounded,
-                            label: _discoveries.contains(_Discovery.pedestal) ? '긁힌 자국' : '별받침대',
-                            active: _nearbyDiscovery == _Discovery.pedestal,
-                          ),
-                        ),
-                        _PositionedMapItem(
-                          position: _targets[_Discovery.footprints]!,
-                          child: _ObjectMarker(
-                            icon: Icons.pets_rounded,
-                            label: _discoveries.contains(_Discovery.footprints) ? '발자국 발견' : '수상한 흔적',
-                            active: _nearbyDiscovery == _Discovery.footprints,
-                          ),
-                        ),
-                        _PositionedMapItem(
-                          position: _player,
-                          size: 72,
-                          child: _PlayerMarker(facing: _facing),
-                        ),
-                        Positioned(
-                          left: 16,
-                          bottom: 18,
-                          child: _DirectionPad(onMove: _move),
-                        ),
-                        Positioned(
-                          right: 18,
-                          bottom: 26,
-                          child: _ActionButton(
-                            enabled: _nearbyDiscovery != null,
-                            onPressed: _interact,
-                          ),
-                        ),
-                        if (_message != null)
-                          Positioned(
-                            left: 18,
-                            right: 18,
-                            bottom: 145,
-                            child: _MessageBubble(
-                              message: _message!,
-                              onClose: () => setState(() => _message = null),
-                            ),
-                          ),
-                        if (complete)
-                          Positioned(
-                            top: 14,
-                            left: 18,
-                            right: 18,
-                            child: _ContinueBanner(
-                              onPressed: () => widget.onContinue(context),
-                            ),
-                          ),
-                      ],
-                    );
-                  },
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GuideCard extends StatelessWidget {
+  const _GuideCard();
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xF22B233B),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0x55FFE99A)),
+        boxShadow: const [BoxShadow(color: Color(0x88000000), blurRadius: 22)],
+      ),
+      child: const Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: Color(0xFFFFD7E6),
+            child: Text('🌸', style: TextStyle(fontSize: 22)),
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              '꽃루미: 반짝이는 곳만 정답은 아닐 거야. 정원을 천천히 눌러 보고, 수상한 흔적 3개를 찾아보자!',
+              style: TextStyle(
+                color: Colors.white,
+                height: 1.4,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ClueFoundDialog extends StatelessWidget {
+  const _ClueFoundDialog({required this.number, required this.detail});
+  final int number;
+  final ({IconData icon, String title, String text}) detail;
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: TweenAnimationBuilder<double>(
+        duration: const Duration(milliseconds: 450),
+        tween: Tween(begin: 0.75, end: 1),
+        curve: Curves.elasticOut,
+        builder: (context, value, child) =>
+            Transform.scale(scale: value, child: child),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 420),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFFFFF4C7), Color(0xFFFFD7E7)],
+            ),
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: Colors.white, width: 3),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0xAAECA5CB),
+                blurRadius: 35,
+                spreadRadius: 4,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                '✨ 새로운 단서 발견!',
+                style: TextStyle(
+                  color: Color(0xFF8B4D70),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 18),
+              CircleAvatar(
+                radius: 38,
+                backgroundColor: Colors.white,
+                child: Icon(
+                  detail.icon,
+                  size: 40,
+                  color: const Color(0xFF76558C),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                detail.title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFF3E3150),
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 9),
+              Text(
+                detail.text,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Color(0xFF685B70), height: 1.5),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.menu_book_rounded),
+                  label: Text('수첩에 저장 · $number/3'),
                 ),
               ),
             ],
@@ -246,363 +490,308 @@ class _GardenExplorationScreenState extends State<GardenExplorationScreen> {
   }
 }
 
-class _MissionBar extends StatelessWidget {
-  const _MissionBar({required this.found, required this.onClose});
-  final int found;
-  final VoidCallback onClose;
-
+class _ClueNotebook extends StatelessWidget {
+  const _ClueNotebook({required this.clues, required this.details, this.focus});
+  final Set<_Clue> clues;
+  final Map<_Clue, ({IconData icon, String title, String text})> details;
+  final _Clue? focus;
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFF332746),
-      padding: const EdgeInsets.fromLTRB(10, 10, 18, 12),
-      child: Row(
-        children: [
-          IconButton(
-            tooltip: '모험 나가기',
-            onPressed: onClose,
-            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+    return DraggableScrollableSheet(
+      initialChildSize: 0.72,
+      maxChildSize: 0.9,
+      minChildSize: 0.45,
+      builder: (context, controller) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFF7F0E4),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
           ),
-          const SizedBox(width: 4),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('별정원 중앙', style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w900)),
-                Text('캐릭터를 움직여 수상한 흔적을 찾아요', style: TextStyle(color: Color(0xFFD7CBE2), fontSize: 12)),
-              ],
-            ),
+          child: ListView(
+            controller: controller,
+            padding: const EdgeInsets.fromLTRB(22, 12, 22, 32),
+            children: [
+              Center(
+                child: Container(
+                  width: 46,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFC8BDAE),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      '별지기의 단서 수첩',
+                      style: TextStyle(
+                        color: Color(0xFF44374C),
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: '단서 수첩 닫기',
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close_rounded),
+                  ),
+                ],
+              ),
+              Text(
+                '발견한 단서 ${clues.length}/3 · 단서를 다시 누르면 언제든 확인할 수 있어요.',
+                style: const TextStyle(color: Color(0xFF756A75)),
+              ),
+              const SizedBox(height: 20),
+              for (final entry in details.entries)
+                _NotebookEntry(
+                  detail: entry.value,
+                  unlocked: clues.contains(entry.key),
+                  highlighted: focus == entry.key,
+                ),
+            ],
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(color: const Color(0xFF554168), borderRadius: BorderRadius.circular(18)),
-            child: Text('발견 $found/3', style: const TextStyle(color: Color(0xFFFFE59D), fontWeight: FontWeight.w900)),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
 
-class _PositionedMapItem extends StatelessWidget {
-  const _PositionedMapItem({required this.position, required this.child, this.size = 86});
-  final Offset position;
-  final Widget child;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment(position.dx * 2 - 1, position.dy * 2 - 1),
-      child: SizedBox(width: size, height: size, child: child),
-    );
-  }
-}
-
-class _CharacterMarker extends StatelessWidget {
-  const _CharacterMarker({required this.emoji, required this.label, required this.active});
-  final String emoji;
-  final String label;
-  final bool active;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (active) const _InteractionHint(),
-        Text(emoji, style: const TextStyle(fontSize: 38)),
-        _MapLabel(text: label),
-      ],
-    );
-  }
-}
-
-class _ObjectMarker extends StatelessWidget {
-  const _ObjectMarker({required this.icon, required this.label, required this.active});
-  final IconData icon;
-  final String label;
-  final bool active;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (active) const _InteractionHint(),
-        Icon(icon, color: const Color(0xFFFFE38D), size: 34, shadows: const [Shadow(color: Colors.white, blurRadius: 12)]),
-        const SizedBox(height: 3),
-        _MapLabel(text: label),
-      ],
-    );
-  }
-}
-
-class _InteractionHint extends StatelessWidget {
-  const _InteractionHint();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-      decoration: BoxDecoration(color: const Color(0xFFFFE89C), borderRadius: BorderRadius.circular(10)),
-      child: const Text('!', style: TextStyle(color: Color(0xFF523F29), fontWeight: FontWeight.w900)),
-    );
-  }
-}
-
-class _MapLabel extends StatelessWidget {
-  const _MapLabel({required this.text});
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-      decoration: BoxDecoration(color: const Color(0xB72A2237), borderRadius: BorderRadius.circular(9)),
-      child: Text(text, maxLines: 1, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800)),
-    );
-  }
-}
-
-class _PlayerMarker extends StatelessWidget {
-  const _PlayerMarker({required this.facing});
-  final _Direction facing;
-
-  @override
-  Widget build(BuildContext context) {
-    final arrow = switch (facing) {
-      _Direction.up => Icons.keyboard_arrow_up_rounded,
-      _Direction.down => Icons.keyboard_arrow_down_rounded,
-      _Direction.left => Icons.keyboard_arrow_left_rounded,
-      _Direction.right => Icons.keyboard_arrow_right_rounded,
-    };
-    return Semantics(
-      label: '플레이어 캐릭터',
-      child: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: const Color(0xFFF6D6E7),
-          border: Border.all(color: Colors.white, width: 3),
-          boxShadow: const [BoxShadow(color: Color(0x66000000), blurRadius: 10, offset: Offset(0, 5))],
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            const Text('🧒', style: TextStyle(fontSize: 35)),
-            Align(alignment: Alignment.bottomCenter, child: Icon(arrow, color: const Color(0xFF6C4B7E), size: 18)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DirectionPad extends StatelessWidget {
-  const _DirectionPad({required this.onMove});
-  final ValueChanged<_Direction> onMove;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 126,
-      height: 126,
-      decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0x66342A42)),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Align(alignment: Alignment.topCenter, child: _PadButton(label: '위로 이동', icon: Icons.keyboard_arrow_up_rounded, onTap: () => onMove(_Direction.up))),
-          Align(alignment: Alignment.bottomCenter, child: _PadButton(label: '아래로 이동', icon: Icons.keyboard_arrow_down_rounded, onTap: () => onMove(_Direction.down))),
-          Align(alignment: Alignment.centerLeft, child: _PadButton(label: '왼쪽으로 이동', icon: Icons.keyboard_arrow_left_rounded, onTap: () => onMove(_Direction.left))),
-          Align(alignment: Alignment.centerRight, child: _PadButton(label: '오른쪽으로 이동', icon: Icons.keyboard_arrow_right_rounded, onTap: () => onMove(_Direction.right))),
-          Container(width: 34, height: 34, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xAA6E5A7C))),
-        ],
-      ),
-    );
-  }
-}
-
-class _PadButton extends StatelessWidget {
-  const _PadButton({required this.label, required this.icon, required this.onTap});
-  final String label;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: label,
-      onPressed: onTap,
-      icon: Icon(icon, color: Colors.white, size: 31),
-    );
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({required this.enabled, required this.onPressed});
-  final bool enabled;
-  final VoidCallback onPressed;
-
+class _NotebookEntry extends StatelessWidget {
+  const _NotebookEntry({
+    required this.detail,
+    required this.unlocked,
+    required this.highlighted,
+  });
+  final ({IconData icon, String title, String text}) detail;
+  final bool unlocked;
+  final bool highlighted;
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      width: 82,
-      height: 82,
+      duration: const Duration(milliseconds: 250),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: enabled ? const Color(0xFFFFD86E) : const Color(0x995A5064),
-        boxShadow: enabled ? const [BoxShadow(color: Color(0x88FFE38A), blurRadius: 20, spreadRadius: 3)] : null,
-      ),
-      child: IconButton(
-        tooltip: '조사하기',
-        onPressed: onPressed,
-        icon: Icon(Icons.search_rounded, color: enabled ? const Color(0xFF4A382A) : Colors.white54, size: 38),
-      ),
-    );
-  }
-}
-
-class _MessageBubble extends StatelessWidget {
-  const _MessageBubble({required this.message, required this.onClose});
-  final String message;
-  final VoidCallback onClose;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: const Color(0xF9FFF9F0),
-      elevation: 10,
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(18, 15, 8, 15),
-        child: Row(
-          children: [
-            const CircleAvatar(backgroundColor: Color(0xFFFFD9E8), child: Text('🌸')),
-            const SizedBox(width: 12),
-            Expanded(child: Text(message, style: const TextStyle(color: Color(0xFF4C4052), height: 1.4, fontWeight: FontWeight.w700))),
-            IconButton(onPressed: onClose, icon: const Icon(Icons.close_rounded)),
-          ],
+        color: unlocked ? Colors.white : const Color(0xFFE9E1D7),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: highlighted
+              ? const Color(0xFFE79BBE)
+              : const Color(0xFFD8CEC2),
+          width: highlighted ? 3 : 1,
         ),
       ),
-    );
-  }
-}
-
-class _ContinueBanner extends StatelessWidget {
-  const _ContinueBanner({required this.onPressed});
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: const Color(0xFFFDF4D0),
-      elevation: 12,
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            const Icon(Icons.auto_awesome_rounded, color: Color(0xFFA9782E)),
-            const SizedBox(width: 10),
-            const Expanded(child: Text('중앙 정원의 흔적을 모두 찾았어요!', style: TextStyle(color: Color(0xFF5C4934), fontWeight: FontWeight.w900))),
-            FilledButton(onPressed: onPressed, child: const Text('연못으로')),
-          ],
-        ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: unlocked
+                ? const Color(0xFFFFE2EC)
+                : const Color(0xFFD5CDC4),
+            child: Icon(
+              unlocked ? detail.icon : Icons.lock_outline_rounded,
+              color: const Color(0xFF76558C),
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  unlocked ? detail.title : '아직 찾지 못한 단서',
+                  style: const TextStyle(
+                    color: Color(0xFF493C4E),
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  unlocked ? detail.text : '사건 현장을 조금 더 자세히 살펴보세요.',
+                  style: const TextStyle(color: Color(0xFF746A74), height: 1.4),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _GardenPainter extends CustomPainter {
-  const _GardenPainter({required this.discoveries, required this.complete});
-  final Set<_Discovery> discoveries;
-  final bool complete;
+class _ContinueCard extends StatelessWidget {
+  const _ContinueCard({required this.onNotebook, required this.onContinue});
+  final VoidCallback onNotebook;
+  final VoidCallback onContinue;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFF0B5), Color(0xFFFFD2E5)],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: const [BoxShadow(color: Color(0x99000000), blurRadius: 25)],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            '단서 3개를 모두 찾았어요!',
+            style: TextStyle(
+              color: Color(0xFF513B4A),
+              fontSize: 17,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            '수첩의 단서를 따라 다음 장소로 추적해 볼까요?',
+            style: TextStyle(color: Color(0xFF745D69), fontSize: 13),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: onNotebook,
+                  child: const Text('수첩 보기'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: FilledButton(
+                  onPressed: onContinue,
+                  child: const Text('연못으로 추적'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
 
+class _GardenScenePainter extends CustomPainter {
+  const _GardenScenePainter();
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
-    const background = LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [Color(0xFF315D51), Color(0xFF49795B), Color(0xFF2F5C48)],
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF1B1836), Color(0xFF243B3C), Color(0xFF162E28)],
+        ).createShader(rect),
     );
-    canvas.drawRect(rect, Paint()..shader = background.createShader(rect));
+
+    final moon = Offset(size.width * 0.17, size.height * 0.18);
+    canvas.drawCircle(moon, 42, Paint()..color = const Color(0x33FFF4C2));
+    canvas.drawCircle(moon, 25, Paint()..color = const Color(0xFFFFE9A5));
 
     final path = Path()
-      ..moveTo(size.width * 0.43, size.height)
-      ..cubicTo(size.width * 0.42, size.height * 0.72, size.width * 0.57, size.height * 0.58, size.width * 0.5, size.height * 0.38)
-      ..cubicTo(size.width * 0.46, size.height * 0.25, size.width * 0.58, size.height * 0.17, size.width * 0.56, 0)
-      ..lineTo(size.width * 0.73, 0)
-      ..cubicTo(size.width * 0.72, size.height * 0.2, size.width * 0.62, size.height * 0.28, size.width * 0.63, size.height * 0.4)
-      ..cubicTo(size.width * 0.68, size.height * 0.62, size.width * 0.57, size.height * 0.76, size.width * 0.6, size.height)
+      ..moveTo(size.width * 0.34, size.height)
+      ..quadraticBezierTo(
+        size.width * 0.55,
+        size.height * 0.68,
+        size.width * 0.47,
+        size.height * 0.42,
+      )
+      ..quadraticBezierTo(
+        size.width * 0.4,
+        size.height * 0.22,
+        size.width * 0.55,
+        0,
+      )
+      ..lineTo(size.width * 0.76, 0)
+      ..quadraticBezierTo(
+        size.width * 0.63,
+        size.height * 0.25,
+        size.width * 0.66,
+        size.height * 0.46,
+      )
+      ..quadraticBezierTo(
+        size.width * 0.73,
+        size.height * 0.72,
+        size.width * 0.67,
+        size.height,
+      )
       ..close();
-    canvas.drawPath(path, Paint()..color = const Color(0xFFC9AE7B));
-    canvas.drawPath(path, Paint()..color = const Color(0x55FFF0C9)..style = PaintingStyle.stroke..strokeWidth = 5);
+    canvas.drawPath(path, Paint()..color = const Color(0xFF9F8967));
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = const Color(0x33FFF4C7)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 5,
+    );
 
-    _drawPond(canvas, size);
-    _drawFlowerBed(canvas, size, const Rect.fromLTWH(0.07, 0.52, 0.22, 0.18), const Color(0xFFE792BB));
-    _drawFlowerBed(canvas, size, const Rect.fromLTWH(0.76, 0.52, 0.18, 0.2), const Color(0xFFB99AE8));
-    _drawTrees(canvas, size);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(size.width * 0.2, size.height * 0.62),
+        width: size.width * 0.3,
+        height: size.height * 0.17,
+      ),
+      Paint()..color = const Color(0xFF4B9BA8),
+    );
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(size.width * 0.2, size.height * 0.61),
+        width: size.width * 0.24,
+        height: size.height * 0.11,
+      ),
+      Paint()..color = const Color(0xFF72C3C4),
+    );
 
-    for (var index = 0; index < 20; index++) {
-      final x = ((index * 47) % 93) / 100 * size.width;
-      final y = ((index * 31 + 17) % 87) / 100 * size.height;
-      canvas.drawCircle(Offset(x, y), index.isEven ? 1.7 : 1.1, Paint()..color = const Color(0x99FFF0AD));
+    for (var index = 0; index < 34; index++) {
+      final x = ((index * 47 + 13) % 97) / 100 * size.width;
+      final y = ((index * 31 + 7) % 91) / 100 * size.height;
+      final color = index.isEven
+          ? const Color(0xFFFFE99C)
+          : const Color(0xFFE8B6DC);
+      canvas.drawCircle(
+        Offset(x, y),
+        index % 3 == 0 ? 2.2 : 1.3,
+        Paint()..color = color,
+      );
     }
 
-    if (discoveries.contains(_Discovery.footprints)) {
-      final paint = Paint()..color = const Color(0xFFFFE29A);
-      for (var i = 0; i < 6; i++) {
-        canvas.drawOval(
-          Rect.fromCenter(
-            center: Offset(size.width * (0.69 - i * 0.025), size.height * (0.32 + i * 0.035)),
-            width: 8,
-            height: 12,
-          ),
-          paint,
-        );
-      }
-    }
-
-    if (complete) {
-      canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.2), 22, Paint()..color = const Color(0x88FFE596));
-      canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.2), 8, Paint()..color = const Color(0xFFFFF4B0));
-    }
-  }
-
-  void _drawPond(Canvas canvas, Size size) {
-    final pond = Rect.fromLTWH(size.width * 0.04, size.height * 0.08, size.width * 0.26, size.height * 0.22);
-    canvas.drawOval(pond, Paint()..color = const Color(0xFF67B8C5));
-    canvas.drawOval(pond.deflate(8), Paint()..color = const Color(0xFF8BD2D5));
-    for (var i = 0; i < 3; i++) {
-      canvas.drawCircle(Offset(pond.left + 35 + i * 28, pond.top + 42 + (i % 2) * 25), 9, Paint()..color = const Color(0xFF6C9C71));
-    }
-  }
-
-  void _drawFlowerBed(Canvas canvas, Size size, Rect normalized, Color flowerColor) {
-    final rect = Rect.fromLTWH(normalized.left * size.width, normalized.top * size.height, normalized.width * size.width, normalized.height * size.height);
-    canvas.drawRRect(RRect.fromRectAndRadius(rect, const Radius.circular(30)), Paint()..color = const Color(0xFF285743));
-    for (var index = 0; index < 11; index++) {
-      final x = rect.left + 14 + (index * 31 % rect.width).toDouble();
-      final y = rect.top + 15 + (index * 23 % rect.height).toDouble();
-      canvas.drawCircle(Offset(x, y), 5, Paint()..color = flowerColor);
-      canvas.drawCircle(Offset(x, y), 2, Paint()..color = const Color(0xFFFFEB8C));
-    }
-  }
-
-  void _drawTrees(Canvas canvas, Size size) {
-    const positions = [Offset(0.76, 0.12), Offset(0.87, 0.17), Offset(0.17, 0.37), Offset(0.9, 0.4), Offset(0.12, 0.82), Offset(0.87, 0.84)];
-    for (final position in positions) {
-      final center = Offset(position.dx * size.width, position.dy * size.height);
-      canvas.drawRect(Rect.fromCenter(center: center + const Offset(0, 18), width: 10, height: 36), Paint()..color = const Color(0xFF745033));
-      canvas.drawCircle(center, 29, Paint()..color = const Color(0xFF234D3E));
-      canvas.drawCircle(center - const Offset(10, 8), 18, Paint()..color = const Color(0xFF3F7652));
+    const treePositions = [
+      Offset(0.08, 0.18),
+      Offset(0.9, 0.2),
+      Offset(0.08, 0.86),
+      Offset(0.91, 0.82),
+    ];
+    for (final position in treePositions) {
+      final center = Offset(
+        position.dx * size.width,
+        position.dy * size.height,
+      );
+      canvas.drawRect(
+        Rect.fromCenter(
+          center: center + const Offset(0, 28),
+          width: 13,
+          height: 55,
+        ),
+        Paint()..color = const Color(0xFF634934),
+      );
+      canvas.drawCircle(center, 38, Paint()..color = const Color(0xFF285341));
+      canvas.drawCircle(
+        center - const Offset(13, 9),
+        24,
+        Paint()..color = const Color(0xFF3B7152),
+      );
     }
   }
 
   @override
-  bool shouldRepaint(covariant _GardenPainter oldDelegate) {
-    return oldDelegate.discoveries.length != discoveries.length || oldDelegate.complete != complete;
-  }
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

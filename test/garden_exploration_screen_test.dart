@@ -3,7 +3,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rumi/features/adventure/garden_exploration_screen.dart';
 
 void main() {
-  testWidgets('캐릭터를 움직여 중앙 정원의 세 조사 대상을 발견한다', (tester) async {
+  Future<void> collectClue(
+    WidgetTester tester,
+    String tooltip,
+    String title,
+  ) async {
+    await tester.tap(find.byTooltip(tooltip));
+    await tester.pumpAndSettle();
+    expect(find.text('✨ 새로운 단서 발견!'), findsOneWidget);
+    expect(find.text(title), findsOneWidget);
+    await tester.tap(find.textContaining('수첩에 저장'));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('사건 현장의 핵심 단서 세 개를 수집하고 다음 장면으로 이동한다', (tester) async {
     tester.view.physicalSize = const Size(900, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -12,54 +25,55 @@ void main() {
     var continued = false;
     await tester.pumpWidget(
       MaterialApp(
-        home: GardenExplorationScreen(
-          onContinue: (_) => continued = true,
-        ),
+        home: GardenExplorationScreen(onContinue: (_) => continued = true),
       ),
     );
 
-    expect(find.text('발견 0/3'), findsOneWidget);
-    await tester.tap(find.byTooltip('조사하기'));
-    await tester.pump();
-    expect(find.textContaining('꽃루미: 기다렸어'), findsOneWidget);
+    expect(find.text('단서 0/3'), findsOneWidget);
+    expect(find.byTooltip('졸고 있는 개구리 조사'), findsOneWidget);
 
-    for (var index = 0; index < 10; index++) {
-      await tester.tap(find.byTooltip('위로 이동'));
-      await tester.pump();
-    }
-    await tester.tap(find.byTooltip('조사하기'));
+    await tester.tap(find.byTooltip('졸고 있는 개구리 조사'));
     await tester.pump();
-    expect(find.textContaining('빈 별받침대'), findsOneWidget);
+    expect(find.textContaining('아무것도 못 봤대요'), findsOneWidget);
+    expect(find.text('단서 0/3'), findsOneWidget);
 
-    for (var index = 0; index < 6; index++) {
-      await tester.tap(find.byTooltip('오른쪽으로 이동'));
-      await tester.pump();
-    }
-    for (var index = 0; index < 4; index++) {
-      await tester.tap(find.byTooltip('위로 이동'));
-      await tester.pump();
-    }
-    await tester.tap(find.byTooltip('조사하기'));
-    await tester.pump();
+    await collectClue(tester, '빈 별받침대 조사', '오른쪽으로 난 긁힌 자국');
+    await collectClue(tester, '작은 발자국 조사', '작고 둥근 발자국');
+    await collectClue(tester, '울타리의 은빛 털 조사', '울타리의 은빛 털');
 
-    expect(find.text('발견 3/3'), findsOneWidget);
-    expect(find.text('중앙 정원의 흔적을 모두 찾았어요!'), findsOneWidget);
-    await tester.tap(find.text('연못으로'));
+    expect(find.text('단서 3/3'), findsOneWidget);
+    expect(find.text('단서 3개를 모두 찾았어요!'), findsOneWidget);
+    await tester.tap(find.text('연못으로 추적'));
     expect(continued, isTrue);
   });
 
-  testWidgets('방향 패드와 조사 버튼은 명확한 조작 이름을 제공한다', (tester) async {
+  testWidgets('단서 수첩은 찾은 단서와 잠긴 단서를 구분한다', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: GardenExplorationScreen(onContinue: (_) {}),
-      ),
+      MaterialApp(home: GardenExplorationScreen(onContinue: (_) {})),
     );
 
-    expect(find.byTooltip('위로 이동'), findsOneWidget);
-    expect(find.byTooltip('아래로 이동'), findsOneWidget);
-    expect(find.byTooltip('왼쪽으로 이동'), findsOneWidget);
-    expect(find.byTooltip('오른쪽으로 이동'), findsOneWidget);
-    expect(find.byTooltip('조사하기'), findsOneWidget);
-    expect(find.bySemanticsLabel('플레이어 캐릭터'), findsOneWidget);
+    await collectClue(tester, '빈 별받침대 조사', '오른쪽으로 난 긁힌 자국');
+    await tester.tap(find.text('단서 1/3'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('별지기의 단서 수첩'), findsOneWidget);
+    expect(find.text('오른쪽으로 난 긁힌 자국'), findsOneWidget);
+    expect(find.text('아직 찾지 못한 단서'), findsNWidgets(2));
+  });
+
+  testWidgets('작은 화면에서도 조사 대상과 단서 안내가 넘치지 않는다', (tester) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(home: GardenExplorationScreen(onContinue: (_) {})),
+    );
+
+    expect(find.byTooltip('빈 별받침대 조사'), findsOneWidget);
+    expect(find.byTooltip('작은 발자국 조사'), findsOneWidget);
+    expect(find.byTooltip('울타리의 은빛 털 조사'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }
