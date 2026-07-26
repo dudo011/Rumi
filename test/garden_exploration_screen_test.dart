@@ -3,11 +3,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rumi/features/adventure/garden_exploration_screen.dart';
 
 void main() {
+  Future<void> waitForUi(WidgetTester tester) async {
+    await tester.pump(const Duration(milliseconds: 500));
+  }
+
   Future<void> startInvestigation(WidgetTester tester) async {
-    await tester.pumpAndSettle();
+    await waitForUi(tester);
     expect(find.text('🌟 별빛 씨앗이 사라졌어요!'), findsOneWidget);
     await tester.tap(find.byKey(const Key('start-investigation')));
-    await tester.pumpAndSettle();
+    await waitForUi(tester);
   }
 
   Future<void> solveSingleChoice(
@@ -18,20 +22,20 @@ void main() {
     await tester.tap(find.byKey(Key('$puzzleKey-option-$correctIndex')));
     await tester.pump();
     await tester.tap(find.byKey(Key('$puzzleKey-check-answer')));
-    await tester.pumpAndSettle();
+    await waitForUi(tester);
     expect(find.text('✨ 새로운 증거 발견!'), findsOneWidget);
     await tester.tap(find.textContaining('수첩에 저장'));
-    await tester.pumpAndSettle();
+    await waitForUi(tester);
   }
 
   Future<void> reachDeduction(WidgetTester tester) async {
     await tester.tap(find.byTooltip('빈 별받침대 조사'));
-    await tester.pumpAndSettle();
+    await waitForUi(tester);
     await solveSingleChoice(tester, 'scratch', 1);
 
     expect(find.byTooltip('오른쪽 길의 작은 발자국 조사'), findsOneWidget);
     await tester.tap(find.byTooltip('오른쪽 길의 작은 발자국 조사'));
-    await tester.pumpAndSettle();
+    await waitForUi(tester);
     await solveSingleChoice(tester, 'footprints', 2);
 
     expect(find.byTooltip('분수대의 잠긴 상자 조사'), findsOneWidget);
@@ -40,21 +44,21 @@ void main() {
     expect(find.textContaining('최근에 움직인 물건'), findsOneWidget);
 
     await tester.tap(find.byTooltip('작은 돌 아래 조사'));
-    await tester.pumpAndSettle();
+    await waitForUi(tester);
     await tester.tap(find.text('열쇠 챙기기'));
-    await tester.pumpAndSettle();
+    await waitForUi(tester);
 
     await tester.tap(find.byTooltip('분수대의 잠긴 상자 조사'));
-    await tester.pumpAndSettle();
+    await waitForUi(tester);
     for (final value in [1, 2, 3, 4, 6]) {
       await tester.tap(find.byKey(Key('factor-$value')));
       await tester.pump();
     }
     await tester.tap(find.byKey(const Key('check-puzzle-answer')));
-    await tester.pumpAndSettle();
+    await waitForUi(tester);
     expect(find.text('✨ 새로운 증거 발견!'), findsOneWidget);
     await tester.tap(find.textContaining('수첩에 저장'));
-    await tester.pumpAndSettle();
+    await waitForUi(tester);
   }
 
   testWidgets('스토리 질문에서 시작해 증거가 단계적으로 열린다', (tester) async {
@@ -74,7 +78,7 @@ void main() {
     expect(find.byTooltip('분수대의 잠긴 상자 조사'), findsNothing);
 
     await tester.tap(find.byTooltip('빈 별받침대 조사'));
-    await tester.pumpAndSettle();
+    await waitForUi(tester);
     expect(find.text('긁힌 별가루 해석'), findsOneWidget);
     await solveSingleChoice(tester, 'scratch', 1);
 
@@ -101,11 +105,11 @@ void main() {
     await tester.tap(find.byKey(const Key('deduction-option-1')));
     await tester.pump();
     await tester.tap(find.byKey(const Key('check-deduction')));
-    await tester.pumpAndSettle();
+    await waitForUi(tester);
 
     expect(find.text('🌸 사건 해결!'), findsOneWidget);
     await tester.tap(find.byKey(const Key('close-resolution')));
-    await tester.pumpAndSettle();
+    await waitForUi(tester);
 
     expect(find.text('별빛 씨앗의 비밀을 밝혀냈어요!'), findsOneWidget);
     expect(find.text('다음 모험 보기'), findsOneWidget);
