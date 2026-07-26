@@ -10,9 +10,9 @@ void main() {
   }
 
   Future<void> start(WidgetTester tester) async {
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 500));
     await tester.tap(find.byKey(const Key('start-investigation')));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 500));
   }
 
   testWidgets('처음에는 핵심 진행 지점이 단계적으로 숨겨진다', (tester) async {
@@ -31,7 +31,7 @@ void main() {
     await start(tester);
 
     await tester.tap(find.byTooltip('빈 별받침대 조사'));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 500));
     await tester.tap(find.byKey(const Key('scratch-option-0')));
     await tester.pump();
     await tester.tap(find.byKey(const Key('scratch-check-answer')));
