@@ -113,9 +113,9 @@ class _SplashScreenState extends State<SplashScreen>
                             ),
                           ),
                           SizedBox(height: compact ? 36 : 58),
-                          const Semantics(
+                          Semantics(
                             label: '별정원을 불러오는 중',
-                            child: SizedBox.square(
+                            child: const SizedBox.square(
                               dimension: 26,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2.5,
