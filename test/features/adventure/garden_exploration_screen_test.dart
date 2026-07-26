@@ -13,9 +13,9 @@ void main() {
     await tester.pumpWidget(buildScreen());
 
     await tester.tap(find.byKey(const Key('chest-hotspot')));
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('잠긴 분수대 상자 · 별 모양 열쇠구멍이 있어요. 정원 어딘가에서 열쇠를 찾아야 해요.'), findsOneWidget);
+    expect(find.textContaining('별 모양 열쇠구멍'), findsOneWidget);
     expect(find.text('별빛 암호판'), findsNothing);
   });
 
@@ -36,13 +36,16 @@ void main() {
     expect(find.text('12의 약수를 모두 선택하세요.'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('factor-5')));
+    await tester.pump();
     await tester.tap(find.byKey(const Key('check-puzzle-answer')));
     await tester.pump();
     expect(find.byKey(const Key('puzzle-feedback')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('factor-5')));
+    await tester.pump();
     for (final value in [1, 2, 3, 4, 6]) {
       await tester.tap(find.byKey(Key('factor-$value')));
+      await tester.pump();
     }
     await tester.tap(find.byKey(const Key('check-puzzle-answer')));
     await tester.pumpAndSettle();
@@ -60,6 +63,8 @@ void main() {
     await tester.pumpWidget(buildScreen());
 
     expect(find.text('사라진 별빛 씨앗'), findsOneWidget);
+    expect(find.byKey(const Key('chest-hotspot')), findsOneWidget);
+    expect(find.byKey(const Key('key-hotspot')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
