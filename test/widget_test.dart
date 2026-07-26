@@ -70,7 +70,7 @@ void main() {
     await tester.tap(find.text('꽃루미와 함께하기'));
     await tester.pumpAndSettle();
     expect(find.text('별하 별지기님'), findsOneWidget);
-    expect(find.text('오늘의 모험'), findsOneWidget);
+    expect(find.text('사라진 별빛 씨앗'), findsOneWidget);
   });
 
   testWidgets('저장된 닉네임이 있으면 메인 화면으로 이동한다', (tester) async {
@@ -81,6 +81,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('루나 별지기님'), findsOneWidget);
-    expect(find.text('오늘의 모험'), findsOneWidget);
+    expect(find.text('사라진 별빛 씨앗'), findsOneWidget);
   });
 }
