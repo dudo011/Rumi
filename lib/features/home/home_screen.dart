@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/storage/progress_store.dart';
+import '../adventure/garden_exploration_screen.dart';
 import '../adventure/starlight_seed_episode_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -31,7 +32,15 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _startAdventure() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => StarlightSeedEpisodeScreen(store: widget.store),
+        builder: (_) => GardenExplorationScreen(
+          onContinue: (context) {
+            Navigator.of(context).pushReplacement<void, void>(
+              MaterialPageRoute<void>(
+                builder: (_) => StarlightSeedEpisodeScreen(store: widget.store),
+              ),
+            );
+          },
+        ),
       ),
     );
     await _loadProgress();
