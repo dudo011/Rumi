@@ -7,7 +7,7 @@
 - 앱 패키지명: rumi
 - Android 애플리케이션 ID(예정): com.dudo011.rumi
 - 개발 대상: Android 및 Web 우선, iOS 확장 가능
-- 개발 환경: GitHub Codespaces, Galaxy 태블릿 Chrome 데스크톱 모드
+- 개발 및 배포: AI 코딩 작업 환경, GitHub Actions, GitHub Pages
 
 ## 2. 프로젝트 목표
 
@@ -76,7 +76,7 @@
 - 향후 백엔드: Firebase
 - 향후 AI: OpenAI API
 - 버전 관리: GitHub
-- 개발 환경: GitHub Codespaces
+- 자동 검사 및 웹 배포: GitHub Actions, GitHub Pages
 
 ## 9. 개발 원칙
 
