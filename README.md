@@ -29,10 +29,21 @@ https://GITHUB_ID.github.io/Rumi/
 자동 배포가 실패하면 **Actions** 탭에서 실패한 단계를 확인하세요. 소스 분석이나
 테스트가 실패한 경우에는 잘못된 버전이 웹사이트에 배포되지 않습니다.
 
+### 설치한 앱이 이전 화면을 보여줄 때
+
+이 프로젝트는 항상 최신 온라인 버전을 사용하도록 빌드합니다. 이전에 설치한 앱이
+오래된 화면을 계속 보여주면 아래 순서로 한 번 초기화하세요.
+
+1. 휴대전화나 태블릿에서 설치된 Rumi 앱을 삭제합니다.
+2. Chrome에서 **설정 → 사이트 설정 → 모든 사이트 → dudo011.github.io**를
+   열고 저장된 데이터를 삭제합니다.
+3. Chrome에서 `https://dudo011.github.io/Rumi/`를 다시 엽니다.
+4. 최신 화면이 나타나는 것을 확인한 뒤 앱을 다시 설치합니다.
+
 ## 기본 확인 명령
 
 ```bash
 flutter analyze
 flutter test
-flutter build web --release --base-href /Rumi/
+flutter build web --release --base-href /Rumi/ --pwa-strategy=none
 ```

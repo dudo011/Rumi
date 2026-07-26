@@ -38,7 +38,11 @@ jobs:
         run: flutter test
 
       - name: Build web app
-        run: flutter build web --release --base-href "/${{ github.event.repository.name }}/"
+        run: >-
+          flutter build web
+          --release
+          --base-href "/${{ github.event.repository.name }}/"
+          --pwa-strategy=none
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5

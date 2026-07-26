@@ -34,6 +34,24 @@
 </head>
 <body>
   <!--
+    GitHub Pages always serves the latest online build. Remove service workers
+    left by earlier Flutter builds so an installed app cannot keep showing an
+    outdated cached version.
+  -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (const registration of registrations) {
+            if (registration.scope.includes('/Rumi/')) {
+              registration.unregister();
+            }
+          }
+        });
+      });
+    }
+  </script>
+  <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader
     or to give the user feedback during the initialization process.
