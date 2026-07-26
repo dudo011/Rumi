@@ -7,7 +7,7 @@
 - 앱 패키지명: rumi
 - Android 애플리케이션 ID(예정): com.dudo011.rumi
 - 개발 대상: Android 및 Web 우선, iOS 확장 가능
-- 개발 환경: GitHub Codespaces, Galaxy 태블릿 Chrome 데스크톱 모드
+- 개발 및 배포: AI 코딩 작업 환경, GitHub Actions, GitHub Pages
 
 ## 2. 프로젝트 목표
 
@@ -76,7 +76,7 @@
 - 향후 백엔드: Firebase
 - 향후 AI: OpenAI API
 - 버전 관리: GitHub
-- 개발 환경: GitHub Codespaces
+- 자동 검사 및 웹 배포: GitHub Actions, GitHub Pages
 
 ## 9. 개발 원칙
 
@@ -115,15 +115,15 @@ lib/
 
 - 기획 및 MVP 범위 정의 완료
 - GitHub 저장소 생성 완료
-- Flutter 프로젝트 초기 골격 구성 진행 중
+- Flutter Web 자동 검사 및 배포 구성 완료
+- 스플래시부터 학습 모험, 경험치와 기기 저장까지 MVP 흐름 구현 완료
 
 ## 12. 다음 작업
 
-1. Flutter 표준 플랫폼 파일 생성 확인
-2. 프로젝트 실행 환경 점검
-3. 스플래시 화면 구현
-4. 닉네임 입력 화면 구현
-5. 메인 화면까지 이동 흐름 구현
+1. 실제 기기에서 전체 MVP 흐름 사용성 테스트
+2. 꽃루미 공식 캐릭터 이미지 준비 및 교체
+3. 문제 난이도와 문구 검토
+4. 사용자 피드백을 반영한 MVP 개선
 
 ## 13. 완료 기준
 
