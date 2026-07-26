@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../core/storage/progress_store.dart';
-import '../adventure/adventure_screen.dart';
-import '../adventure/question_bank.dart';
+import '../adventure/garden_exploration_screen.dart';
+import '../adventure/starlight_seed_episode_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, this.store = const ProgressStore()});
@@ -30,19 +30,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _startAdventure() async {
-    final completedAdventures = _progress?.completedAdventures ?? 0;
-    final startIndex = (completedAdventures * 5) % divisorMultipleQuestions.length;
-    final questions = List.generate(
-      5,
-      (index) => divisorMultipleQuestions[
-        (startIndex + index) % divisorMultipleQuestions.length
-      ],
-    );
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => AdventureScreen(
-          store: widget.store,
-          questions: questions,
+        builder: (_) => GardenExplorationScreen(
+          onContinue: (context) {
+            Navigator.of(context).pushReplacement<void, void>(
+              MaterialPageRoute<void>(
+                builder: (_) => StarlightSeedEpisodeScreen(store: widget.store),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -169,23 +166,82 @@ class _AdventureCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Icon(Icons.auto_awesome_rounded, color: Color(0xFF8A68C1), size: 48),
-            const SizedBox(width: 18),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('오늘의 모험', style: TextStyle(color: Color(0xFF3F3156), fontSize: 22, fontWeight: FontWeight.w900)),
-                  SizedBox(height: 5),
-                  Text('약수와 배수 · 5문제', style: TextStyle(color: Color(0xFF7B7184))),
-                ],
-              ),
+            Row(
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [Color(0xFF7158AE), Color(0xFFD37DA5)]),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 34),
+                ),
+                const SizedBox(width: 18),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('새로운 사건', style: TextStyle(color: Color(0xFF9A4D72), fontWeight: FontWeight.w800)),
+                      SizedBox(height: 3),
+                      Text('사라진 별빛 씨앗', style: TextStyle(color: Color(0xFF3F3156), fontSize: 22, fontWeight: FontWeight.w900)),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            FilledButton(onPressed: onPressed, child: const Text('시작')),
+            const SizedBox(height: 16),
+            const Text(
+              '오늘 밤 피어날 별빛 꽃의 씨앗이 사라졌어요. 꽃루미와 정원을 탐험하고 단서를 찾아보세요.',
+              style: TextStyle(color: Color(0xFF6F6478), height: 1.5),
+            ),
+            const SizedBox(height: 16),
+            const Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _Tag(icon: Icons.calculate_rounded, label: '약수와 배수'),
+                _Tag(icon: Icons.schedule_rounded, label: '약 10분'),
+                _Tag(icon: Icons.search_rounded, label: '단서 3개'),
+              ],
+            ),
+            const SizedBox(height: 18),
+            FilledButton.icon(
+              onPressed: onPressed,
+              icon: const Icon(Icons.travel_explore_rounded),
+              label: const Text('사건 조사하기'),
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _Tag extends StatelessWidget {
+  const _Tag({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF2ECF8),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: const Color(0xFF7255A0)),
+          const SizedBox(width: 5),
+          Text(label, style: const TextStyle(color: Color(0xFF655475), fontSize: 12, fontWeight: FontWeight.w700)),
+        ],
       ),
     );
   }
