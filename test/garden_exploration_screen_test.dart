@@ -7,6 +7,21 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
   }
 
+  Future<void> waitForWidget(
+    WidgetTester tester,
+    Finder finder, {
+    int maxAttempts = 20,
+  }) async {
+    for (var attempt = 0; attempt < maxAttempts; attempt++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      if (finder.evaluate().isNotEmpty) {
+        return;
+      }
+    }
+
+    expect(finder, findsOneWidget);
+  }
+
   Future<void> startInvestigation(WidgetTester tester) async {
     await waitForUi(tester);
     expect(find.text('🌟 별빛 씨앗이 사라졌어요!'), findsOneWidget);
@@ -58,7 +73,10 @@ void main() {
     await waitForUi(tester);
     expect(find.text('✨ 새로운 증거 발견!'), findsOneWidget);
     await tester.tap(find.textContaining('수첩에 저장'));
-    await waitForUi(tester);
+    await waitForWidget(
+      tester,
+      find.text('🕵️ 정원에서 무슨 일이 있었을까요?'),
+    );
   }
 
   testWidgets('스토리 질문에서 시작해 증거가 단계적으로 열린다', (tester) async {
@@ -105,11 +123,11 @@ void main() {
     await tester.tap(find.byKey(const Key('deduction-option-1')));
     await tester.pump();
     await tester.tap(find.byKey(const Key('check-deduction')));
-    await waitForUi(tester);
+    await waitForWidget(tester, find.text('🌸 사건 해결!'));
 
     expect(find.text('🌸 사건 해결!'), findsOneWidget);
     await tester.tap(find.byKey(const Key('close-resolution')));
-    await waitForUi(tester);
+    await waitForWidget(tester, find.text('별빛 씨앗의 비밀을 밝혀냈어요!'));
 
     expect(find.text('별빛 씨앗의 비밀을 밝혀냈어요!'), findsOneWidget);
     expect(find.text('다음 모험 보기'), findsOneWidget);
