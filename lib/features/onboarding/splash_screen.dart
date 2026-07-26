@@ -1,9 +1,16 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../core/storage/progress_store.dart';
+import '../home/home_screen.dart';
+import 'nickname_screen.dart';
+
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  const SplashScreen({super.key, this.store = const ProgressStore()});
+
+  final ProgressStore store;
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -12,6 +19,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _animationController;
+  Timer? _navigationTimer;
 
   @override
   void initState() {
@@ -20,10 +28,35 @@ class _SplashScreenState extends State<SplashScreen>
       vsync: this,
       duration: const Duration(milliseconds: 2400),
     )..repeat(reverse: true);
+    _navigationTimer = Timer(const Duration(seconds: 2), _openNicknameScreen);
+  }
+
+  Future<void> _openNicknameScreen() async {
+    if (!mounted) {
+      return;
+    }
+    final progress = await widget.store.load();
+    if (!mounted) {
+      return;
+    }
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder<void>(
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return progress.nickname.isEmpty
+              ? NicknameScreen(store: widget.store)
+              : HomeScreen(store: widget.store);
+        },
+        transitionDuration: const Duration(milliseconds: 650),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
+    );
   }
 
   @override
   void dispose() {
+    _navigationTimer?.cancel();
     _animationController.dispose();
     super.dispose();
   }
