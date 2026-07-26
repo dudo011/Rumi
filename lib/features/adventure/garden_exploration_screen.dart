@@ -39,7 +39,47 @@ class _GardenExplorationScreenState extends State<GardenExplorationScreen> {
         ),
       };
 
+  static const _cluePuzzles = <_Clue, _CluePuzzleData>{
+    _Clue.scratch: _CluePuzzleData(
+      title: '별가루 묶음',
+      prompt: '별가루 12개를 3개씩 묶으면 몇 묶음일까요?',
+      options: ['3묶음', '4묶음', '6묶음'],
+      correctIndex: 1,
+      hint: '12 ÷ 3을 생각해 보세요.',
+      keyPrefix: 'scratch-puzzle',
+    ),
+    _Clue.footprints: _CluePuzzleData(
+      title: '반짝이는 발자국',
+      prompt: '4칸마다 발자국이, 6칸마다 별 표시가 나타나요. 둘이 다시 함께 나타나는 곳은 몇 번째 칸일까요?',
+      options: ['8칸', '10칸', '12칸'],
+      correctIndex: 2,
+      hint: '4의 배수와 6의 배수를 차례로 찾아보세요.',
+      keyPrefix: 'footprints-puzzle',
+    ),
+  };
+
   bool get _complete => _clues.length == _clueDetails.length;
+
+  Future<void> _inspectClue(_Clue clue) async {
+    if (_clues.contains(clue)) {
+      _openNotebook(focus: clue);
+      return;
+    }
+
+    final puzzle = _cluePuzzles[clue];
+    if (puzzle != null) {
+      final solved = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => _CluePuzzleDialog(data: puzzle),
+      );
+      if (solved != true || !mounted) {
+        return;
+      }
+    }
+
+    await _findClue(clue);
+  }
 
   Future<void> _findClue(_Clue clue) async {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -160,25 +200,22 @@ class _GardenExplorationScreenState extends State<GardenExplorationScreen> {
                   ),
                   const Positioned(left: 18, top: 16, child: _SceneLabel()),
                   _Hotspot(
-                    key: const Key('scratch-hotspot'),
                     alignment: const Alignment(-0.12, -0.15),
                     semanticLabel: '빈 별받침대 조사',
                     discovered: _clues.contains(_Clue.scratch),
                     icon: Icons.auto_awesome_rounded,
                     color: const Color(0xFFFFDB72),
-                    onTap: () => _findClue(_Clue.scratch),
+                    onTap: () => _inspectClue(_Clue.scratch),
                   ),
                   _Hotspot(
-                    key: const Key('footprints-hotspot'),
                     alignment: const Alignment(0.55, 0.23),
                     semanticLabel: '작은 발자국 조사',
                     discovered: _clues.contains(_Clue.footprints),
                     icon: Icons.pets_rounded,
                     color: const Color(0xFFEAB4DB),
-                    onTap: () => _findClue(_Clue.footprints),
+                    onTap: () => _inspectClue(_Clue.footprints),
                   ),
                   _Hotspot(
-                    key: const Key('chest-hotspot'),
                     alignment: const Alignment(-0.72, 0.36),
                     semanticLabel: '분수대의 잠긴 상자 조사',
                     discovered: _puzzleSolved,
@@ -190,7 +227,6 @@ class _GardenExplorationScreenState extends State<GardenExplorationScreen> {
                     onTap: _inspectChest,
                   ),
                   _Hotspot(
-                    key: const Key('key-hotspot'),
                     alignment: const Alignment(0.76, -0.55),
                     semanticLabel: '작은 돌 아래 조사',
                     checked: _hasKey,
@@ -245,6 +281,101 @@ class _GardenExplorationScreenState extends State<GardenExplorationScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _CluePuzzleData {
+  const _CluePuzzleData({
+    required this.title,
+    required this.prompt,
+    required this.options,
+    required this.correctIndex,
+    required this.hint,
+    required this.keyPrefix,
+  });
+
+  final String title;
+  final String prompt;
+  final List<String> options;
+  final int correctIndex;
+  final String hint;
+  final String keyPrefix;
+}
+
+class _CluePuzzleDialog extends StatefulWidget {
+  const _CluePuzzleDialog({required this.data});
+
+  final _CluePuzzleData data;
+
+  @override
+  State<_CluePuzzleDialog> createState() => _CluePuzzleDialogState();
+}
+
+class _CluePuzzleDialogState extends State<_CluePuzzleDialog> {
+  int? _selectedIndex;
+  String? _feedback;
+
+  void _checkAnswer() {
+    if (_selectedIndex == widget.data.correctIndex) {
+      Navigator.of(context).pop(true);
+      return;
+    }
+    setState(() => _feedback = widget.data.hint);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final data = widget.data;
+    return AlertDialog(
+      title: Text(data.title),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(data.prompt, style: const TextStyle(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 16),
+          for (var index = 0; index < data.options.length; index++)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: ChoiceChip(
+                key: Key('${data.keyPrefix}-option-$index'),
+                label: SizedBox(
+                  width: double.infinity,
+                  child: Text(data.options[index], textAlign: TextAlign.center),
+                ),
+                selected: _selectedIndex == index,
+                onSelected: (_) {
+                  setState(() {
+                    _selectedIndex = index;
+                    _feedback = null;
+                  });
+                },
+              ),
+            ),
+          if (_feedback != null)
+            Text(
+              _feedback!,
+              key: Key('${data.keyPrefix}-feedback'),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF9A4D72),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('정원을 더 살펴보기'),
+        ),
+        FilledButton(
+          key: Key('${data.keyPrefix}-check'),
+          onPressed: _selectedIndex == null ? null : _checkAnswer,
+          child: const Text('문양 확인하기'),
+        ),
+      ],
     );
   }
 }
@@ -360,7 +491,6 @@ class _Hotspot extends StatefulWidget {
     required this.onTap,
     this.discovered = false,
     this.checked = false,
-    super.key,
   });
 
   final Alignment alignment;
@@ -473,7 +603,7 @@ class _GuideCard extends StatelessWidget {
           SizedBox(width: 12),
           Expanded(
             child: Text(
-              '꽃루미: 반짝이는 곳만 정답은 아닐 거야. 돌과 상자도 눌러 보고, 수상한 흔적 3개를 찾아보자!',
+              '꽃루미: 단서를 누르면 작은 별빛 문제가 나타나. 하나씩 풀며 흔적을 모아보자!',
               style: TextStyle(
                 color: Colors.white,
                 height: 1.4,
@@ -539,7 +669,11 @@ class _FactorPuzzleDialogState extends State<_FactorPuzzleDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Icon(Icons.auto_awesome_rounded, size: 48, color: Color(0xFF76558C)),
+              const Icon(
+                Icons.auto_awesome_rounded,
+                size: 48,
+                color: Color(0xFF76558C),
+              ),
               const SizedBox(height: 12),
               const Text(
                 '별빛 암호판',
@@ -566,7 +700,9 @@ class _FactorPuzzleDialogState extends State<_FactorPuzzleDialog> {
                       onSelected: (selected) {
                         setState(() {
                           _feedback = null;
-                          selected ? _selected.add(option) : _selected.remove(option);
+                          selected
+                              ? _selected.add(option)
+                              : _selected.remove(option);
                         });
                       },
                     ),
@@ -578,7 +714,10 @@ class _FactorPuzzleDialogState extends State<_FactorPuzzleDialog> {
                   _feedback!,
                   key: const Key('puzzle-feedback'),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(color: Color(0xFF9A4D72), fontWeight: FontWeight.w700),
+                  style: const TextStyle(
+                    color: Color(0xFF9A4D72),
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
               const SizedBox(height: 20),
@@ -721,7 +860,9 @@ class _NotebookEntry extends StatelessWidget {
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: unlocked ? const Color(0xFFFFE2EC) : const Color(0xFFD5CDC4),
+            backgroundColor: unlocked
+                ? const Color(0xFFFFE2EC)
+                : const Color(0xFFD5CDC4),
             child: Icon(
               unlocked ? detail.icon : Icons.lock_outline_rounded,
               color: const Color(0xFF76558C),
@@ -734,10 +875,16 @@ class _NotebookEntry extends StatelessWidget {
               children: [
                 Text(
                   unlocked ? detail.title : '아직 찾지 못한 단서',
-                  style: const TextStyle(fontWeight: FontWeight.w900),
+                  style: const TextStyle(
+                    color: Color(0xFF493C4E),
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
                 const SizedBox(height: 4),
-                Text(unlocked ? detail.text : '사건 현장을 조금 더 자세히 살펴보세요.'),
+                Text(
+                  unlocked ? detail.text : '사건 현장을 조금 더 자세히 살펴보세요.',
+                  style: const TextStyle(color: Color(0xFF746A74)),
+                ),
               ],
             ),
           ),
@@ -758,7 +905,9 @@ class _ContinueCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFFFFF0B5), Color(0xFFFFD2E5)]),
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFF0B5), Color(0xFFFFD2E5)],
+        ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: const [BoxShadow(color: Color(0x99000000), blurRadius: 25)],
       ),
@@ -766,15 +915,47 @@ class _ContinueCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('단서 3개를 모두 찾았어요!', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900)),
+          const Text(
+            '단서 3개를 모두 찾았어요!',
+            style: TextStyle(
+              color: Color(0xFF4A3042),
+              fontSize: 17,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
           const SizedBox(height: 4),
-          const Text('수첩의 단서를 따라 다음 장소로 추적해 볼까요?'),
+          const Text(
+            '수첩의 단서를 따라 다음 장소로 추적해 볼까요?',
+            style: TextStyle(
+              color: Color(0xFF6B4F60),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: OutlinedButton(onPressed: onNotebook, child: const Text('수첩 보기'))),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: onNotebook,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF5F3E70),
+                    backgroundColor: Colors.white.withValues(alpha: 0.65),
+                    side: const BorderSide(color: Color(0xFF76558C), width: 1.5),
+                  ),
+                  child: const Text('수첩 보기'),
+                ),
+              ),
               const SizedBox(width: 10),
-              Expanded(child: FilledButton(onPressed: onContinue, child: const Text('연못으로 추적'))),
+              Expanded(
+                child: FilledButton(
+                  onPressed: onContinue,
+                  style: FilledButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: const Color(0xFF6E4A8E),
+                  ),
+                  child: const Text('연못으로 추적'),
+                ),
+              ),
             ],
           ),
         ],
@@ -805,11 +986,31 @@ class _GardenScenePainter extends CustomPainter {
 
     final path = Path()
       ..moveTo(size.width * 0.34, size.height)
-      ..quadraticBezierTo(size.width * 0.55, size.height * 0.68, size.width * 0.47, size.height * 0.42)
-      ..quadraticBezierTo(size.width * 0.4, size.height * 0.22, size.width * 0.55, 0)
+      ..quadraticBezierTo(
+        size.width * 0.55,
+        size.height * 0.68,
+        size.width * 0.47,
+        size.height * 0.42,
+      )
+      ..quadraticBezierTo(
+        size.width * 0.4,
+        size.height * 0.22,
+        size.width * 0.55,
+        0,
+      )
       ..lineTo(size.width * 0.76, 0)
-      ..quadraticBezierTo(size.width * 0.63, size.height * 0.25, size.width * 0.66, size.height * 0.46)
-      ..quadraticBezierTo(size.width * 0.73, size.height * 0.72, size.width * 0.67, size.height)
+      ..quadraticBezierTo(
+        size.width * 0.63,
+        size.height * 0.25,
+        size.width * 0.66,
+        size.height * 0.46,
+      )
+      ..quadraticBezierTo(
+        size.width * 0.73,
+        size.height * 0.72,
+        size.width * 0.67,
+        size.height,
+      )
       ..close();
     canvas.drawPath(path, Paint()..color = const Color(0xFF9F8967));
 
@@ -833,8 +1034,14 @@ class _GardenScenePainter extends CustomPainter {
     for (var index = 0; index < 34; index++) {
       final x = ((index * 47 + 13) % 97) / 100 * size.width;
       final y = ((index * 31 + 7) % 91) / 100 * size.height;
-      final color = index.isEven ? const Color(0xFFFFE99C) : const Color(0xFFE8B6DC);
-      canvas.drawCircle(Offset(x, y), index % 3 == 0 ? 2.2 : 1.3, Paint()..color = color);
+      final color = index.isEven
+          ? const Color(0xFFFFE99C)
+          : const Color(0xFFE8B6DC);
+      canvas.drawCircle(
+        Offset(x, y),
+        index % 3 == 0 ? 2.2 : 1.3,
+        Paint()..color = color,
+      );
     }
   }
 
