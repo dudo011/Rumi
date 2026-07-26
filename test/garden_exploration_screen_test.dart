@@ -17,14 +17,14 @@ void main() {
   }
 
   Future<void> solveChestPuzzle(WidgetTester tester) async {
-    await tester.tap(find.byKey(const Key('key-hotspot')));
+    await tester.tap(find.byTooltip('작은 돌 아래 조사'));
     await tester.pumpAndSettle();
     expect(find.text('🔑 낡은 별열쇠 발견!'), findsOneWidget);
 
     await tester.tap(find.text('열쇠 챙기기'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('chest-hotspot')));
+    await tester.tap(find.byTooltip('분수대의 잠긴 상자 조사'));
     await tester.pumpAndSettle();
     expect(find.text('별빛 암호판'), findsOneWidget);
 
