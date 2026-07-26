@@ -30,6 +30,33 @@ https://GITHUB_ID.github.io/Rumi/
 `Test and deploy Flutter web` 작업에 초록색 체크가 표시된 후 웹사이트를
 새로고침하세요.
 
+## Codespaces에서 개발하기
+
+이 저장소에는 Flutter Web 개발환경을 자동으로 준비하는 `.devcontainer` 설정이
+포함되어 있습니다. GitHub 저장소에서 **Code → Codespaces → Create codespace on
+main**을 선택하면 stable 채널의 Flutter, Dart·Flutter VS Code 확장, 웹 미리보기용
+3000번 포트와 프로젝트 패키지가 자동으로 준비됩니다.
+
+Codespace가 열린 뒤 변경 전후에 다음 명령으로 Actions와 동일한 핵심 검사를
+실행하세요.
+
+```bash
+dart format --output=none --set-exit-if-changed lib test
+flutter analyze
+flutter test
+flutter build web --release --base-href /Rumi/ --pwa-strategy=none
+```
+
+웹 앱을 직접 조작하려면 다음 명령을 실행하고 **Ports** 패널에서 `3000` 포트를
+여세요.
+
+```bash
+flutter run -d web-server --web-hostname 0.0.0.0 --web-port 3000
+```
+
+VS Code의 **Terminal → Run Task**에서 `Rumi: Check all`, `Rumi: Run web preview`,
+`Rumi: Build Pages release` 작업을 선택해 같은 명령을 실행할 수도 있습니다.
+
 ### 최초 한 번 필요한 GitHub 설정
 
 1. GitHub 저장소에서 **Settings → Pages**로 이동합니다.

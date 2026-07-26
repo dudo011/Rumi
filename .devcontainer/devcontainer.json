@@ -1,0 +1,33 @@
+{
+  "name": "Rumi Flutter Web",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "FLUTTER_CHANNEL": "stable"
+    }
+  },
+  "remoteUser": "vscode",
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "Rumi Flutter Web",
+      "onAutoForward": "openPreview"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Dart-Code.dart-code",
+        "Dart-Code.flutter",
+        "GitHub.vscode-github-actions"
+      ],
+      "settings": {
+        "dart.flutterSdkPath": "/opt/flutter",
+        "dart.lineLength": 100,
+        "editor.formatOnSave": true,
+        "files.insertFinalNewline": true
+      }
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh"
+}

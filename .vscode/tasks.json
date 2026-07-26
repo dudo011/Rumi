@@ -1,0 +1,37 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Rumi: Check all",
+      "type": "shell",
+      "command": "dart format --output=none --set-exit-if-changed lib test && flutter analyze && flutter test",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": ["$dart-analyze"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Rumi: Run web preview",
+      "type": "shell",
+      "command": "flutter run -d web-server --web-hostname 0.0.0.0 --web-port 3000",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Rumi: Build Pages release",
+      "type": "shell",
+      "command": "flutter build web --release --base-href /Rumi/ --pwa-strategy=none",
+      "group": "build",
+      "problemMatcher": ["$dart-analyze"]
+    }
+  ]
+}
