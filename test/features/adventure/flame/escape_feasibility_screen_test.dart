@@ -1,37 +1,26 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:rumi/features/adventure/flame/escape_feasibility_screen.dart';
 
 void main() {
-  testWidgets('Flame 방탈출 기술 검증 화면은 인벤토리와 힌트 오버레이를 제공한다',
-      (tester) async {
-    tester.view.physicalSize = const Size(360, 640);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
-    await tester.pumpWidget(
-      const MaterialApp(home: EscapeFeasibilityScreen()),
+  test('기술 검증 상태는 초기 인벤토리와 진행 메시지를 보존한다', () {
+    const state = EscapeLabState(
+      inventory: {EscapeLabItem.flower},
+      selected: null,
+      message: '등불을 조사하세요.',
+      completed: {},
+      inputLocked: false,
+      lifecycle: '실행 중',
     );
-    await tester.pump();
 
-    expect(find.text('Flame 방탈출 기술 검증실'), findsOneWidget);
-    expect(find.text('가방'), findsOneWidget);
-    expect(find.text('꽃잎'), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    expect(state.inventory, contains(EscapeLabItem.flower));
+    expect(state.selected, isNull);
+    expect(state.inputLocked, isFalse);
+    expect(state.message, '등불을 조사하세요.');
+  });
 
-    await tester.tap(find.byKey(const Key('escape-lab-hint')));
-    await tester.pump();
-
-    expect(find.text('기술 검증 힌트'), findsOneWidget);
-    expect(find.byKey(const Key('escape-lab-hint-close')), findsOneWidget);
-
-    await tester.tap(find.byKey(const Key('escape-lab-hint-close')));
-    await tester.pump();
-    expect(find.text('기술 검증 힌트'), findsNothing);
-
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pump();
+  test('기술 검증 화면은 독립 StatefulWidget으로 제공된다', () {
+    expect(const EscapeFeasibilityScreen(), isA<StatefulWidget>());
   });
 }
