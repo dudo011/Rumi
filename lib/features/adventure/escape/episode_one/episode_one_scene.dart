@@ -605,7 +605,10 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
     final cups = _cupRects;
     final plusRects = _cupPlusRects;
     final minusRects = _cupMinusRects;
-    final maxCount = snapshot.pedestalCupCounts.fold(0, math.max);
+    final maxCount = snapshot.pedestalCupCounts.fold<int>(
+      0,
+      (maxValue, count) => math.max(maxValue, count),
+    );
 
     for (var index = 0; index < cups.length; index++) {
       final cup = cups[index];
@@ -800,6 +803,7 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
           Paint()..color = const Color(0xAA66C9DA),
         );
         _drawStar(canvas, center, 34);
+        break;
       case EpisodeOneScene.clockflowerGrove:
         canvas.drawCircle(
           Offset(center.dx - 48, center.dy),
@@ -819,6 +823,7 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
             ..style = PaintingStyle.stroke
             ..strokeWidth = 4,
         );
+        break;
       case EpisodeOneScene.fountain:
         canvas.drawCircle(
           center,
@@ -835,6 +840,7 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
             ..color = const Color(0xFFCEE9EC)
             ..strokeWidth = 8,
         );
+        break;
       case EpisodeOneScene.greenhouse:
         final house = Rect.fromCenter(
           center: center,
@@ -843,9 +849,7 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
         );
         canvas.drawRRect(
           RRect.fromRectAndRadius(house, const Radius.circular(28)),
-          Paint()
-            ..color = const Color(0x4477D4B0)
-            ..style = PaintingStyle.fill,
+          Paint()..color = const Color(0x4477D4B0),
         );
         canvas.drawRRect(
           RRect.fromRectAndRadius(house, const Radius.circular(28)),
@@ -864,6 +868,7 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
             ..style = PaintingStyle.stroke
             ..strokeWidth = 8,
         );
+        break;
       case EpisodeOneScene.centralGarden:
         break;
     }
