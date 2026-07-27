@@ -1,0 +1,47 @@
+name: Fix Flame prototype
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-flame-prototype.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Apply targeted fixes
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('lib/features/adventure/flame/pedestal_flame_prototype_screen.dart')
+          text = path.read_text()
+          replacements = {
+              'final _PedestalWorld worldScene = _PedestalWorld();': 'final _PedestalWorld _worldScene = _PedestalWorld();',
+              'await add(worldScene);': 'await add(_worldScene);',
+              'worldScene.size = size;': '_worldScene.size = size;',
+              '  void onDragStart(DragStartEvent event) {\n': '  void onDragStart(DragStartEvent event) {\n    super.onDragStart(event);\n',
+              '  void onDragUpdate(DragUpdateEvent event) {\n': '  void onDragUpdate(DragUpdateEvent event) {\n    super.onDragUpdate(event);\n',
+              '  void onDragEnd(DragEndEvent event) {\n': '  void onDragEnd(DragEndEvent event) {\n    super.onDragEnd(event);\n',
+              'center: rect.center + const Offset(0, rect.height * 0.43),': 'center: rect.center + Offset(0, rect.height * 0.43),',
+          }
+          for old, new in replacements.items():
+              if old not in text:
+                  raise SystemExit(f'Missing expected text: {old}')
+              text = text.replace(old, new, 1)
+          path.write_text(text)
+          PY
+          rm .github/workflows/fix-flame-prototype.yml
+      - name: Commit fixes
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add lib/features/adventure/flame/pedestal_flame_prototype_screen.dart .github/workflows/fix-flame-prototype.yml
+          git commit -m "fix: resolve Flame prototype analyzer errors"
+          git push
