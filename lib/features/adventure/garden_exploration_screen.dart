@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'garden_mystery_screen.dart';
+import 'garden_mystery_v2_screen.dart';
 
-/// 기존 호출부와의 호환성을 유지하면서 새 몰입형 조사 화면을 사용한다.
+/// 기존 호출부와의 호환성을 유지하면서 직접 조작형 조사 화면을 사용한다.
 class GardenExplorationScreen extends StatelessWidget {
   const GardenExplorationScreen({required this.onContinue, super.key});
 
@@ -10,6 +10,6 @@ class GardenExplorationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GardenMysteryScreen(onContinue: onContinue);
+    return GardenMysteryV2Screen(onContinue: onContinue);
   }
 }
