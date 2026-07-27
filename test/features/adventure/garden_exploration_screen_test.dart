@@ -27,17 +27,14 @@ void main() {
     await tester.tap(find.byKey(const Key('pedestal-hotspot')));
     await tester.pump(const Duration(milliseconds: 500));
 
-    final wrongChoice = tester.widget<ChoiceChip>(
-      find.byKey(const Key('scratch-option-3')),
-    );
-    wrongChoice.onSelected!.call(true);
+    final wrongChoice = find.byKey(const Key('scratch-option-3'));
+    await tester.ensureVisible(wrongChoice);
+    await tester.tap(wrongChoice);
     await tester.pump();
 
-    final checkButton = tester.widget<FilledButton>(
-      find.byKey(const Key('scratch-check-answer')),
-    );
-    expect(checkButton.onPressed, isNotNull);
-    checkButton.onPressed!.call();
+    final checkButton = find.byKey(const Key('scratch-check-answer'));
+    await tester.ensureVisible(checkButton);
+    await tester.tap(checkButton);
     await tester.pump();
 
     expect(find.byKey(const Key('scene-feedback')), findsOneWidget);
