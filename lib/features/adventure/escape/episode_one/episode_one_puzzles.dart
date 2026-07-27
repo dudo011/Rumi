@@ -31,3 +31,41 @@ class PedestalBalancePuzzle {
     return '세 컵의 무게가 아직 달라요. 아래쪽 빼기 버튼으로 다시 옮길 수 있어요.';
   }
 }
+
+class PondTrackPuzzle {
+  const PondTrackPuzzle._();
+
+  static const List<int> correctOrder = [0, 2, 4, 6];
+  static const Set<int> windMarks = {1, 3, 5};
+
+  static bool isExpectedTrack({
+    required int selectedIndex,
+    required int progress,
+  }) {
+    if (progress < 0 || progress >= correctOrder.length) return false;
+    return correctOrder[progress] == selectedIndex;
+  }
+
+  static bool isRealFootprint(int index) {
+    return correctOrder.contains(index);
+  }
+
+  static bool isCompleted(int progress) {
+    return progress >= correctOrder.length;
+  }
+
+  static String incorrectFeedback({
+    required int selectedIndex,
+    required int progress,
+  }) {
+    if (windMarks.contains(selectedIndex)) {
+      return '이 자국에는 작은 발가락 모양이 없어요. 바람이 물 위를 스친 흔적 같아요.';
+    }
+    if (isRealFootprint(selectedIndex)) {
+      return progress == 0
+          ? '물가에서 가장 가까운 둥근 발자국부터 찾아보세요.'
+          : '빛으로 이어진 마지막 발자국 다음의 흔적을 찾아보세요.';
+    }
+    return '둥근 발바닥과 작은 발가락이 있는 흔적을 찾아보세요.';
+  }
+}
