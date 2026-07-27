@@ -129,3 +129,5 @@ jobs:
           git add -A
           git commit -m 'test: validate episode one P5 implementation'
           git push origin HEAD:main
+
+# validation trigger
