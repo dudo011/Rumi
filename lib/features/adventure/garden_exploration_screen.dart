@@ -16,8 +16,8 @@ class GardenExplorationScreen extends StatelessWidget {
       children: [
         GardenMysteryV2Screen(onContinue: onContinue),
         Positioned(
-          left: 16,
-          bottom: 86,
+          right: 16,
+          top: 18,
           child: SafeArea(
             child: FilledButton.icon(
               key: const Key('open-flame-feasibility-lab'),

@@ -1,3 +1,5 @@
+// ignore_for_file: sort_child_properties_last
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -88,8 +90,7 @@ class _EscapeFeasibilityScreenState extends State<EscapeFeasibilityScreen>
                 game: _game,
                 initialActiveOverlays: const [_inventoryOverlay],
                 overlayBuilderMap: {
-                  _inventoryOverlay: (_, game) =>
-                      _InventoryOverlay(game: game),
+                  _inventoryOverlay: (_, game) => _InventoryOverlay(game: game),
                   _hintOverlay: (_, game) => _HintOverlay(game: game),
                   _statusOverlay: (_, game) => _StatusOverlay(game: game),
                 },
@@ -139,16 +140,16 @@ class _EscapeFeasibilityScreenState extends State<EscapeFeasibilityScreen>
 
 class EscapeFeasibilityGame extends FlameGame {
   EscapeFeasibilityGame()
-      : state = ValueNotifier<EscapeLabState>(
-          const EscapeLabState(
-            inventory: {EscapeLabItem.flower},
-            selected: null,
-            message: '등불을 누른 뒤 다른 장면을 조사하세요.',
-            completed: {},
-            inputLocked: false,
-            lifecycle: '실행 중',
-          ),
-        );
+    : state = ValueNotifier<EscapeLabState>(
+        const EscapeLabState(
+          inventory: {EscapeLabItem.flower},
+          selected: null,
+          message: '등불을 누른 뒤 다른 장면을 조사하세요.',
+          completed: {},
+          inputLocked: false,
+          lifecycle: '실행 중',
+        ),
+      );
 
   final ValueNotifier<EscapeLabState> state;
   final AudioPlayer _player = AudioPlayer();
@@ -387,20 +388,20 @@ class _EscapeLabWorld extends PositionComponent
   Rect get rightButton =>
       Rect.fromLTWH(frame.right - 132, frame.bottom - 52, 120, 40);
   Rect get lamp => Rect.fromCenter(
-        center: Offset(size.x * .28, frame.center.dy),
-        width: 110,
-        height: 140,
-      );
+    center: Offset(size.x * .28, frame.center.dy),
+    width: 110,
+    height: 140,
+  );
   Rect get door => Rect.fromCenter(
-        center: Offset(size.x * .68, frame.center.dy),
-        width: 140,
-        height: 210,
-      );
-  Rect get key => Rect.fromCenter(
-        center: Offset(size.x * .56, frame.center.dy),
-        width: 100,
-        height: 80,
-      );
+    center: Offset(size.x * .68, frame.center.dy),
+    width: 140,
+    height: 210,
+  );
+  Rect get keyRect => Rect.fromCenter(
+    center: Offset(size.x * .56, frame.center.dy),
+    width: 100,
+    height: 80,
+  );
 
   @override
   Future<void> onLoad() async {
@@ -453,7 +454,7 @@ class _EscapeLabWorld extends PositionComponent
           return;
         }
         if (!lab.inventory.contains(EscapeLabItem.starKey) &&
-            key.inflate(20).contains(point)) {
+            keyRect.inflate(20).contains(point)) {
           lab.addKey();
           return;
         }
@@ -466,6 +467,7 @@ class _EscapeLabWorld extends PositionComponent
 
   @override
   void onDragStart(DragStartEvent event) {
+    super.onDragStart(event);
     if (lab.scene == EscapeLabScene.dragPuzzle &&
         !lab.dragSolved &&
         piece.distanceTo(event.localPosition) < 50) {
@@ -482,6 +484,7 @@ class _EscapeLabWorld extends PositionComponent
 
   @override
   void onDragEnd(DragEndEvent event) {
+    super.onDragEnd(event);
     if (!dragging) return;
 
     dragging = false;
@@ -620,19 +623,19 @@ class _EscapeLabWorld extends PositionComponent
     );
     if (!lab.inventory.contains(EscapeLabItem.starKey)) {
       canvas.drawCircle(
-        key.center,
+        keyRect.center,
         24,
         Paint()..color = const Color(0xFFFFD96A),
       );
       canvas.drawRect(
-        Rect.fromLTWH(key.center.dx + 15, key.center.dy - 6, 42, 12),
+        Rect.fromLTWH(keyRect.center.dx + 15, keyRect.center.dy - 6, 42, 12),
         Paint()..color = const Color(0xFFFFD96A),
       );
       _text(
         canvas,
         '별열쇠',
-        Offset(key.left, key.bottom + 8),
-        key.width,
+        Offset(keyRect.left, keyRect.bottom + 8),
+        keyRect.width,
         13,
         center: true,
       );
@@ -742,7 +745,7 @@ class _InventoryOverlay extends StatelessWidget {
         alignment: Alignment.bottomCenter,
         child: ValueListenableBuilder<EscapeLabState>(
           valueListenable: game.state,
-          builder: (_, state, __) => Container(
+          builder: (_, state, _) => Container(
             height: 80,
             margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
             padding: const EdgeInsets.all(9),
@@ -810,7 +813,7 @@ class _StatusOverlay extends StatelessWidget {
       title: 'Flame 구현 가능성 검증 현황',
       child: ValueListenableBuilder<EscapeLabState>(
         valueListenable: game.state,
-        builder: (_, state, __) => ConstrainedBox(
+        builder: (_, state, _) => ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 390),
           child: ListView(
             shrinkWrap: true,
