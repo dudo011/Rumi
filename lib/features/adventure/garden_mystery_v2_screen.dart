@@ -605,10 +605,14 @@ class _GardenPainter extends CustomPainter {
     canvas.drawCircle(Offset(size.width * .48, size.height * .39), 34, Paint()..color = const Color(0xFFBBA36A));
     if (evidence.contains(_Evidence.scratch)) {
       final paint = Paint()..color = const Color(0xFFFFD66F)..strokeWidth = 4..strokeCap = StrokeCap.round;
-      for (var i = 0; i < 4; i++) canvas.drawLine(Offset(size.width * .5 + i * 5, size.height * .39), Offset(size.width * .6 + i * 5, size.height * .43), paint);
+      for (var i = 0; i < 4; i++) {
+        canvas.drawLine(Offset(size.width * .5 + i * 5, size.height * .39), Offset(size.width * .6 + i * 5, size.height * .43), paint);
+      }
     }
     if (evidence.contains(_Evidence.footprints)) {
-      for (var i = 0; i < 5; i++) canvas.drawCircle(Offset(size.width * (.58 + i * .045), size.height * (.5 + i * .045)), 7, Paint()..color = const Color(0xFFEAB4DB));
+      for (var i = 0; i < 5; i++) {
+        canvas.drawCircle(Offset(size.width * (.58 + i * .045), size.height * (.5 + i * .045)), 7, Paint()..color = const Color(0xFFEAB4DB));
+      }
     }
   }
   @override
@@ -626,9 +630,13 @@ class _PedestalPainter extends CustomPainter {
     canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: center, width: size.width * .36, height: 150), const Radius.circular(32)), Paint()..shader = const LinearGradient(colors: [Color(0xFFD7C18C), Color(0xFF8C7650)]).createShader(Rect.fromCenter(center: center, width: size.width * .36, height: 150)));
     canvas.drawCircle(center, 34, Paint()..color = const Color(0xFF4D405A));
     final scratchPaint = Paint()..color = const Color(0xFFFFD55D)..strokeWidth = solved ? 7 : 3..strokeCap = StrokeCap.round;
-    for (var i = 0; i < 4; i++) canvas.drawLine(center + Offset(42, -18 + i * 12), center + Offset(size.width * (flowing ? .4 : .24), -10 + i * 12), scratchPaint);
+    for (var i = 0; i < 4; i++) {
+      canvas.drawLine(center + Offset(42, -18 + i * 12), center + Offset(size.width * (flowing ? .4 : .24), -10 + i * 12), scratchPaint);
+    }
     if (flowing) {
-      for (var i = 0; i < 14; i++) canvas.drawCircle(Offset(center.dx + 40 + i * 18, center.dy - 42 + (i % 3) * 18), 5 + (i % 2) * 2, Paint()..color = const Color(0xFFFFE170));
+      for (var i = 0; i < 14; i++) {
+        canvas.drawCircle(Offset(center.dx + 40 + i * 18, center.dy - 42 + (i % 3) * 18), 5 + (i % 2) * 2, Paint()..color = const Color(0xFFFFE170));
+      }
     }
   }
   @override
