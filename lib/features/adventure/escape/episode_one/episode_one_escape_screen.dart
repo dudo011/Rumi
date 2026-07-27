@@ -1,20 +1,28 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/storage/progress_store.dart';
 import 'episode_one_game.dart';
 import 'episode_one_state.dart';
 import 'widgets/episode_one_clockflower_overlay.dart';
+import 'widgets/episode_one_finale_overlay.dart';
 import 'widgets/episode_one_fountain_overlay.dart';
 import 'widgets/episode_one_greenhouse_overlay.dart';
 import 'widgets/episode_one_inventory_overlay.dart';
 
 class EpisodeOneEscapeScreen extends StatefulWidget {
-  const EpisodeOneEscapeScreen({super.key, this.controller});
+  const EpisodeOneEscapeScreen({
+    super.key,
+    this.controller,
+    this.store = const ProgressStore(),
+  });
 
   final EpisodeOneStateController? controller;
+  final ProgressStore store;
 
   @override
-  State<EpisodeOneEscapeScreen> createState() => _EpisodeOneEscapeScreenState();
+  State<EpisodeOneEscapeScreen> createState() =>
+      _EpisodeOneEscapeScreenState();
 }
 
 class _EpisodeOneEscapeScreenState extends State<EpisodeOneEscapeScreen> {
@@ -93,6 +101,10 @@ class _EpisodeOneEscapeScreenState extends State<EpisodeOneEscapeScreen> {
         );
       },
     );
+  }
+
+  void _returnToHome() {
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   @override
@@ -308,6 +320,13 @@ class _EpisodeOneEscapeScreenState extends State<EpisodeOneEscapeScreen> {
               right: 0,
               bottom: 0,
               child: EpisodeOneInventoryOverlay(controller: _controller),
+            ),
+            Positioned.fill(
+              child: EpisodeOneFinaleOverlay(
+                controller: _controller,
+                store: widget.store,
+                onReturnToGarden: _returnToHome,
+              ),
             ),
           ],
         ),
