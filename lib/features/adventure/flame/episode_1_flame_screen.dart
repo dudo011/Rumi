@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -312,7 +311,7 @@ class _EpisodeOneWorld extends PositionComponent with TapCallbacks, DragCallback
   }
 
   void _handleDeductionTap(Offset point) {
-    final cardWidth = math.min(size.x * 0.78, 620);
+    final cardWidth = math.min(size.x * 0.78, 620).toDouble();
     final left = (size.x - cardWidth) / 2;
     for (var index = 0; index < 3; index++) {
       final rect = Rect.fromLTWH(left, size.y * (0.38 + index * 0.13), cardWidth, 68);
@@ -642,7 +641,7 @@ class _EpisodeOneWorld extends PositionComponent with TapCallbacks, DragCallback
   }
 
   void _drawDeductionScene(Canvas canvas) {
-    final board = Rect.fromCenter(center: Offset(size.x * 0.5, size.y * 0.5), width: math.min(size.x * 0.86, 720), height: math.min(size.y * 0.7, 560));
+    final board = Rect.fromCenter(center: Offset(size.x * 0.5, size.y * 0.5), width: math.min(size.x * 0.86, 720).toDouble(), height: math.min(size.y * 0.7, 560).toDouble());
     _drawRoundedPanel(canvas, board, const Color(0xEE251E35));
     _drawText(canvas, '추리 보드', Offset(board.left + 28, board.top + 24), 27, Colors.white, FontWeight.w900);
     _drawText(canvas, '증거: 오른쪽 긁힌 자국 · 분수대 발자국 · 은빛 털과 꺾인 잎', Offset(board.left + 28, board.top + 70), 15, const Color(0xFFDCCDEA), FontWeight.w700, maxWidth: board.width - 56);
@@ -651,7 +650,7 @@ class _EpisodeOneWorld extends PositionComponent with TapCallbacks, DragCallback
       '강한 바람에 밀린 씨앗을 포포가 주워 상자에 지켜두었다.',
       '쓰러진 물뿌리개가 씨앗을 분수대로 밀었다.',
     ];
-    final cardWidth = math.min(size.x * 0.78, 620);
+    final cardWidth = math.min(size.x * 0.78, 620).toDouble();
     final left = (size.x - cardWidth) / 2;
     for (var index = 0; index < options.length; index++) {
       final rect = Rect.fromLTWH(left, size.y * (0.38 + index * 0.13), cardWidth, 68);
