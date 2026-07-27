@@ -69,3 +69,42 @@ class PondTrackPuzzle {
     return '둥근 발바닥과 작은 발가락이 있는 흔적을 찾아보세요.';
   }
 }
+
+class ClockflowerPuzzle {
+  const ClockflowerPuzzle._();
+
+  static const int ringSize = 12;
+  static const int blueInterval = 4;
+  static const int yellowInterval = 6;
+  static const int firstCommonStep = 12;
+
+  static bool isValidStep(int step) {
+    return step >= 1 && step <= ringSize;
+  }
+
+  static bool blueOpensAt(int step) {
+    return isValidStep(step) && step % blueInterval == 0;
+  }
+
+  static bool yellowOpensAt(int step) {
+    return isValidStep(step) && step % yellowInterval == 0;
+  }
+
+  static bool isSolved(int step) {
+    return step == firstCommonStep;
+  }
+
+  static String feedback(int step) {
+    if (!isValidStep(step)) {
+      return '시간고리의 1번부터 12번 사이 칸을 선택하세요.';
+    }
+    final blueOpen = blueOpensAt(step);
+    final yellowOpen = yellowOpensAt(step);
+    if (blueOpen && yellowOpen) {
+      return '두 시계꽃이 함께 열렸어요. 은빛 바람끈이 내려오기 시작해요!';
+    }
+    if (blueOpen) return '파란 시계꽃만 반응했어요.';
+    if (yellowOpen) return '노란 시계꽃만 반응했어요.';
+    return '아직 두 꽃의 시간이 아니에요.';
+  }
+}
