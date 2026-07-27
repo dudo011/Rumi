@@ -108,3 +108,61 @@ class ClockflowerPuzzle {
     return '아직 두 꽃의 시간이 아니에요.';
   }
 }
+
+class GreenhouseBalancePuzzle {
+  const GreenhouseBalancePuzzle._();
+
+  static const int starEnergy = 18;
+  static const int moonEnergy = 24;
+  static const List<int> choices = [2, 3, 4, 6, 8];
+  static const int targetBedCount = 6;
+
+  static bool isValidChoice(int bedCount) {
+    return choices.contains(bedCount);
+  }
+
+  static int starRemainder(int bedCount) {
+    return isValidChoice(bedCount) ? starEnergy % bedCount : starEnergy;
+  }
+
+  static int moonRemainder(int bedCount) {
+    return isValidChoice(bedCount) ? moonEnergy % bedCount : moonEnergy;
+  }
+
+  static int starPerBed(int bedCount) {
+    return isValidChoice(bedCount) ? starEnergy ~/ bedCount : 0;
+  }
+
+  static int moonPerBed(int bedCount) {
+    return isValidChoice(bedCount) ? moonEnergy ~/ bedCount : 0;
+  }
+
+  static bool dividesBoth(int bedCount) {
+    return isValidChoice(bedCount) &&
+        starRemainder(bedCount) == 0 &&
+        moonRemainder(bedCount) == 0;
+  }
+
+  static bool isSolved(int bedCount) {
+    return bedCount == targetBedCount;
+  }
+
+  static String feedback(int bedCount) {
+    if (!isValidChoice(bedCount)) {
+      return '화단 수를 2, 3, 4, 6, 8 중에서 선택하세요.';
+    }
+    if (isSolved(bedCount)) {
+      return '6개 화단에 별 3개와 달 4개씩 들어갔어요. 안쪽 이끼 보관대가 열리고 있어요!';
+    }
+    if (bedCount == 2) {
+      return '남는 힘은 없지만 더 많은 화단에도 똑같이 나눌 수 있을 것 같아요.';
+    }
+    if (bedCount == 3) {
+      return '남는 것은 없지만 가장 많은 화단은 아니에요.';
+    }
+    if (bedCount == 4) {
+      return '별 에너지가 2개 남았어요.';
+    }
+    return '별과 달 에너지가 모두 남아요.';
+  }
+}
