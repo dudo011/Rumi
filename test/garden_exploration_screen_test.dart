@@ -9,16 +9,14 @@ void main() {
 
   Future<void> waitForWidget(
     WidgetTester tester,
-    Finder finder, {
-    int maxAttempts = 20,
-  }) async {
-    for (var attempt = 0; attempt < maxAttempts; attempt++) {
+    Finder finder,
+  ) async {
+    for (var attempt = 0; attempt < 20; attempt++) {
       await tester.pump(const Duration(milliseconds: 100));
       if (finder.evaluate().isNotEmpty) {
         return;
       }
     }
-
     expect(finder, findsOneWidget);
   }
 
@@ -55,8 +53,10 @@ void main() {
 
     expect(find.byTooltip('분수대의 잠긴 상자 조사'), findsOneWidget);
     await tester.tap(find.byTooltip('분수대의 잠긴 상자 조사'));
-    await tester.pump(const Duration(milliseconds: 350));
-    expect(find.textContaining('최근에 움직인 물건'), findsOneWidget);
+    await waitForWidget(
+      tester,
+      find.textContaining('잠긴 상자 근처에서 움직인 물건'),
+    );
 
     await tester.tap(find.byTooltip('작은 돌 아래 조사'));
     await waitForUi(tester);
@@ -73,10 +73,7 @@ void main() {
     await waitForUi(tester);
     expect(find.text('✨ 새로운 증거 발견!'), findsOneWidget);
     await tester.tap(find.textContaining('수첩에 저장'));
-    await waitForWidget(
-      tester,
-      find.text('🕵️ 정원에서 무슨 일이 있었을까요?'),
-    );
+    await waitForUi(tester);
   }
 
   testWidgets('스토리 질문에서 시작해 증거가 단계적으로 열린다', (tester) async {
@@ -119,17 +116,18 @@ void main() {
     await startInvestigation(tester);
     await reachDeduction(tester);
 
-    expect(find.text('🕵️ 정원에서 무슨 일이 있었을까요?'), findsOneWidget);
+    final deductionDialog = find.text('🕵️ 정원에서 무슨 일이 있었을까요?');
+    await waitForWidget(tester, deductionDialog);
     await tester.tap(find.byKey(const Key('deduction-option-1')));
     await tester.pump();
     await tester.tap(find.byKey(const Key('check-deduction')));
-    await waitForWidget(tester, find.text('🌸 사건 해결!'));
 
-    expect(find.text('🌸 사건 해결!'), findsOneWidget);
+    final resolutionDialog = find.text('🌸 사건 해결!');
+    await waitForWidget(tester, resolutionDialog);
     await tester.tap(find.byKey(const Key('close-resolution')));
-    await waitForWidget(tester, find.text('별빛 씨앗의 비밀을 밝혀냈어요!'));
 
-    expect(find.text('별빛 씨앗의 비밀을 밝혀냈어요!'), findsOneWidget);
+    final completionTitle = find.text('별빛 씨앗의 비밀을 밝혀냈어요!');
+    await waitForWidget(tester, completionTitle);
     expect(find.text('다음 모험 보기'), findsOneWidget);
     await tester.tap(find.text('다음 모험 보기'));
     expect(continued, isTrue);
