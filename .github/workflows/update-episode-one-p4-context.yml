@@ -1,0 +1,111 @@
+name: Update Episode 1 P4 project context
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/update-episode-one-p4-context.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-context:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Update project documents
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          design = Path('docs/EPISODE_01_ESCAPE_DESIGN.md')
+          design_text = design.read_text(encoding='utf-8')
+          design_text = design_text.replace(
+              '- 문서 상태: 승인 대기 완성본',
+              '- 문서 상태: 승인 완료·구현 기준본',
+              1,
+          )
+          design.write_text(design_text, encoding='utf-8')
+
+          context = Path('PROJECT_CONTEXT.md')
+          text = context.read_text(encoding='utf-8')
+          heading = '## 21. Episode 1 P0~P4 구현 현황 (2026-07-28)'
+          if heading not in text:
+              text = text.rstrip() + '''
+
+## 21. Episode 1 P0~P4 구현 현황 (2026-07-28)
+
+### 구현 완료 범위
+
+- P0 떨어진 별조각 결합과 입력 잠금 연출
+- P1 별가루 12개를 세 균형컵에 4개씩 분배
+- P1 완료 후 연못과 시계꽃 숲 경로 해제
+- 별무늬 렌즈 인벤토리 선택·사용·소모
+- P3 연못 기억거울과 젖은 발자국 추적, 단서 수첩 기록
+- P2 12칸 시계꽃 시간고리와 은빛 바람끈 획득
+- 연못과 시계꽃 숲의 자유로운 해결 순서
+- P4 분수대 바람바퀴 수리, 세 번째 돌의 별열쇠 발견
+- 별열쇠로 관리 상자를 열어 달빛 손잡이 획득
+- 은빛 털과 접힌 잎을 포포의 이동 증거로 수첩에 기록
+
+### 추가 파일
+
+```text
+lib/features/adventure/escape/episode_one/widgets/
+├── episode_one_clockflower_overlay.dart
+└── episode_one_fountain_overlay.dart
+
+test/episode_one_fountain_test.dart
+docs/EPISODE_01_P4_VALIDATION.md
+```
+
+### 자동 검증
+
+`docs/EPISODE_01_P4_VALIDATION.md` 기준으로 다음 항목을 모두 통과했다.
+
+- `flutter pub get`
+- `dart format`
+- `flutter analyze`
+- `flutter test`
+- `flutter build web --release --base-href /Rumi/ --pwa-strategy=none`
+
+### 확인 경로
+
+```text
+오늘의 모험
+→ 우측 개발 메뉴
+→ 새 방탈출 P0~P4 체험
+→ 별받침대 해결
+→ 연못과 시계꽃 숲 해결
+→ 분수대에서 은빛 바람끈 사용
+→ 세 번째 돌 선택
+→ 별열쇠 획득과 관리 상자 개방
+```
+
+### 다음 작업
+
+1. 달빛 온실 외부와 달빛 손잡이 설치
+2. P5 달빛 화단 균형 장치
+3. 씨앗과 포포 발견
+4. 핵심 증거 3과 최종 추리
+5. 결말·보상·저장 연동
+'''
+          context.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Commit documentation updates
+        shell: bash
+        run: |
+          rm .github/workflows/update-episode-one-p4-context.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add PROJECT_CONTEXT.md docs/EPISODE_01_ESCAPE_DESIGN.md .github/workflows/update-episode-one-p4-context.yml
+          git commit -m 'docs: record episode one P0 to P4 completion'
+          git push origin HEAD:main
