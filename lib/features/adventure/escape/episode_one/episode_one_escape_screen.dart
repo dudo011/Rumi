@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'episode_one_game.dart';
 import 'episode_one_state.dart';
+import 'widgets/episode_one_clockflower_overlay.dart';
 import 'widgets/episode_one_inventory_overlay.dart';
 
 class EpisodeOneEscapeScreen extends StatefulWidget {
@@ -102,6 +103,13 @@ class _EpisodeOneEscapeScreenState extends State<EpisodeOneEscapeScreen> {
           children: [
             Positioned.fill(
               child: GameWidget<EpisodeOneEscapeGame>(game: _game),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 68,
+              bottom: 70,
+              child: EpisodeOneClockflowerOverlay(controller: _controller),
             ),
             Positioned(
               left: 8,
