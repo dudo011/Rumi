@@ -176,7 +176,7 @@ class _EpisodeOneWorld extends PositionComponent with TapCallbacks, DragCallback
   void update(double dt) {
     super.update(dt);
     _time += dt;
-    _transition = math.max(0, _transition - dt * 2.8);
+    _transition = math.max(0, _transition - dt * 2.8).toDouble();
 
     for (final spark in _sparks) {
       spark.position += spark.velocity * dt;
@@ -215,6 +215,11 @@ class _EpisodeOneWorld extends PositionComponent with TapCallbacks, DragCallback
   }
 
   void _handlePedestalTap(Offset point) {
+    if (_dust.every((item) => item.group != null) && _primaryButton.contains(point)) {
+      _changeScene(_EpisodeScene.trail, '4칸마다 발자국, 6칸마다 별가루가 나타납니다.');
+      return;
+    }
+
     final targets = <_PedestalClue, Offset>{
       _PedestalClue.emptySpot: Offset(size.x * 0.5, size.y * 0.34),
       _PedestalClue.scratch: Offset(size.x * 0.69, size.y * 0.49),
@@ -282,11 +287,26 @@ class _EpisodeOneWorld extends PositionComponent with TapCallbacks, DragCallback
       return;
     }
 
+    final lockCenter = Vector2(size.x * 0.62, size.y * 0.47);
+    if (_hasKey && _keyPosition.distanceTo(lockCenter) < 12) {
+      final values = [1, 2, 3, 4, 5, 6, 8, 12];
+      for (var index = 0; index < values.length; index++) {
+        final factorPoint = Offset(
+          size.x * (0.18 + (index % 4) * 0.21),
+          size.y * (0.72 + (index ~/ 4) * 0.08),
+        );
+        if ((point - factorPoint).distance < 32) {
+          _toggleFactor(values[index]);
+          return;
+        }
+      }
+    }
+
     if (_hasKey && !_keyDragging && _keyPosition.distanceTo(Vector2(point.dx, point.dy)) < 42) {
       _keyDragging = true;
     }
 
-    if (_factors.length == 6 && _primaryButton.contains(point)) {
+    if (_factorsSolved && _primaryButton.contains(point)) {
       _changeScene(_EpisodeScene.deduction, '세 증거를 연결해 가장 자연스러운 가설을 선택하세요.');
     }
   }
@@ -401,6 +421,11 @@ class _EpisodeOneWorld extends PositionComponent with TapCallbacks, DragCallback
   }
 
   int _countInGroup(int group) => _dust.where((piece) => piece.group == group).length;
+
+  bool get _factorsSolved {
+    const answer = {1, 2, 3, 4, 6, 12};
+    return _factors.length == answer.length && _factors.containsAll(answer);
+  }
 
   void _toggleFactor(int value) {
     if (_factors.contains(value)) {
@@ -610,7 +635,7 @@ class _EpisodeOneWorld extends PositionComponent with TapCallbacks, DragCallback
         canvas.drawCircle(point, 27, Paint()..color = selected ? const Color(0xFF8FE0BE) : const Color(0xFF425866));
         _drawText(canvas, '${values[index]}', point - const Offset(8, 12), 16, Colors.white, FontWeight.w900);
       }
-      if (_factors.length == 6) {
+      if (_factorsSolved) {
         _drawButton(canvas, _primaryButton, '세 증거 연결해 추리');
       }
     }
@@ -708,7 +733,7 @@ class _EpisodeOneWorld extends PositionComponent with TapCallbacks, DragCallback
 
   void _drawSparks(Canvas canvas) {
     for (final spark in _sparks) {
-      canvas.drawCircle(spark.position.toOffset(), 3 + spark.life * 3, Paint()..color = Color.fromRGBO(255, 220, 105, spark.life.clamp(0, 1)));
+      canvas.drawCircle(spark.position.toOffset(), 3 + spark.life * 3, Paint()..color = Color.fromRGBO(255, 220, 105, spark.life.clamp(0, 1).toDouble()));
     }
   }
 
