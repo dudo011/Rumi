@@ -15,7 +15,7 @@ class GardenExplorationScreen extends StatelessWidget {
       children: [
         GardenMysteryV2Screen(onContinue: onContinue),
         Positioned(
-          right: 16,
+          left: 16,
           bottom: 18,
           child: SafeArea(
             child: FilledButton.icon(
