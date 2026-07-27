@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   fix-and-verify:
-    if: github.head_ref == 'chore/flame-feasibility-fix-v3'
+    if: github.head_ref == 'chore/flame-feasibility-fix-v2'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
