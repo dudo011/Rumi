@@ -5,6 +5,7 @@ import 'episode_one_game.dart';
 import 'episode_one_state.dart';
 import 'widgets/episode_one_clockflower_overlay.dart';
 import 'widgets/episode_one_fountain_overlay.dart';
+import 'widgets/episode_one_greenhouse_overlay.dart';
 import 'widgets/episode_one_inventory_overlay.dart';
 
 class EpisodeOneEscapeScreen extends StatefulWidget {
@@ -117,6 +118,13 @@ class _EpisodeOneEscapeScreenState extends State<EpisodeOneEscapeScreen> {
               top: 68,
               bottom: 70,
               child: EpisodeOneFountainOverlay(controller: _controller),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 68,
+              bottom: 70,
+              child: EpisodeOneGreenhouseOverlay(controller: _controller),
             ),
             Positioned(
               left: 8,
