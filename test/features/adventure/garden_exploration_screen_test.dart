@@ -26,9 +26,18 @@ void main() {
 
     await tester.tap(find.byKey(const Key('pedestal-hotspot')));
     await tester.pump(const Duration(milliseconds: 500));
-    await tester.tap(find.byKey(const Key('scratch-option-3')));
+
+    final wrongChoice = tester.widget<ChoiceChip>(
+      find.byKey(const Key('scratch-option-3')),
+    );
+    wrongChoice.onSelected!.call(true);
     await tester.pump();
-    await tester.tap(find.byKey(const Key('scratch-check-answer')));
+
+    final checkButton = tester.widget<FilledButton>(
+      find.byKey(const Key('scratch-check-answer')),
+    );
+    expect(checkButton.onPressed, isNotNull);
+    checkButton.onPressed!.call();
     await tester.pump();
 
     expect(find.byKey(const Key('scene-feedback')), findsOneWidget);
