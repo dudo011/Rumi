@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   fix-and-verify:
-    if: github.head_ref == 'chore/flame-feasibility-fix'
+    if: github.head_ref == 'chore/flame-feasibility-fix-v2'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -53,7 +53,19 @@ jobs:
       - run: flutter pub get
       - run: dart format lib/features/adventure/flame/escape_feasibility_screen.dart test/features/adventure/flame/escape_feasibility_screen_test.dart lib/features/adventure/garden_exploration_screen.dart
       - run: flutter analyze
-      - run: flutter test
+      - name: Test
+        id: test
+        continue-on-error: true
+        run: flutter test > test.log 2>&1
+      - name: Upload test output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-log
+          path: test.log
+      - name: Stop on test errors
+        if: steps.test.outcome == 'failure'
+        run: exit 1
       - run: flutter build web --release --base-href /Rumi/
       - name: Commit verified fixes
         shell: bash
