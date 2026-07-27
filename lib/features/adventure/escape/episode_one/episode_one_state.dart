@@ -12,7 +12,7 @@ enum EpisodeOneScene {
   greenhouse,
 }
 
-enum EpisodeOneItem { starLens }
+enum EpisodeOneItem { starLens, silverRibbon }
 
 enum EpisodeOneClue { wetTracks }
 
@@ -20,6 +20,7 @@ extension EpisodeOneItemMetadata on EpisodeOneItem {
   String get label {
     return switch (this) {
       EpisodeOneItem.starLens => '별무늬 렌즈',
+      EpisodeOneItem.silverRibbon => '은빛 바람끈',
     };
   }
 }
@@ -54,7 +55,8 @@ extension EpisodeOneSceneMetadata on EpisodeOneScene {
     return switch (this) {
       EpisodeOneScene.centralGarden => '빈 별받침대 주변을 살펴보세요.',
       EpisodeOneScene.pond => '별 모양 홈이 있는 연못의 돌거울을 살펴보세요.',
-      EpisodeOneScene.clockflowerGrove => '서로 다른 간격으로 피는 두 시계꽃을 관찰하세요.',
+      EpisodeOneScene.clockflowerGrove =>
+        '서로 다른 간격으로 피는 두 시계꽃과 시간고리를 살펴보세요.',
       EpisodeOneScene.fountain => '멈춘 바람바퀴와 잠긴 관리 상자를 살펴보세요.',
       EpisodeOneScene.greenhouse => '손잡이가 빠진 달빛 온실 문을 살펴보세요.',
     };
@@ -81,14 +83,18 @@ class EpisodeOneSnapshot {
     required this.pondTrackProgress,
     required this.pondTrackAnimating,
     required this.pondSolved,
+    required this.clockflowerCloseUpOpen,
+    required this.clockflowerSelection,
+    required this.clockflowerAnimating,
+    required this.clockflowerSolved,
     required Set<EpisodeOneClue> clues,
     required this.inputLocked,
     required this.message,
-  })  : visitedScenes = UnmodifiableSetView(visitedScenes),
-        history = UnmodifiableListView(history),
-        pedestalCupCounts = UnmodifiableListView(pedestalCupCounts),
-        inventory = UnmodifiableSetView(inventory),
-        clues = UnmodifiableSetView(clues);
+  }) : visitedScenes = UnmodifiableSetView(visitedScenes),
+       history = UnmodifiableListView(history),
+       pedestalCupCounts = UnmodifiableListView(pedestalCupCounts),
+       inventory = UnmodifiableSetView(inventory),
+       clues = UnmodifiableSetView(clues);
 
   factory EpisodeOneSnapshot.initial() {
     return EpisodeOneSnapshot(
@@ -109,6 +115,10 @@ class EpisodeOneSnapshot {
       pondTrackProgress: 0,
       pondTrackAnimating: false,
       pondSolved: false,
+      clockflowerCloseUpOpen: false,
+      clockflowerSelection: null,
+      clockflowerAnimating: false,
+      clockflowerSolved: false,
       clues: const {},
       inputLocked: false,
       message: '받침대 아래에서 희미하게 흔들리는 별조각을 찾아보세요.',
@@ -132,6 +142,10 @@ class EpisodeOneSnapshot {
   final int pondTrackProgress;
   final bool pondTrackAnimating;
   final bool pondSolved;
+  final bool clockflowerCloseUpOpen;
+  final int? clockflowerSelection;
+  final bool clockflowerAnimating;
+  final bool clockflowerSolved;
   final Set<EpisodeOneClue> clues;
   final bool inputLocked;
   final String message;
@@ -141,11 +155,13 @@ class EpisodeOneSnapshot {
 
   bool get gardenPathsUnlocked => pedestalSolved;
 
-  bool get closeUpOpen => pedestalCloseUpOpen || pondCloseUpOpen;
+  bool get closeUpOpen =>
+      pedestalCloseUpOpen || pondCloseUpOpen || clockflowerCloseUpOpen;
 
   String get displayLabel {
     if (pedestalCloseUpOpen) return '별받침대 균형 장치';
     if (pondCloseUpOpen) return '연못의 기억 흔적';
+    if (clockflowerCloseUpOpen) return '시계꽃 시간고리';
     return currentScene.label;
   }
 
@@ -170,6 +186,16 @@ class EpisodeOneSnapshot {
       return '둥근 발바닥과 작은 발가락이 있는 흔적을 순서대로 찾으세요.';
     }
 
+    if (clockflowerCloseUpOpen) {
+      if (clockflowerSolved) {
+        return '은빛 바람끈을 얻었어요. 분수대 장치에 사용할 수 있어요.';
+      }
+      if (clockflowerAnimating) {
+        return '두 시계꽃이 함께 열리며 가지의 바람끈이 풀리고 있어요.';
+      }
+      return '4칸과 6칸마다 피는 두 꽃이 처음 함께 피는 칸을 찾으세요.';
+    }
+
     if (currentScene == EpisodeOneScene.pond) {
       if (pondLensInstalling) {
         return '별무늬 렌즈가 돌거울의 빈 홈에 맞춰지고 있어요.';
@@ -185,6 +211,13 @@ class EpisodeOneSnapshot {
       return '기록된 젖은 발자국 단서를 다시 확인할 수 있어요.';
     }
 
+    if (currentScene == EpisodeOneScene.clockflowerGrove) {
+      if (clockflowerSolved) {
+        return '12번째 칸이 빛나고 있어요. 은빛 바람끈을 확인하세요.';
+      }
+      return '두 시계꽃과 12칸 시간고리를 확대 조사하세요.';
+    }
+
     if (currentScene != EpisodeOneScene.centralGarden) {
       return currentScene.objective;
     }
@@ -197,13 +230,26 @@ class EpisodeOneSnapshot {
     if (!pedestalSolved) {
       return '조각이 맞춰진 별받침대의 안쪽 장치를 조사하세요.';
     }
+    if (!pondSolved && !clockflowerSolved) {
+      return '연못과 시계꽃 숲을 원하는 순서로 조사하세요.';
+    }
     if (!pondSolved) {
       return '연못에서 별무늬 렌즈를 사용해 발자국 단서를 찾으세요.';
     }
-    return '연못 단서를 기록했어요. 다음 장소를 조사하세요.';
+    if (!clockflowerSolved) {
+      return '시계꽃 숲에서 두 꽃이 함께 피는 첫 시간을 찾으세요.';
+    }
+    return '연못과 시계꽃 숲 조사를 마쳤어요. 분수대를 조사하세요.';
   }
 
   String get progressLabel {
+    if (pondSolved && clockflowerSolved) return '연못·숲 조사 완료';
+    if (clockflowerSolved) return '은빛 바람끈 획득';
+    if (clockflowerCloseUpOpen) {
+      return clockflowerSelection == null
+          ? '시간고리 조사'
+          : '선택 ${clockflowerSelection!}/12';
+    }
     if (pondSolved) return '연못 단서 ${clues.length}/1';
     if (pondCloseUpOpen) {
       return '발자국 $pondTrackProgress/${PondTrackPuzzle.correctOrder.length}';
@@ -237,6 +283,11 @@ class EpisodeOneSnapshot {
     int? pondTrackProgress,
     bool? pondTrackAnimating,
     bool? pondSolved,
+    bool? clockflowerCloseUpOpen,
+    int? clockflowerSelection,
+    bool clearClockflowerSelection = false,
+    bool? clockflowerAnimating,
+    bool? clockflowerSolved,
     Set<EpisodeOneClue>? clues,
     bool? inputLocked,
     String? message,
@@ -261,6 +312,14 @@ class EpisodeOneSnapshot {
       pondTrackProgress: pondTrackProgress ?? this.pondTrackProgress,
       pondTrackAnimating: pondTrackAnimating ?? this.pondTrackAnimating,
       pondSolved: pondSolved ?? this.pondSolved,
+      clockflowerCloseUpOpen:
+          clockflowerCloseUpOpen ?? this.clockflowerCloseUpOpen,
+      clockflowerSelection: clearClockflowerSelection
+          ? null
+          : (clockflowerSelection ?? this.clockflowerSelection),
+      clockflowerAnimating:
+          clockflowerAnimating ?? this.clockflowerAnimating,
+      clockflowerSolved: clockflowerSolved ?? this.clockflowerSolved,
       clues: clues ?? this.clues,
       inputLocked: inputLocked ?? this.inputLocked,
       message: message ?? this.message,
@@ -299,9 +358,12 @@ class EpisodeOneStateController extends ValueNotifier<EpisodeOneSnapshot> {
       currentScene: scene,
       visitedScenes: visited,
       history: history,
-      message: scene == EpisodeOneScene.pond
-          ? '연못의 돌거울 중앙에 별 모양 홈이 비어 있어요.'
-          : scene.objective,
+      message: switch (scene) {
+        EpisodeOneScene.pond => '연못의 돌거울 중앙에 별 모양 홈이 비어 있어요.',
+        EpisodeOneScene.clockflowerGrove =>
+          '파란 꽃은 4칸마다, 노란 꽃은 6칸마다 잠깐씩 열리고 있어요.',
+        _ => scene.objective,
+      },
     );
     return true;
   }
@@ -314,6 +376,10 @@ class EpisodeOneStateController extends ValueNotifier<EpisodeOneSnapshot> {
     }
     if (value.pondCloseUpOpen) {
       closePondMirror();
+      return;
+    }
+    if (value.clockflowerCloseUpOpen) {
+      closeClockflowerRing();
       return;
     }
     navigateTo(EpisodeOneScene.centralGarden);
@@ -540,6 +606,58 @@ class EpisodeOneStateController extends ValueNotifier<EpisodeOneSnapshot> {
       clues: {...value.clues, EpisodeOneClue.wetTracks},
       inputLocked: false,
       message: '발자국은 바람 자국 위에 남았고 분수대 방향으로 이어졌어요.',
+    );
+  }
+
+  bool openClockflowerRing() {
+    if (value.inputLocked ||
+        value.currentScene != EpisodeOneScene.clockflowerGrove) {
+      return false;
+    }
+    value = value.copyWith(
+      clockflowerCloseUpOpen: true,
+      message: value.clockflowerSolved
+          ? '12번째 칸과 두 꽃의 공통 개화 흔적을 다시 확인할 수 있어요.'
+          : '파란 꽃은 4칸마다, 노란 꽃은 6칸마다 열려요.',
+    );
+    return true;
+  }
+
+  void closeClockflowerRing() {
+    if (value.inputLocked) return;
+    value = value.copyWith(
+      clockflowerCloseUpOpen: false,
+      message: value.clockflowerSolved
+          ? '은빛 바람끈을 얻었어요. 분수대의 멈춘 바람바퀴에 맞을 것 같아요.'
+          : '두 꽃이 처음 함께 피는 칸을 다시 조사할 수 있어요.',
+    );
+  }
+
+  void selectClockflowerStep(int step) {
+    if (value.inputLocked ||
+        !value.clockflowerCloseUpOpen ||
+        value.clockflowerSolved ||
+        !ClockflowerPuzzle.isValidStep(step)) {
+      return;
+    }
+
+    final solved = ClockflowerPuzzle.isSolved(step);
+    value = value.copyWith(
+      clockflowerSelection: step,
+      clockflowerAnimating: solved,
+      inputLocked: solved,
+      message: ClockflowerPuzzle.feedback(step),
+    );
+  }
+
+  void completeClockflowerAnimation() {
+    if (!value.clockflowerAnimating) return;
+    value = value.copyWith(
+      clockflowerAnimating: false,
+      clockflowerSolved: true,
+      inventory: {...value.inventory, EpisodeOneItem.silverRibbon},
+      inputLocked: false,
+      message: '두 꽃이 함께 피고 가지에서 은빛 바람끈이 내려왔어요.',
     );
   }
 
