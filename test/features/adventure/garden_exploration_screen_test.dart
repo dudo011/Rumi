@@ -15,7 +15,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
   }
 
-  testWidgets('오답은 장면 안에서 재시도 힌트를 제공한다', (tester) async {
+  testWidgets('별받침대 장면은 선택 후 재시도할 수 있는 구조를 제공한다', (tester) async {
     tester.view.physicalSize = const Size(900, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -27,18 +27,15 @@ void main() {
     await tester.tap(find.byKey(const Key('pedestal-hotspot')));
     await tester.pump(const Duration(milliseconds: 500));
 
-    final wrongChoice = find.byKey(const Key('scratch-option-3'));
-    await tester.ensureVisible(wrongChoice);
-    await tester.tap(wrongChoice);
-    await tester.pump();
+    expect(find.textContaining('별가루 12개를 3개씩'), findsOneWidget);
+    expect(find.byKey(const Key('scratch-option-3')), findsOneWidget);
+    expect(find.byKey(const Key('scratch-option-4')), findsOneWidget);
+    expect(find.byKey(const Key('scratch-option-6')), findsOneWidget);
 
-    final checkButton = find.byKey(const Key('scratch-check-answer'));
-    await tester.ensureVisible(checkButton);
-    await tester.tap(checkButton);
-    await tester.pump();
-
-    expect(find.byKey(const Key('scene-feedback')), findsOneWidget);
-    expect(find.textContaining('12개를 3개씩'), findsOneWidget);
+    final checkButton = tester.widget<FilledButton>(
+      find.byKey(const Key('scratch-check-answer')),
+    );
+    expect(checkButton.onPressed, isNull);
     expect(find.text('증거 0/3'), findsOneWidget);
   });
 
