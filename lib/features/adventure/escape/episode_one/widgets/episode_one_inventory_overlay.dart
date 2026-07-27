@@ -140,6 +140,8 @@ class _InventorySlot extends StatelessWidget {
     return switch (item) {
       EpisodeOneItem.starLens => Icons.filter_vintage_rounded,
       EpisodeOneItem.silverRibbon => Icons.air_rounded,
+      EpisodeOneItem.starKey => Icons.key_rounded,
+      EpisodeOneItem.moonHandle => Icons.nights_stay_rounded,
     };
   }
 }
