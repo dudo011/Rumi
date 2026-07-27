@@ -14,7 +14,7 @@ enum EpisodeOneScene {
 
 enum EpisodeOneItem { starLens, silverRibbon, starKey, moonHandle }
 
-enum EpisodeOneClue { wetTracks, silverFurTrail }
+enum EpisodeOneClue { wetTracks, silverFurTrail, warmNest }
 
 extension EpisodeOneItemMetadata on EpisodeOneItem {
   String get label {
@@ -32,14 +32,18 @@ extension EpisodeOneClueMetadata on EpisodeOneClue {
     return switch (this) {
       EpisodeOneClue.wetTracks => '바람 뒤의 젖은 발자국',
       EpisodeOneClue.silverFurTrail => '은빛 털과 접힌 잎',
+      EpisodeOneClue.warmNest => '따뜻한 이끼와 감싼 씨앗',
     };
   }
 
   String get description {
     return switch (this) {
-      EpisodeOneClue.wetTracks => '둥근 발자국은 바람 자국 위에 남았고 분수대 방향으로 이어졌어요.',
+      EpisodeOneClue.wetTracks =>
+        '둥근 발자국은 바람 자국 위에 남았고 분수대 방향으로 이어졌어요.',
       EpisodeOneClue.silverFurTrail =>
         '분수대 뒤의 은빛 털과 접힌 잎은 포포가 바람 뒤에 씨앗을 따라 온실 방향으로 이동했음을 보여줘요.',
+      EpisodeOneClue.warmNest =>
+        '씨앗은 따뜻한 달빛 이끼 위에 잎으로 감싸여 있었고 포포는 곁에서 씨앗을 지키고 있었어요.',
     };
   }
 }
@@ -59,7 +63,8 @@ extension EpisodeOneSceneMetadata on EpisodeOneScene {
     return switch (this) {
       EpisodeOneScene.centralGarden => '빈 별받침대 주변을 살펴보세요.',
       EpisodeOneScene.pond => '별 모양 홈이 있는 연못의 돌거울을 살펴보세요.',
-      EpisodeOneScene.clockflowerGrove => '서로 다른 간격으로 피는 두 시계꽃과 시간고리를 살펴보세요.',
+      EpisodeOneScene.clockflowerGrove =>
+        '서로 다른 간격으로 피는 두 시계꽃과 시간고리를 살펴보세요.',
       EpisodeOneScene.fountain => '멈춘 바람바퀴와 잠긴 관리 상자를 살펴보세요.',
       EpisodeOneScene.greenhouse => '손잡이가 빠진 달빛 온실 문을 살펴보세요.',
     };
@@ -98,6 +103,11 @@ class EpisodeOneSnapshot {
     required this.fountainStarKeyCollected,
     required this.fountainChestOpening,
     required this.fountainChestOpened,
+    required this.greenhouseDoorOpening,
+    required this.greenhouseDoorOpened,
+    required this.greenhouseBedSelection,
+    required this.greenhouseBalanceAnimating,
+    required this.seedFound,
     required Set<EpisodeOneClue> clues,
     required this.inputLocked,
     required this.message,
@@ -138,6 +148,11 @@ class EpisodeOneSnapshot {
       fountainStarKeyCollected: false,
       fountainChestOpening: false,
       fountainChestOpened: false,
+      greenhouseDoorOpening: false,
+      greenhouseDoorOpened: false,
+      greenhouseBedSelection: null,
+      greenhouseBalanceAnimating: false,
+      seedFound: false,
       clues: const {},
       inputLocked: false,
       message: '받침대 아래에서 희미하게 흔들리는 별조각을 찾아보세요.',
@@ -173,6 +188,11 @@ class EpisodeOneSnapshot {
   final bool fountainStarKeyCollected;
   final bool fountainChestOpening;
   final bool fountainChestOpened;
+  final bool greenhouseDoorOpening;
+  final bool greenhouseDoorOpened;
+  final int? greenhouseBedSelection;
+  final bool greenhouseBalanceAnimating;
+  final bool seedFound;
   final Set<EpisodeOneClue> clues;
   final bool inputLocked;
   final String message;
@@ -183,6 +203,8 @@ class EpisodeOneSnapshot {
   bool get gardenPathsUnlocked => pedestalSolved;
 
   bool get fountainSolved => fountainChestOpened;
+
+  bool get greenhouseSolved => seedFound;
 
   bool get closeUpOpen =>
       pedestalCloseUpOpen || pondCloseUpOpen || clockflowerCloseUpOpen;
@@ -206,12 +228,8 @@ class EpisodeOneSnapshot {
     }
 
     if (pondCloseUpOpen) {
-      if (pondSolved) {
-        return '젖은 발자국이 분수대 방향으로 이어져요.';
-      }
-      if (pondTrackAnimating) {
-        return '네 발자국이 물빛 선으로 이어지고 있어요.';
-      }
+      if (pondSolved) return '젖은 발자국이 분수대 방향으로 이어져요.';
+      if (pondTrackAnimating) return '네 발자국이 물빛 선으로 이어지고 있어요.';
       return '둥근 발바닥과 작은 발가락이 있는 흔적을 순서대로 찾으세요.';
     }
 
@@ -226,24 +244,18 @@ class EpisodeOneSnapshot {
     }
 
     if (currentScene == EpisodeOneScene.pond) {
-      if (pondLensInstalling) {
-        return '별무늬 렌즈가 돌거울의 빈 홈에 맞춰지고 있어요.';
-      }
+      if (pondLensInstalling) return '별무늬 렌즈가 돌거울의 빈 홈에 맞춰지고 있어요.';
       if (!pondLensInstalled) {
         return selectedItem == EpisodeOneItem.starLens
             ? '선택한 별무늬 렌즈를 돌거울에 사용하세요.'
             : '별 모양 홈에 맞는 아이템을 선택하세요.';
       }
-      if (!pondSolved) {
-        return '기억거울에 나타난 흔적을 확대 조사하세요.';
-      }
+      if (!pondSolved) return '기억거울에 나타난 흔적을 확대 조사하세요.';
       return '기록된 젖은 발자국 단서를 다시 확인할 수 있어요.';
     }
 
     if (currentScene == EpisodeOneScene.clockflowerGrove) {
-      if (clockflowerSolved) {
-        return '12번째 칸이 빛나고 있어요. 은빛 바람끈을 확인하세요.';
-      }
+      if (clockflowerSolved) return '12번째 칸이 빛나고 있어요. 은빛 바람끈을 확인하세요.';
       return '두 시계꽃과 12칸 시간고리를 확대 조사하세요.';
     }
 
@@ -262,12 +274,8 @@ class EpisodeOneSnapshot {
       if (!fountainStarKeyRevealed) {
         return '연못에서 본 젖은 발자국과 같은 흔적이 있는 돌을 찾으세요.';
       }
-      if (!fountainStarKeyCollected) {
-        return '세 번째 돌 아래에 나타난 별열쇠를 챙기세요.';
-      }
-      if (fountainChestOpening) {
-        return '별열쇠가 관리 상자의 자물쇠를 열고 있어요.';
-      }
+      if (!fountainStarKeyCollected) return '세 번째 돌 아래에 나타난 별열쇠를 챙기세요.';
+      if (fountainChestOpening) return '별열쇠가 관리 상자의 자물쇠를 열고 있어요.';
       if (!fountainChestOpened) {
         return selectedItem == EpisodeOneItem.starKey
             ? '선택한 별열쇠를 관리 상자에 사용하세요.'
@@ -276,34 +284,46 @@ class EpisodeOneSnapshot {
       return '달빛 손잡이와 포포의 이동 흔적을 확인했어요.';
     }
 
+    if (currentScene == EpisodeOneScene.greenhouse) {
+      if (greenhouseDoorOpening) return '달빛 손잡이가 돌아가며 온실 문이 열리고 있어요.';
+      if (!greenhouseDoorOpened) {
+        return selectedItem == EpisodeOneItem.moonHandle
+            ? '선택한 달빛 손잡이를 온실 문에 사용하세요.'
+            : '초승달 모양 홈에 맞는 손잡이가 필요해요.';
+      }
+      if (greenhouseBalanceAnimating) {
+        return '여섯 화단이 빛나며 안쪽 이끼 보관대가 열리고 있어요.';
+      }
+      if (seedFound) return '따뜻한 이끼 위의 별빛 씨앗과 포포를 발견했어요.';
+      return '별 18개와 달 24개를 가장 많은 같은 화단에 나누세요.';
+    }
+
     if (currentScene != EpisodeOneScene.centralGarden) {
       return currentScene.objective;
     }
-    if (fittingFallenPiece) {
-      return '별조각이 받침대의 빈 홈으로 이동하고 있어요.';
-    }
-    if (!fallenPieceFitted) {
-      return '받침대 아래 떨어진 별조각을 찾아 맞춰 보세요.';
-    }
-    if (!pedestalSolved) {
-      return '조각이 맞춰진 별받침대의 안쪽 장치를 조사하세요.';
-    }
-    if (!pondSolved && !clockflowerSolved) {
-      return '연못과 시계꽃 숲을 원하는 순서로 조사하세요.';
-    }
-    if (!pondSolved) {
-      return '연못에서 별무늬 렌즈를 사용해 발자국 단서를 찾으세요.';
-    }
-    if (!clockflowerSolved) {
-      return '시계꽃 숲에서 두 꽃이 함께 피는 첫 시간을 찾으세요.';
-    }
-    if (!fountainSolved) {
-      return '분수대에서 젖은 발자국과 은빛 바람끈을 함께 사용하세요.';
-    }
-    return '달빛 손잡이를 들고 온실 문을 조사하세요.';
+    if (fittingFallenPiece) return '별조각이 받침대의 빈 홈으로 이동하고 있어요.';
+    if (!fallenPieceFitted) return '받침대 아래 떨어진 별조각을 찾아 맞춰 보세요.';
+    if (!pedestalSolved) return '조각이 맞춰진 별받침대의 안쪽 장치를 조사하세요.';
+    if (!pondSolved && !clockflowerSolved) return '연못과 시계꽃 숲을 원하는 순서로 조사하세요.';
+    if (!pondSolved) return '연못에서 별무늬 렌즈를 사용해 발자국 단서를 찾으세요.';
+    if (!clockflowerSolved) return '시계꽃 숲에서 두 꽃이 함께 피는 첫 시간을 찾으세요.';
+    if (!fountainSolved) return '분수대에서 젖은 발자국과 은빛 바람끈을 함께 사용하세요.';
+    if (!seedFound) return '달빛 손잡이를 들고 온실 문을 조사하세요.';
+    return '세 가지 핵심 증거를 연결해 사건의 진실을 확인하세요.';
   }
 
   String get progressLabel {
+    if (currentScene == EpisodeOneScene.greenhouse) {
+      if (seedFound) return '씨앗과 포포 발견';
+      if (greenhouseBalanceAnimating) return '이끼 보관대 개방 중';
+      if (greenhouseDoorOpened) {
+        return greenhouseBedSelection == null
+            ? '달빛 화단 조사'
+            : '화단 ${greenhouseBedSelection!}개 선택';
+      }
+      if (greenhouseDoorOpening) return '온실 문 개방 중';
+      return '온실 문 잠김';
+    }
     if (currentScene == EpisodeOneScene.fountain) {
       if (fountainChestOpened) return '달빛 손잡이 획득';
       if (fountainChestOpening) return '관리 상자 개방 중';
@@ -366,6 +386,12 @@ class EpisodeOneSnapshot {
     bool? fountainStarKeyCollected,
     bool? fountainChestOpening,
     bool? fountainChestOpened,
+    bool? greenhouseDoorOpening,
+    bool? greenhouseDoorOpened,
+    int? greenhouseBedSelection,
+    bool clearGreenhouseBedSelection = false,
+    bool? greenhouseBalanceAnimating,
+    bool? seedFound,
     Set<EpisodeOneClue>? clues,
     bool? inputLocked,
     String? message,
@@ -413,6 +439,16 @@ class EpisodeOneSnapshot {
           fountainStarKeyCollected ?? this.fountainStarKeyCollected,
       fountainChestOpening: fountainChestOpening ?? this.fountainChestOpening,
       fountainChestOpened: fountainChestOpened ?? this.fountainChestOpened,
+      greenhouseDoorOpening:
+          greenhouseDoorOpening ?? this.greenhouseDoorOpening,
+      greenhouseDoorOpened:
+          greenhouseDoorOpened ?? this.greenhouseDoorOpened,
+      greenhouseBedSelection: clearGreenhouseBedSelection
+          ? null
+          : (greenhouseBedSelection ?? this.greenhouseBedSelection),
+      greenhouseBalanceAnimating:
+          greenhouseBalanceAnimating ?? this.greenhouseBalanceAnimating,
+      seedFound: seedFound ?? this.seedFound,
       clues: clues ?? this.clues,
       inputLocked: inputLocked ?? this.inputLocked,
       message: message ?? this.message,
@@ -445,20 +481,22 @@ class EpisodeOneStateController extends ValueNotifier<EpisodeOneSnapshot> {
       return false;
     }
 
-    final visited = {...value.visitedScenes, scene};
-    final history = [...value.history, scene];
     value = value.copyWith(
       currentScene: scene,
-      visitedScenes: visited,
-      history: history,
+      visitedScenes: {...value.visitedScenes, scene},
+      history: [...value.history, scene],
       message: switch (scene) {
         EpisodeOneScene.pond => '연못의 돌거울 중앙에 별 모양 홈이 비어 있어요.',
         EpisodeOneScene.clockflowerGrove =>
           '파란 꽃은 4칸마다, 노란 꽃은 6칸마다 잠깐씩 열리고 있어요.',
-        EpisodeOneScene.fountain =>
-          value.fountainSolved
-              ? '열린 관리 상자와 포포가 남긴 흔적을 다시 확인할 수 있어요.'
-              : '바람바퀴의 끈이 끊어져 있고 관리 상자는 굳게 잠겨 있어요.',
+        EpisodeOneScene.fountain => value.fountainSolved
+            ? '열린 관리 상자와 포포가 남긴 흔적을 다시 확인할 수 있어요.'
+            : '바람바퀴의 끈이 끊어져 있고 관리 상자는 굳게 잠겨 있어요.',
+        EpisodeOneScene.greenhouse => value.seedFound
+            ? '따뜻한 이끼 위의 씨앗과 포포를 다시 확인할 수 있어요.'
+            : value.greenhouseDoorOpened
+            ? '별과 달 에너지가 잠긴 이끼 보관대를 둘러싸고 있어요.'
+            : '온실 문에는 초승달 모양 손잡이가 빠져 있어요.',
         _ => scene.objective,
       },
     );
@@ -737,7 +775,6 @@ class EpisodeOneStateController extends ValueNotifier<EpisodeOneSnapshot> {
         !ClockflowerPuzzle.isValidStep(step)) {
       return;
     }
-
     final solved = ClockflowerPuzzle.isSolved(step);
     value = value.copyWith(
       clockflowerSelection: step,
@@ -775,7 +812,8 @@ class EpisodeOneStateController extends ValueNotifier<EpisodeOneSnapshot> {
       return false;
     }
 
-    final inventory = {...value.inventory}..remove(EpisodeOneItem.silverRibbon);
+    final inventory = {...value.inventory}
+      ..remove(EpisodeOneItem.silverRibbon);
     value = value.copyWith(
       inventory: inventory,
       clearSelectedItem: true,
@@ -897,6 +935,73 @@ class EpisodeOneStateController extends ValueNotifier<EpisodeOneSnapshot> {
       clues: {...value.clues, EpisodeOneClue.silverFurTrail},
       inputLocked: false,
       message: '달빛 손잡이를 얻고, 가시나무에 걸린 은빛 털과 접힌 잎을 수첩에 기록했어요.',
+    );
+  }
+
+  bool useSelectedItemOnGreenhouseDoor() {
+    if (value.inputLocked || value.currentScene != EpisodeOneScene.greenhouse) {
+      return false;
+    }
+    if (value.greenhouseDoorOpened) {
+      value = value.copyWith(message: '달빛 온실 문은 이미 열려 있어요.');
+      return true;
+    }
+    if (value.selectedItem != EpisodeOneItem.moonHandle) {
+      value = value.copyWith(
+        message: value.inventory.contains(EpisodeOneItem.moonHandle)
+            ? '인벤토리에서 달빛 손잡이를 먼저 선택하세요.'
+            : '초승달 모양 홈에 맞는 손잡이가 필요해요.',
+      );
+      return false;
+    }
+
+    final inventory = {...value.inventory}..remove(EpisodeOneItem.moonHandle);
+    value = value.copyWith(
+      inventory: inventory,
+      clearSelectedItem: true,
+      greenhouseDoorOpening: true,
+      inputLocked: true,
+      message: '달빛 손잡이가 문에 맞춰지고 잠금 고리가 돌아가고 있어요.',
+    );
+    return true;
+  }
+
+  void completeGreenhouseDoorOpening() {
+    if (!value.greenhouseDoorOpening) return;
+    value = value.copyWith(
+      greenhouseDoorOpening: false,
+      greenhouseDoorOpened: true,
+      inputLocked: false,
+      message: '온실 문이 열렸어요. 별 18개와 달 24개가 화단 장치를 비추고 있어요.',
+    );
+  }
+
+  void selectGreenhouseBedCount(int bedCount) {
+    if (value.inputLocked ||
+        value.currentScene != EpisodeOneScene.greenhouse ||
+        !value.greenhouseDoorOpened ||
+        value.seedFound ||
+        !GreenhouseBalancePuzzle.isValidChoice(bedCount)) {
+      return;
+    }
+
+    final solved = GreenhouseBalancePuzzle.isSolved(bedCount);
+    value = value.copyWith(
+      greenhouseBedSelection: bedCount,
+      greenhouseBalanceAnimating: solved,
+      inputLocked: solved,
+      message: GreenhouseBalancePuzzle.feedback(bedCount),
+    );
+  }
+
+  void completeGreenhouseBalanceAnimation() {
+    if (!value.greenhouseBalanceAnimating) return;
+    value = value.copyWith(
+      greenhouseBalanceAnimating: false,
+      seedFound: true,
+      clues: {...value.clues, EpisodeOneClue.warmNest},
+      inputLocked: false,
+      message: '따뜻한 이끼 위에 잎으로 감싼 별빛 씨앗과 곁을 지키던 포포를 발견했어요.',
     );
   }
 
