@@ -37,9 +37,9 @@ class GardenExplorationScreen extends StatelessWidget {
                     _DevelopmentPreview.feasibilityLab =>
                       const EscapeFeasibilityScreen(),
                   };
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(builder: (_) => screen),
-                  );
+                  Navigator.of(
+                    context,
+                  ).push(MaterialPageRoute<void>(builder: (_) => screen));
                 },
                 itemBuilder: (context) => const [
                   PopupMenuItem(

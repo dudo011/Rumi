@@ -21,9 +21,9 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
   }
 
   @override
-  void onGameResize(Vector2 gameSize) {
-    super.onGameResize(gameSize);
-    size = gameSize;
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+    this.size = size;
   }
 
   @override
@@ -41,8 +41,7 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
     }
 
     if (snapshot.pedestalMechanismAnimating) {
-      _mechanismProgress =
-          math.min(1, _mechanismProgress + dt / 2).toDouble();
+      _mechanismProgress = math.min(1, _mechanismProgress + dt / 2).toDouble();
       if (_mechanismProgress >= 1) {
         controller.completePedestalMechanism();
       }
@@ -130,25 +129,24 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
   bool get _compact => size.x < 520 || size.y < 720;
 
   Rect get _pedestalRect => Rect.fromCenter(
-        center: Offset(size.x * 0.5, size.y * 0.48),
-        width: math.min(size.x * 0.26, 190).toDouble(),
-        height: math.min(size.y * 0.22, 165).toDouble(),
-      );
+    center: Offset(size.x * 0.5, size.y * 0.48),
+    width: math.min(size.x * 0.26, 190).toDouble(),
+    height: math.min(size.y * 0.22, 165).toDouble(),
+  );
 
   Rect get _fallenPieceRect => Rect.fromCenter(
-        center: Offset(size.x * 0.39, size.y * 0.65),
-        width: 72,
-        height: 64,
-      );
+    center: Offset(size.x * 0.39, size.y * 0.65),
+    width: 72,
+    height: 64,
+  );
 
   Rect get _returnButton => Rect.fromCenter(
-        center: Offset(size.x * 0.5, size.y * 0.76),
-        width: math.min(size.x * 0.62, 380).toDouble(),
-        height: 58,
-      );
+    center: Offset(size.x * 0.5, size.y * 0.76),
+    width: math.min(size.x * 0.62, 380).toDouble(),
+    height: 58,
+  );
 
-  Rect get _pedestalBackButton =>
-      Rect.fromLTWH(18, size.y - 76, 126, 50);
+  Rect get _pedestalBackButton => Rect.fromLTWH(18, size.y - 76, 126, 50);
 
   Rect get _pedestalResetButton =>
       Rect.fromLTWH(size.x - 150, size.y - 76, 132, 50);
@@ -216,30 +214,30 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
     final rect = Offset.zero & Size(size.x, size.y);
     final colors = switch (scene) {
       EpisodeOneScene.centralGarden => const [
-          Color(0xFF111D2C),
-          Color(0xFF174D45),
-          Color(0xFF0B211B),
-        ],
+        Color(0xFF111D2C),
+        Color(0xFF174D45),
+        Color(0xFF0B211B),
+      ],
       EpisodeOneScene.pond => const [
-          Color(0xFF10283E),
-          Color(0xFF1D6470),
-          Color(0xFF0B2632),
-        ],
+        Color(0xFF10283E),
+        Color(0xFF1D6470),
+        Color(0xFF0B2632),
+      ],
       EpisodeOneScene.clockflowerGrove => const [
-          Color(0xFF271D45),
-          Color(0xFF554474),
-          Color(0xFF132925),
-        ],
+        Color(0xFF271D45),
+        Color(0xFF554474),
+        Color(0xFF132925),
+      ],
       EpisodeOneScene.fountain => const [
-          Color(0xFF1A2C41),
-          Color(0xFF3C6470),
-          Color(0xFF14252C),
-        ],
+        Color(0xFF1A2C41),
+        Color(0xFF3C6470),
+        Color(0xFF14252C),
+      ],
       EpisodeOneScene.greenhouse => const [
-          Color(0xFF2D2042),
-          Color(0xFF735D78),
-          Color(0xFF172925),
-        ],
+        Color(0xFF2D2042),
+        Color(0xFF735D78),
+        Color(0xFF172925),
+      ],
     };
 
     canvas.drawRect(
@@ -421,11 +419,11 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
     final position = snapshot.fallenPieceFitted
         ? end
         : (Offset.lerp(
-              start,
-              end,
-              Curves.easeInOutCubic.transform(_pieceProgress),
-            ) ??
-            start);
+                start,
+                end,
+                Curves.easeInOutCubic.transform(_pieceProgress),
+              ) ??
+              start);
 
     _drawCrescent(canvas, position, 22);
     if (!snapshot.fallenPieceFitted && !snapshot.fittingFallenPiece) {
@@ -542,9 +540,7 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
 
     for (var index = 0; index < cups.length; index++) {
       final count = snapshot.pedestalCupCounts[index];
-      final shifted = cups[index].shift(
-        Offset(0, (maxCount - count) * 5.0),
-      );
+      final shifted = cups[index].shift(Offset(0, (maxCount - count) * 5.0));
       final cupPath = Path()
         ..moveTo(shifted.left + 8, shifted.top + 18)
         ..lineTo(shifted.right - 8, shifted.top + 18)
@@ -602,7 +598,8 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
         canvas,
         _cupPlusRects[index],
         '+',
-        enabled: !snapshot.inputLocked &&
+        enabled:
+            !snapshot.inputLocked &&
             !snapshot.pedestalSolved &&
             snapshot.remainingPedestalDust > 0,
       );
@@ -629,11 +626,7 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
     );
 
     if (snapshot.pedestalSolved || progress > 0.7) {
-      canvas.drawCircle(
-        center,
-        24,
-        Paint()..color = const Color(0xAA7BD9E5),
-      );
+      canvas.drawCircle(center, 24, Paint()..color = const Color(0xAA7BD9E5));
       _drawStar(canvas, center, 16);
     }
   }
@@ -773,8 +766,8 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
         ..color = !available
             ? const Color(0xBB202D36)
             : visited
-                ? const Color(0xCC4D8B7A)
-                : const Color(0xCC304E58),
+            ? const Color(0xCC4D8B7A)
+            : const Color(0xCC304E58),
     );
     canvas.drawRRect(
       RRect.fromRectAndRadius(rect, const Radius.circular(22)),
@@ -782,8 +775,8 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
         ..color = !available
             ? const Color(0x557A8B89)
             : visited
-                ? const Color(0xFFFFE39A)
-                : const Color(0xAA8BD5C5)
+            ? const Color(0xFFFFE39A)
+            : const Color(0xAA8BD5C5)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 3,
     );
@@ -801,9 +794,7 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
       status,
       Offset(rect.center.dx, rect.center.dy + 14),
       fontSize: _compact ? 8 : 10,
-      color: available
-          ? const Color(0xFFFFE9AB)
-          : const Color(0xFFAAB9B5),
+      color: available ? const Color(0xFFFFE9AB) : const Color(0xFFAAB9B5),
       weight: FontWeight.w700,
       align: TextAlign.center,
       maxWidth: rect.width - 12,
@@ -838,9 +829,7 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
     canvas.drawRRect(
       RRect.fromRectAndRadius(rect, const Radius.circular(22)),
       Paint()
-        ..color = enabled
-            ? const Color(0xFFEBCB78)
-            : const Color(0xFF59656A),
+        ..color = enabled ? const Color(0xFFEBCB78) : const Color(0xFF59656A),
     );
     _drawText(
       canvas,

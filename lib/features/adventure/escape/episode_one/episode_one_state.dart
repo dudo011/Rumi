@@ -59,10 +59,10 @@ class EpisodeOneSnapshot {
     required Set<EpisodeOneItem> inventory,
     required this.inputLocked,
     required this.message,
-  })  : visitedScenes = UnmodifiableSetView(visitedScenes),
-        history = UnmodifiableListView(history),
-        pedestalCupCounts = UnmodifiableListView(pedestalCupCounts),
-        inventory = UnmodifiableSetView(inventory);
+  }) : visitedScenes = UnmodifiableSetView(visitedScenes),
+       history = UnmodifiableListView(history),
+       pedestalCupCounts = UnmodifiableListView(pedestalCupCounts),
+       inventory = UnmodifiableSetView(inventory);
 
   factory EpisodeOneSnapshot.initial() {
     return EpisodeOneSnapshot(
@@ -159,8 +159,7 @@ class EpisodeOneSnapshot {
       history: history ?? this.history,
       fittingFallenPiece: fittingFallenPiece ?? this.fittingFallenPiece,
       fallenPieceFitted: fallenPieceFitted ?? this.fallenPieceFitted,
-      pedestalCloseUpOpen:
-          pedestalCloseUpOpen ?? this.pedestalCloseUpOpen,
+      pedestalCloseUpOpen: pedestalCloseUpOpen ?? this.pedestalCloseUpOpen,
       pedestalCupCounts: pedestalCupCounts ?? this.pedestalCupCounts,
       pedestalMechanismAnimating:
           pedestalMechanismAnimating ?? this.pedestalMechanismAnimating,
@@ -248,9 +247,7 @@ class EpisodeOneStateController extends ValueNotifier<EpisodeOneSnapshot> {
       return false;
     }
     if (!value.fallenPieceFitted) {
-      value = value.copyWith(
-        message: '받침대의 반달 모양 홈에 맞는 조각이 먼저 필요해요.',
-      );
+      value = value.copyWith(message: '받침대의 반달 모양 홈에 맞는 조각이 먼저 필요해요.');
       return false;
     }
     value = value.copyWith(

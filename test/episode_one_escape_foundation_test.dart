@@ -100,14 +100,15 @@ void main() {
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: EpisodeOneEscapeScreen(controller: controller),
-      ),
+      MaterialApp(home: EpisodeOneEscapeScreen(controller: controller)),
     );
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('중앙 정원'), findsOneWidget);
-    expect(find.byKey(const Key('episode-one-foundation-status')), findsOneWidget);
+    expect(
+      find.byKey(const Key('episode-one-foundation-status')),
+      findsOneWidget,
+    );
     expect(find.text('받침대 준비 전'), findsOneWidget);
 
     controller.startFittingFallenPiece();
@@ -139,13 +140,17 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(
-      const MaterialApp(home: EpisodeOneEscapeScreen()),
-    );
+    await tester.pumpWidget(const MaterialApp(home: EpisodeOneEscapeScreen()));
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.byKey(const Key('episode-one-current-objective')), findsOneWidget);
-    expect(find.byKey(const Key('episode-one-foundation-status')), findsOneWidget);
+    expect(
+      find.byKey(const Key('episode-one-current-objective')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('episode-one-foundation-status')),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('episode-one-progress-label')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
