@@ -46,8 +46,8 @@ class GardenExplorationScreen extends StatelessWidget {
                     value: _DevelopmentPreview.episodeOne,
                     child: ListTile(
                       key: Key('open-episode-one-escape-foundation'),
-                      leading: Icon(Icons.watch_later_outlined),
-                      title: Text('새 방탈출 P0·P1·P2·P3 체험'),
+                      leading: Icon(Icons.account_tree_rounded),
+                      title: Text('새 방탈출 P0~P4 체험'),
                     ),
                   ),
                   PopupMenuItem(
