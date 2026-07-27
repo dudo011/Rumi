@@ -53,13 +53,10 @@ void main() {
 
     expect(find.byTooltip('분수대의 잠긴 상자 조사'), findsOneWidget);
     await tester.tap(find.byTooltip('분수대의 잠긴 상자 조사'));
-    await waitForWidget(
-      tester,
-      find.textContaining('잠긴 상자 근처에서 움직인 물건'),
-    );
+    await waitForUi(tester);
 
     await tester.tap(find.byTooltip('작은 돌 아래 조사'));
-    await waitForUi(tester);
+    await waitForWidget(tester, find.text('🔑 낡은 별열쇠 발견!'));
     await tester.tap(find.text('열쇠 챙기기'));
     await waitForUi(tester);
 
