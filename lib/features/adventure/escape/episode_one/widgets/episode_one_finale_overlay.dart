@@ -31,11 +31,6 @@ class _EpisodeOneFinaleOverlayState extends State<EpisodeOneFinaleOverlay> {
     '꽃루미가 씨앗을 옮겼고 바람이 모든 흔적을 만들었다.',
   ];
 
-  static const _wrongFeedback = {
-    0: '젖은 발자국은 바람 자국 위에 남아 있어요. 포포는 바람이 분 뒤에 씨앗을 따라갔어요.',
-    2: '둥근 발자국과 은빛 털은 포포의 이동을 보여줘요. 꽃루미가 옮겼다는 증거는 없어요.',
-  };
-
   _FinaleStage _stage = _FinaleStage.deduction;
   int? _selectedHypothesis;
   bool _checked = false;
@@ -59,7 +54,7 @@ class _EpisodeOneFinaleOverlayState extends State<EpisodeOneFinaleOverlay> {
     setState(() => _selectedHypothesis = index);
   }
 
-  void _handleDeductionButton() {
+  void _handleDeductionAction() {
     if (_selectedHypothesis == null || _saving) return;
 
     if (!_checked) {
@@ -114,7 +109,7 @@ class _EpisodeOneFinaleOverlayState extends State<EpisodeOneFinaleOverlay> {
       if (!mounted) return;
       setState(() {
         _saving = false;
-        _saveError = '완료 기록을 저장하지 못했어요. 연결 상태를 확인한 뒤 다시 시도해 주세요.';
+        _saveError = '완료 기록을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.';
       });
       _finishBloomingWhenReady();
     }
@@ -156,7 +151,7 @@ class _EpisodeOneFinaleOverlayState extends State<EpisodeOneFinaleOverlay> {
           color: const Color(0xFF101B27),
           child: SafeArea(
             child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 320),
+              duration: const Duration(milliseconds: 280),
               child: switch (_stage) {
                 _FinaleStage.deduction => _buildDeduction(snapshot),
                 _FinaleStage.blooming => _buildBlooming(),
@@ -171,124 +166,118 @@ class _EpisodeOneFinaleOverlayState extends State<EpisodeOneFinaleOverlay> {
   }
 
   Widget _buildDeduction(EpisodeOneSnapshot snapshot) {
-    return Container(
+    return _FinalePage(
       key: const Key('episode-one-final-deduction'),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF31274B), Color(0xFF16372F), Color(0xFF0E1B25)],
-        ),
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(18, 20, 18, 32),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const _FinaleHeading(
-                  eyebrow: '최종 추리 · 핵심 증거 3/3',
-                  title: '별빛 씨앗은 왜 사라졌을까요?',
-                  subtitle: '한 가지 흔적만 보고 누군가를 의심하지 말고, 사건의 순서를 모두 연결해 보세요.',
-                ),
-                const SizedBox(height: 18),
-                _EvidenceCard(
-                  key: const Key('episode-one-finale-evidence-1'),
-                  number: '1',
-                  icon: Icons.air_rounded,
-                  title: '옆으로 이어진 긁힘과 별가루',
-                  text: '씨앗이 위로 들린 자국은 없고, 강한 바람이 분 방향으로 길게 밀려났어요.',
-                  confirmed: snapshot.pedestalSolved,
-                ),
-                const SizedBox(height: 10),
-                _EvidenceCard(
-                  key: const Key('episode-one-finale-evidence-2'),
-                  number: '2',
-                  icon: Icons.pets_rounded,
-                  title: '바람 뒤의 젖은 발자국과 은빛 털',
-                  text: '포포의 흔적은 바람 자국 위에 남았고, 씨앗을 따라 온실 방향으로 이어졌어요.',
-                  confirmed: snapshot.pondSolved && snapshot.fountainSolved,
-                ),
-                const SizedBox(height: 10),
-                _EvidenceCard(
-                  key: const Key('episode-one-finale-evidence-3'),
-                  number: '3',
-                  icon: Icons.local_florist_rounded,
-                  title: '따뜻한 이끼와 감싼 씨앗',
-                  text: '씨앗은 차가운 바람을 막는 잎에 감싸여 있었고 포포가 곁을 지키고 있었어요.',
-                  confirmed: snapshot.seedFound,
-                ),
-                const SizedBox(height: 22),
-                const Text(
-                  '세 증거를 가장 잘 설명하는 이야기를 선택하세요.',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                for (var index = 0; index < _hypotheses.length; index++) ...[
-                  _HypothesisTile(
-                    key: Key('episode-one-hypothesis-$index'),
-                    index: index,
-                    label: _hypotheses[index],
-                    selected: _selectedHypothesis == index,
-                    checked: _checked,
-                    correct: index == 1,
-                    onTap: () => _selectHypothesis(index),
-                  ),
-                  if (index != _hypotheses.length - 1)
-                    const SizedBox(height: 10),
-                ],
-                if (_checked) ...[
-                  const SizedBox(height: 14),
-                  _DeductionFeedback(
-                    correct: _correct,
-                    text: _correct
-                        ? '세 증거가 모두 연결돼요. 바람이 씨앗을 떨어뜨렸고, 포포는 차가워진 씨앗을 온실의 이끼로 옮겨 보호했어요.'
-                        : _wrongFeedback[_selectedHypothesis] ??
-                              '단서의 시간 순서를 다시 살펴보세요.',
-                  ),
-                ],
-                const SizedBox(height: 18),
-                FilledButton.icon(
-                  key: const Key('episode-one-deduction-action'),
-                  onPressed: _selectedHypothesis == null
-                      ? null
-                      : _handleDeductionButton,
-                  icon: Icon(
-                    _checked && _correct
-                        ? Icons.local_florist_rounded
-                        : Icons.fact_check_rounded,
-                  ),
-                  label: Text(
-                    !_checked
-                        ? '증거와 비교하기'
-                        : _correct
-                            ? '씨앗을 받침대로 돌려보내기'
-                            : '단서 보고 다시 생각하기',
-                    style: const TextStyle(fontWeight: FontWeight.w900),
-                  ),
-                ),
-              ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const _Heading(
+            eyebrow: '최종 추리 · 핵심 증거 3/3',
+            title: '별빛 씨앗은 왜 사라졌을까요?',
+            subtitle: '한 가지 흔적만 보고 누군가를 의심하지 말고, 사건의 순서를 모두 연결해 보세요.',
+          ),
+          const SizedBox(height: 18),
+          _EvidenceCard(
+            key: const Key('episode-one-finale-evidence-1'),
+            number: '1',
+            icon: Icons.air_rounded,
+            title: '옆으로 이어진 긁힘과 별가루',
+            text: '씨앗이 위로 들린 자국은 없고, 강한 바람 방향으로 길게 밀려났어요.',
+            confirmed: snapshot.pedestalSolved,
+          ),
+          const SizedBox(height: 10),
+          _EvidenceCard(
+            key: const Key('episode-one-finale-evidence-2'),
+            number: '2',
+            icon: Icons.pets_rounded,
+            title: '바람 뒤의 젖은 발자국과 은빛 털',
+            text: '포포의 흔적은 바람 자국 위에 남았고 씨앗을 따라 온실로 이어졌어요.',
+            confirmed: snapshot.pondSolved && snapshot.fountainSolved,
+          ),
+          const SizedBox(height: 10),
+          _EvidenceCard(
+            key: const Key('episode-one-finale-evidence-3'),
+            number: '3',
+            icon: Icons.local_florist_rounded,
+            title: '따뜻한 이끼와 감싼 씨앗',
+            text: '씨앗은 잎에 감싸져 있었고 포포가 따뜻한 이끼 곁을 지키고 있었어요.',
+            confirmed: snapshot.seedFound,
+          ),
+          const SizedBox(height: 22),
+          const Text(
+            '세 증거를 가장 잘 설명하는 이야기를 선택하세요.',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w900,
             ),
           ),
-        ),
+          const SizedBox(height: 12),
+          for (var index = 0; index < _hypotheses.length; index++) ...[
+            _HypothesisTile(
+              key: Key('episode-one-hypothesis-$index'),
+              index: index,
+              label: _hypotheses[index],
+              selected: _selectedHypothesis == index,
+              checked: _checked,
+              correct: index == 1,
+              onTap: () => _selectHypothesis(index),
+            ),
+            if (index != _hypotheses.length - 1)
+              const SizedBox(height: 10),
+          ],
+          if (_checked) ...[
+            const SizedBox(height: 14),
+            _FeedbackCard(
+              correct: _correct,
+              text: _feedbackForSelection(),
+            ),
+          ],
+          const SizedBox(height: 18),
+          FilledButton.icon(
+            key: const Key('episode-one-deduction-action'),
+            onPressed: _selectedHypothesis == null
+                ? null
+                : _handleDeductionAction,
+            icon: Icon(
+              _checked && _correct
+                  ? Icons.local_florist_rounded
+                  : Icons.fact_check_rounded,
+            ),
+            label: Text(
+              !_checked
+                  ? '증거와 비교하기'
+                  : _correct
+                      ? '씨앗을 받침대로 돌려보내기'
+                      : '단서 보고 다시 생각하기',
+              style: const TextStyle(fontWeight: FontWeight.w900),
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  String _feedbackForSelection() {
+    if (_correct) {
+      return '세 증거가 모두 연결돼요. 바람이 씨앗을 떨어뜨렸고, 포포는 차가워진 씨앗을 온실로 옮겨 보호했어요.';
+    }
+    if (_selectedHypothesis == 0) {
+      return '젖은 발자국은 바람 자국 위에 남아 있어요. 포포는 바람이 분 뒤에 씨앗을 따라갔어요.';
+    }
+    return '둥근 발자국과 은빛 털은 포포의 이동을 보여줘요. 꽃루미가 옮겼다는 증거는 없어요.';
   }
 
   Widget _buildBlooming() {
     return TweenAnimationBuilder<double>(
       key: const Key('episode-one-finale-blooming'),
-      tween: Tween(begin: 0, end: 1),
+      tween: Tween(begin: 0.0, end: 1.0),
       duration: const Duration(milliseconds: 3200),
       onEnd: _markAnimationFinished,
       builder: (context, value, _) {
-        final flowerProgress = ((value - 0.48) / 0.52).clamp(0.0, 1.0);
+        final flowerProgress = ((value - 0.45) / 0.55)
+            .clamp(0.0, 1.0)
+            .toDouble();
         return Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -296,44 +285,28 @@ class _EpisodeOneFinaleOverlayState extends State<EpisodeOneFinaleOverlay> {
               end: Alignment.bottomCenter,
               colors: [
                 Color.lerp(
-                  const Color(0xFF18243A),
-                  const Color(0xFF584B82),
+                  const Color(0xFF1B2940),
+                  const Color(0xFF65528A),
                   value,
                 )!,
                 Color.lerp(
-                  const Color(0xFF123129),
-                  const Color(0xFF4C8062),
+                  const Color(0xFF17372F),
+                  const Color(0xFF52866B),
                   value,
                 )!,
-                const Color(0xFF111D27),
               ],
             ),
           ),
           child: Stack(
             children: [
-              for (var index = 0; index < 18; index++)
-                Positioned(
-                  left: (index * 53 % 97) / 100 *
-                      MediaQuery.sizeOf(context).width,
-                  top: 40 + (index * 71 % 68) / 100 *
-                      MediaQuery.sizeOf(context).height * 0.56,
-                  child: Opacity(
-                    opacity: (0.2 + value * 0.8).clamp(0.0, 1.0),
-                    child: Icon(
-                      Icons.auto_awesome_rounded,
-                      size: 12 + (index % 3) * 5,
-                      color: const Color(0xFFFFE39A),
-                    ),
-                  ),
-                ),
               Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Transform.translate(
-                      offset: Offset(0, -130 * (1 - value)),
+                      offset: Offset(0, -120 * (1 - value)),
                       child: Transform.scale(
-                        scale: 0.62 + value * 0.38,
+                        scale: 0.65 + value * 0.35,
                         child: Container(
                           width: 170,
                           height: 170,
@@ -369,7 +342,7 @@ class _EpisodeOneFinaleOverlayState extends State<EpisodeOneFinaleOverlay> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 28),
                     Text(
                       flowerProgress > 0.65
                           ? '별빛 꽃이 피었어요!'
@@ -385,7 +358,9 @@ class _EpisodeOneFinaleOverlayState extends State<EpisodeOneFinaleOverlay> {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      _saving ? '모험 완료 기록을 안전하게 저장하고 있어요.' : '완료 기록을 저장했어요.',
+                      _saving
+                          ? '모험 완료 기록을 안전하게 저장하고 있어요.'
+                          : '완료 기록을 저장했어요.',
                       style: const TextStyle(
                         color: Color(0xFFD9ECE5),
                         fontSize: 12,
@@ -414,232 +389,236 @@ class _EpisodeOneFinaleOverlayState extends State<EpisodeOneFinaleOverlay> {
   }
 
   Widget _buildSaveError() {
-    return Container(
+    return _FinalePage(
       key: const Key('episode-one-finale-save-error'),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF3C2D4B), Color(0xFF172A2B)],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      padding: const EdgeInsets.all(24),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 520),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.cloud_off_rounded,
-                color: Color(0xFFFFD7A3),
-                size: 70,
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                '별빛 꽃은 안전해요',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 25,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                _saveError ?? '완료 기록을 저장하지 못했어요.',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Color(0xFFDCE9E5),
-                  height: 1.5,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 22),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  key: const Key('episode-one-retry-save'),
-                  onPressed: _saving ? null : _retrySaving,
-                  icon: const Icon(Icons.refresh_rounded),
-                  label: Text(_saving ? '저장 중...' : '완료 기록 다시 저장'),
-                ),
-              ),
-            ],
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.cloud_off_rounded,
+            color: Color(0xFFFFD7A3),
+            size: 70,
           ),
-        ),
+          const SizedBox(height: 18),
+          const Text(
+            '별빛 꽃은 안전해요',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 25,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _saveError ?? '완료 기록을 저장하지 못했어요.',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Color(0xFFDCE9E5),
+              height: 1.5,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 22),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              key: const Key('episode-one-retry-save'),
+              onPressed: _saving ? null : _retrySaving,
+              icon: const Icon(Icons.refresh_rounded),
+              label: Text(_saving ? '저장 중...' : '완료 기록 다시 저장'),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildEnding() {
     final progress = _progress;
-    return Container(
+    return _FinalePage(
       key: const Key('episode-one-finale-ending'),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF56477A), Color(0xFF42745D), Color(0xFF14212C)],
-        ),
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 24, 20, 34),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 680),
+      child: Column(
+        children: [
+          Container(
+            width: 150,
+            height: 150,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [Color(0xFFFFF4B8), Color(0xFFFFCBE2)],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x99FFE39A),
+                  blurRadius: 42,
+                  spreadRadius: 8,
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.local_florist_rounded,
+              color: Color(0xFF75528F),
+              size: 82,
+            ),
+          ),
+          const SizedBox(height: 22),
+          const Text(
+            'Episode 1 사건 해결!',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 29,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            '별빛 꽃이 다시 중앙 정원을 환하게 밝혔어요.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Color(0xFFDCE9E5),
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 18),
+          const _DialogueCard(
+            speaker: '포포',
+            icon: Icons.pets_rounded,
+            message: '차가운 바람에 씨앗이 떨어졌어. 얼어붙을까 봐 달빛 이끼로 옮겼는데 먼저 알려주지 못해서 미안해.',
+          ),
+          const SizedBox(height: 10),
+          const _DialogueCard(
+            speaker: '꽃루미',
+            icon: Icons.local_florist_rounded,
+            message: '별지기가 누구도 함부로 의심하지 않고 세 증거를 끝까지 연결해서 포포의 진짜 마음을 알아냈어!',
+          ),
+          const SizedBox(height: 18),
+          Container(
+            key: const Key('episode-one-finale-reward'),
+            width: double.infinity,
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFFFFF0BE), Color(0xFFFFDCEB)],
+              ),
+              borderRadius: BorderRadius.circular(24),
+            ),
             child: Column(
               children: [
-                Container(
-                  width: 150,
-                  height: 150,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [Color(0xFFFFF4B8), Color(0xFFFFCBE2)],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(0x99FFE39A),
-                        blurRadius: 42,
-                        spreadRadius: 8,
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.local_florist_rounded,
-                    color: Color(0xFF75528F),
-                    size: 82,
+                const Text(
+                  '새로운 꽃을 발견했어요',
+                  style: TextStyle(
+                    color: Color(0xFF795833),
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(height: 22),
+                const SizedBox(height: 5),
                 const Text(
-                  'Episode 1 사건 해결!',
-                  textAlign: TextAlign.center,
+                  '✨ 별빛 꽃 ✨',
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 29,
+                    color: Color(0xFF5D416D),
+                    fontSize: 24,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  '별빛 꽃이 다시 중앙 정원을 환하게 밝혔어요.',
+                const SizedBox(height: 10),
+                Text(
+                  '핵심 증거 3개 · P0~P5 해결 · +110 XP${progress == null ? '' : ' · 꽃숲 ${progress.gardenLevel}단계'}',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Color(0xFFDCE9E5),
-                    fontSize: 15,
+                  style: const TextStyle(
+                    color: Color(0xFF755F69),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 20),
-                const _DialogueCard(
-                  speaker: '포포',
-                  icon: Icons.pets_rounded,
-                  message: '차가운 바람에 씨앗이 떨어졌어. 얼어붙을까 봐 달빛 이끼로 옮겼는데 먼저 알려주지 못해서 미안해.',
-                ),
-                const SizedBox(height: 10),
-                const _DialogueCard(
-                  speaker: '꽃루미',
-                  icon: Icons.local_florist_rounded,
-                  message: '별지기가 누구도 함부로 의심하지 않고 세 증거를 끝까지 연결해서 포포의 진짜 마음을 알아냈어!',
-                ),
-                const SizedBox(height: 18),
-                Container(
-                  key: const Key('episode-one-finale-reward'),
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFFF0BE), Color(0xFFFFDCEB)],
+                if (progress != null) ...[
+                  const SizedBox(height: 5),
+                  Text(
+                    '완료한 모험 ${progress.completedAdventures}회 · 누적 ${progress.experience} XP',
+                    key: const Key('episode-one-finale-progress-record'),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Color(0xFF795F6C),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
                     ),
-                    borderRadius: BorderRadius.circular(24),
                   ),
-                  child: Column(
-                    children: [
-                      const Text(
-                        '새로운 꽃을 발견했어요',
-                        style: TextStyle(
-                          color: Color(0xFF795833),
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      const Text(
-                        '✨ 별빛 꽃 ✨',
-                        style: TextStyle(
-                          color: Color(0xFF5D416D),
-                          fontSize: 24,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        '핵심 증거 3개 · P0~P5 해결 · +110 XP${progress == null ? '' : ' · 꽃숲 ${progress.gardenLevel}단계'}',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Color(0xFF755F69),
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      if (progress != null) ...[
-                        const SizedBox(height: 5),
-                        Text(
-                          '완료한 모험 ${progress.completedAdventures}회 · 누적 ${progress.experience} XP',
-                          key: const Key('episode-one-finale-progress-record'),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Color(0xFF795F6C),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(15),
+            decoration: BoxDecoration(
+              color: const Color(0x553A4D59),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0x5578DFC3)),
+            ),
+            child: const Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.notifications_active_rounded,
+                  color: Color(0xFFFFE39A),
                 ),
-                const SizedBox(height: 16),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    color: const Color(0x553A4D59),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0x5578DFC3)),
-                  ),
-                  child: const Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.notifications_active_rounded, color: Color(0xFFFFE39A)),
-                      SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          '별빛 꽃이 피는 순간, 꽃숲 깊은 곳에서 아무도 건드리지 않은 작은 별종이 한 번 울렸어요. 누가 새로운 도움을 요청하는 걸까요?',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            height: 1.45,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    key: const Key('episode-one-return-home'),
-                    onPressed: widget.onReturnToGarden,
-                    icon: const Icon(Icons.park_rounded),
-                    label: const Text(
-                      '별정원으로 돌아가기',
-                      style: TextStyle(fontWeight: FontWeight.w900),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    '별빛 꽃이 피는 순간, 꽃숲 깊은 곳에서 아무도 건드리지 않은 작은 별종이 한 번 울렸어요. 누가 새로운 도움을 요청하는 걸까요?',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      height: 1.45,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
               ],
             ),
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              key: const Key('episode-one-return-home'),
+              onPressed: widget.onReturnToGarden,
+              icon: const Icon(Icons.park_rounded),
+              label: const Text(
+                '별정원으로 돌아가기',
+                style: TextStyle(fontWeight: FontWeight.w900),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FinalePage extends StatelessWidget {
+  const _FinalePage({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF31274B), Color(0xFF16372F), Color(0xFF0E1B25)],
+        ),
+      ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(18, 22, 18, 34),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: child,
           ),
         ),
       ),
@@ -647,8 +626,8 @@ class _EpisodeOneFinaleOverlayState extends State<EpisodeOneFinaleOverlay> {
   }
 }
 
-class _FinaleHeading extends StatelessWidget {
-  const _FinaleHeading({
+class _Heading extends StatelessWidget {
+  const _Heading({
     required this.eyebrow,
     required this.title,
     required this.subtitle,
@@ -762,10 +741,7 @@ class _EvidenceCard extends StatelessWidget {
             ),
           ),
           if (confirmed)
-            const Padding(
-              padding: EdgeInsets.only(left: 6),
-              child: Icon(Icons.check_circle_rounded, color: Color(0xFF9BE7D0)),
-            ),
+            const Icon(Icons.check_circle_rounded, color: Color(0xFF9BE7D0)),
         ],
       ),
     );
@@ -850,7 +826,10 @@ class _HypothesisTile extends StatelessWidget {
                 ),
               ),
               if (showCorrect)
-                const Icon(Icons.check_circle_rounded, color: Color(0xFF9BE7D0))
+                const Icon(
+                  Icons.check_circle_rounded,
+                  color: Color(0xFF9BE7D0),
+                )
               else if (showWrong)
                 const Icon(Icons.help_rounded, color: Color(0xFFFFC2D2)),
             ],
@@ -861,8 +840,8 @@ class _HypothesisTile extends StatelessWidget {
   }
 }
 
-class _DeductionFeedback extends StatelessWidget {
-  const _DeductionFeedback({required this.correct, required this.text});
+class _FeedbackCard extends StatelessWidget {
+  const _FeedbackCard({required this.correct, required this.text});
 
   final bool correct;
   final String text;
@@ -870,7 +849,11 @@ class _DeductionFeedback extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      key: Key(correct ? 'episode-one-deduction-correct' : 'episode-one-deduction-wrong'),
+      key: Key(
+        correct
+            ? 'episode-one-deduction-correct'
+            : 'episode-one-deduction-wrong',
+      ),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: correct ? const Color(0x6653C8A9) : const Color(0x665A4557),
@@ -884,7 +867,9 @@ class _DeductionFeedback extends StatelessWidget {
         children: [
           Icon(
             correct ? Icons.lightbulb_rounded : Icons.menu_book_rounded,
-            color: correct ? const Color(0xFFFFE39A) : const Color(0xFFFFC2D2),
+            color: correct
+                ? const Color(0xFFFFE39A)
+                : const Color(0xFFFFC2D2),
           ),
           const SizedBox(width: 10),
           Expanded(
