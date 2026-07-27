@@ -65,20 +65,20 @@ class _PedestalFlamePrototypeScreenState
 }
 
 class PedestalPrototypeGame extends FlameGame {
-  final _PedestalWorld worldScene = _PedestalWorld();
+  final _PedestalWorld _worldScene = _PedestalWorld();
 
   @override
   Color backgroundColor() => const Color(0xFF0B1020);
 
   @override
   Future<void> onLoad() async {
-    await add(worldScene);
+    await add(_worldScene);
   }
 
   @override
   void onGameResize(Vector2 size) {
     super.onGameResize(size);
-    worldScene.size = size;
+    _worldScene.size = size;
   }
 }
 
@@ -192,6 +192,7 @@ class _PedestalWorld extends PositionComponent
 
   @override
   void onDragStart(DragStartEvent event) {
+    super.onDragStart(event);
     if (_phase != _PrototypePhase.grouping) {
       return;
     }
@@ -213,6 +214,7 @@ class _PedestalWorld extends PositionComponent
 
   @override
   void onDragUpdate(DragUpdateEvent event) {
+    super.onDragUpdate(event);
     final index = _draggingIndex;
     if (index == null) {
       return;
@@ -222,6 +224,7 @@ class _PedestalWorld extends PositionComponent
 
   @override
   void onDragEnd(DragEndEvent event) {
+    super.onDragEnd(event);
     final index = _draggingIndex;
     if (index == null) {
       return;
@@ -389,7 +392,7 @@ class _PedestalWorld extends PositionComponent
 
     canvas.drawOval(
       Rect.fromCenter(
-        center: rect.center + const Offset(0, rect.height * 0.43),
+        center: rect.center + Offset(0, rect.height * 0.43),
         width: rect.width * 1.22,
         height: rect.height * 0.28,
       ),
