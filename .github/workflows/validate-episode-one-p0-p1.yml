@@ -1,0 +1,89 @@
+name: Validate Episode 1 P0 and P1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/validate-episode-one-p0-p1.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Run validation
+        shell: bash
+        run: |
+          set +e
+          flutter pub get > /tmp/pub-get.log 2>&1
+          PUB_RESULT=$?
+          flutter analyze > /tmp/analyze.log 2>&1
+          ANALYZE_RESULT=$?
+          flutter test > /tmp/test.log 2>&1
+          TEST_RESULT=$?
+          flutter build web --release --base-href /Rumi/ --pwa-strategy=none > /tmp/build.log 2>&1
+          BUILD_RESULT=$?
+
+          status_text() {
+            if [ "$1" -eq 0 ]; then
+              echo "성공"
+            else
+              echo "실패"
+            fi
+          }
+
+          mkdir -p docs
+          {
+            echo "# Episode 1 P0·P1 자동 검증 결과"
+            echo
+            echo "- 검증 커밋: $(git rev-parse HEAD)"
+            echo "- flutter pub get: $(status_text "$PUB_RESULT")"
+            echo "- flutter analyze: $(status_text "$ANALYZE_RESULT")"
+            echo "- flutter test: $(status_text "$TEST_RESULT")"
+            echo "- flutter build web: $(status_text "$BUILD_RESULT")"
+            echo
+            if [ "$ANALYZE_RESULT" -ne 0 ]; then
+              echo "## Analyze 오류"
+              echo '```text'
+              tail -n 80 /tmp/analyze.log
+              echo '```'
+              echo
+            fi
+            if [ "$TEST_RESULT" -ne 0 ]; then
+              echo "## Test 오류"
+              echo '```text'
+              tail -n 100 /tmp/test.log
+              echo '```'
+              echo
+            fi
+            if [ "$BUILD_RESULT" -ne 0 ]; then
+              echo "## Build 오류"
+              echo '```text'
+              tail -n 80 /tmp/build.log
+              echo '```'
+            fi
+          } > docs/EPISODE_01_P0_P1_VALIDATION.md
+
+      - name: Commit validation result and remove temporary workflow
+        shell: bash
+        run: |
+          rm .github/workflows/validate-episode-one-p0-p1.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/EPISODE_01_P0_P1_VALIDATION.md .github/workflows/validate-episode-one-p0-p1.yml
+          git commit -m 'test: record episode one P0 P1 validation'
+          git push origin HEAD:main
