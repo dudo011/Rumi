@@ -14,10 +14,27 @@ enum EpisodeOneScene {
 
 enum EpisodeOneItem { starLens }
 
+enum EpisodeOneClue { wetTracks }
+
 extension EpisodeOneItemMetadata on EpisodeOneItem {
   String get label {
     return switch (this) {
       EpisodeOneItem.starLens => '별무늬 렌즈',
+    };
+  }
+}
+
+extension EpisodeOneClueMetadata on EpisodeOneClue {
+  String get label {
+    return switch (this) {
+      EpisodeOneClue.wetTracks => '바람 뒤의 젖은 발자국',
+    };
+  }
+
+  String get description {
+    return switch (this) {
+      EpisodeOneClue.wetTracks =>
+        '둥근 발자국은 바람 자국 위에 남았고 분수대 방향으로 이어졌어요.',
     };
   }
 }
@@ -57,12 +74,21 @@ class EpisodeOneSnapshot {
     required this.pedestalMechanismAnimating,
     required this.pedestalSolved,
     required Set<EpisodeOneItem> inventory,
+    required this.selectedItem,
+    required this.pondLensInstalling,
+    required this.pondLensInstalled,
+    required this.pondCloseUpOpen,
+    required this.pondTrackProgress,
+    required this.pondTrackAnimating,
+    required this.pondSolved,
+    required Set<EpisodeOneClue> clues,
     required this.inputLocked,
     required this.message,
-  }) : visitedScenes = UnmodifiableSetView(visitedScenes),
-       history = UnmodifiableListView(history),
-       pedestalCupCounts = UnmodifiableListView(pedestalCupCounts),
-       inventory = UnmodifiableSetView(inventory);
+  })  : visitedScenes = UnmodifiableSetView(visitedScenes),
+        history = UnmodifiableListView(history),
+        pedestalCupCounts = UnmodifiableListView(pedestalCupCounts),
+        inventory = UnmodifiableSetView(inventory),
+        clues = UnmodifiableSetView(clues);
 
   factory EpisodeOneSnapshot.initial() {
     return EpisodeOneSnapshot(
@@ -76,6 +102,14 @@ class EpisodeOneSnapshot {
       pedestalMechanismAnimating: false,
       pedestalSolved: false,
       inventory: const {},
+      selectedItem: null,
+      pondLensInstalling: false,
+      pondLensInstalled: false,
+      pondCloseUpOpen: false,
+      pondTrackProgress: 0,
+      pondTrackAnimating: false,
+      pondSolved: false,
+      clues: const {},
       inputLocked: false,
       message: '받침대 아래에서 희미하게 흔들리는 별조각을 찾아보세요.',
     );
@@ -91,6 +125,14 @@ class EpisodeOneSnapshot {
   final bool pedestalMechanismAnimating;
   final bool pedestalSolved;
   final Set<EpisodeOneItem> inventory;
+  final EpisodeOneItem? selectedItem;
+  final bool pondLensInstalling;
+  final bool pondLensInstalled;
+  final bool pondCloseUpOpen;
+  final int pondTrackProgress;
+  final bool pondTrackAnimating;
+  final bool pondSolved;
+  final Set<EpisodeOneClue> clues;
   final bool inputLocked;
   final String message;
 
@@ -99,20 +141,48 @@ class EpisodeOneSnapshot {
 
   bool get gardenPathsUnlocked => pedestalSolved;
 
+  bool get closeUpOpen => pedestalCloseUpOpen || pondCloseUpOpen;
+
   String get displayLabel {
     if (pedestalCloseUpOpen) return '별받침대 균형 장치';
+    if (pondCloseUpOpen) return '연못의 기억 흔적';
     return currentScene.label;
   }
 
   String get objective {
     if (pedestalCloseUpOpen) {
       if (pedestalSolved) {
-        return '별무늬 렌즈를 챙기고 중앙 정원으로 돌아가세요.';
+        return '별무늬 렌즈를 얻었어요. 중앙 정원으로 돌아가세요.';
       }
       if (pedestalMechanismAnimating) {
         return '세 균형컵이 맞춰지며 받침대 장치가 움직이고 있어요.';
       }
       return '별가루 12개를 세 균형컵에 똑같이 나누세요.';
+    }
+
+    if (pondCloseUpOpen) {
+      if (pondSolved) {
+        return '젖은 발자국이 분수대 방향으로 이어져요.';
+      }
+      if (pondTrackAnimating) {
+        return '네 발자국이 물빛 선으로 이어지고 있어요.';
+      }
+      return '둥근 발바닥과 작은 발가락이 있는 흔적을 순서대로 찾으세요.';
+    }
+
+    if (currentScene == EpisodeOneScene.pond) {
+      if (pondLensInstalling) {
+        return '별무늬 렌즈가 돌거울의 빈 홈에 맞춰지고 있어요.';
+      }
+      if (!pondLensInstalled) {
+        return selectedItem == EpisodeOneItem.starLens
+            ? '선택한 별무늬 렌즈를 돌거울에 사용하세요.'
+            : '별 모양 홈에 맞는 아이템을 선택하세요.';
+      }
+      if (!pondSolved) {
+        return '기억거울에 나타난 흔적을 확대 조사하세요.';
+      }
+      return '기록된 젖은 발자국 단서를 다시 확인할 수 있어요.';
     }
 
     if (currentScene != EpisodeOneScene.centralGarden) {
@@ -127,10 +197,19 @@ class EpisodeOneSnapshot {
     if (!pedestalSolved) {
       return '조각이 맞춰진 별받침대의 안쪽 장치를 조사하세요.';
     }
-    return '연못과 시계꽃 숲에서 바람과 발자국 단서를 찾아보세요.';
+    if (!pondSolved) {
+      return '연못에서 별무늬 렌즈를 사용해 발자국 단서를 찾으세요.';
+    }
+    return '연못 단서를 기록했어요. 다음 장소를 조사하세요.';
   }
 
   String get progressLabel {
+    if (pondSolved) return '연못 단서 ${clues.length}/1';
+    if (pondCloseUpOpen) {
+      return '발자국 $pondTrackProgress/${PondTrackPuzzle.correctOrder.length}';
+    }
+    if (pondLensInstalled) return '기억거울 활성화';
+    if (selectedItem != null) return '${selectedItem!.label} 선택';
     if (pedestalSolved) return '별무늬 렌즈 획득';
     if (pedestalCloseUpOpen) {
       return '별가루 ${PedestalBalancePuzzle.totalDust - remainingPedestalDust}/${PedestalBalancePuzzle.totalDust}';
@@ -150,6 +229,15 @@ class EpisodeOneSnapshot {
     bool? pedestalMechanismAnimating,
     bool? pedestalSolved,
     Set<EpisodeOneItem>? inventory,
+    EpisodeOneItem? selectedItem,
+    bool clearSelectedItem = false,
+    bool? pondLensInstalling,
+    bool? pondLensInstalled,
+    bool? pondCloseUpOpen,
+    int? pondTrackProgress,
+    bool? pondTrackAnimating,
+    bool? pondSolved,
+    Set<EpisodeOneClue>? clues,
     bool? inputLocked,
     String? message,
   }) {
@@ -165,6 +253,15 @@ class EpisodeOneSnapshot {
           pedestalMechanismAnimating ?? this.pedestalMechanismAnimating,
       pedestalSolved: pedestalSolved ?? this.pedestalSolved,
       inventory: inventory ?? this.inventory,
+      selectedItem:
+          clearSelectedItem ? null : (selectedItem ?? this.selectedItem),
+      pondLensInstalling: pondLensInstalling ?? this.pondLensInstalling,
+      pondLensInstalled: pondLensInstalled ?? this.pondLensInstalled,
+      pondCloseUpOpen: pondCloseUpOpen ?? this.pondCloseUpOpen,
+      pondTrackProgress: pondTrackProgress ?? this.pondTrackProgress,
+      pondTrackAnimating: pondTrackAnimating ?? this.pondTrackAnimating,
+      pondSolved: pondSolved ?? this.pondSolved,
+      clues: clues ?? this.clues,
       inputLocked: inputLocked ?? this.inputLocked,
       message: message ?? this.message,
     );
@@ -175,7 +272,7 @@ class EpisodeOneStateController extends ValueNotifier<EpisodeOneSnapshot> {
   EpisodeOneStateController() : super(EpisodeOneSnapshot.initial());
 
   bool canNavigateTo(EpisodeOneScene scene) {
-    if (value.inputLocked || value.pedestalCloseUpOpen) return false;
+    if (value.inputLocked || value.closeUpOpen) return false;
     if (scene == EpisodeOneScene.centralGarden) return true;
     if (scene == EpisodeOneScene.pond ||
         scene == EpisodeOneScene.clockflowerGrove) {
@@ -202,7 +299,9 @@ class EpisodeOneStateController extends ValueNotifier<EpisodeOneSnapshot> {
       currentScene: scene,
       visitedScenes: visited,
       history: history,
-      message: scene.objective,
+      message: scene == EpisodeOneScene.pond
+          ? '연못의 돌거울 중앙에 별 모양 홈이 비어 있어요.'
+          : scene.objective,
     );
     return true;
   }
@@ -211,6 +310,10 @@ class EpisodeOneStateController extends ValueNotifier<EpisodeOneSnapshot> {
     if (value.inputLocked) return;
     if (value.pedestalCloseUpOpen) {
       closePedestal();
+      return;
+    }
+    if (value.pondCloseUpOpen) {
+      closePondMirror();
       return;
     }
     navigateTo(EpisodeOneScene.centralGarden);
@@ -323,6 +426,120 @@ class EpisodeOneStateController extends ValueNotifier<EpisodeOneSnapshot> {
       inventory: {...value.inventory, EpisodeOneItem.starLens},
       inputLocked: false,
       message: '별무늬 렌즈를 얻었어요. 연못과 시계꽃 숲의 별길이 밝아졌어요!',
+    );
+  }
+
+  void selectItem(EpisodeOneItem item) {
+    if (value.inputLocked || !value.inventory.contains(item)) return;
+    if (value.selectedItem == item) {
+      value = value.copyWith(
+        clearSelectedItem: true,
+        message: '${item.label} 선택을 해제했어요.',
+      );
+      return;
+    }
+    value = value.copyWith(
+      selectedItem: item,
+      message: '${item.label}을 선택했어요. 모양이 맞는 곳에 사용해 보세요.',
+    );
+  }
+
+  bool useSelectedItemOnPondMirror() {
+    if (value.inputLocked || value.currentScene != EpisodeOneScene.pond) {
+      return false;
+    }
+    if (value.pondLensInstalled) {
+      value = value.copyWith(
+        pondCloseUpOpen: true,
+        message: value.pondSolved
+            ? '완성된 발자국 경로를 다시 확인할 수 있어요.'
+            : '둥근 발바닥과 작은 발가락이 있는 흔적을 순서대로 찾으세요.',
+      );
+      return true;
+    }
+    if (value.selectedItem != EpisodeOneItem.starLens) {
+      value = value.copyWith(
+        message: value.inventory.contains(EpisodeOneItem.starLens)
+            ? '인벤토리에서 별무늬 렌즈를 먼저 선택하세요.'
+            : '돌거울의 별 모양 홈에 맞는 물건이 필요해요.',
+      );
+      return false;
+    }
+
+    final inventory = {...value.inventory}..remove(EpisodeOneItem.starLens);
+    value = value.copyWith(
+      inventory: inventory,
+      clearSelectedItem: true,
+      pondLensInstalling: true,
+      inputLocked: true,
+      message: '별무늬 렌즈가 돌거울의 빈 홈에 맞춰지고 있어요.',
+    );
+    return true;
+  }
+
+  void completePondLensInstallation() {
+    if (!value.pondLensInstalling) return;
+    value = value.copyWith(
+      pondLensInstalling: false,
+      pondLensInstalled: true,
+      pondCloseUpOpen: true,
+      inputLocked: false,
+      message: '별무늬 렌즈가 맞춰지자 과거의 흔적이 수면에 나타났어요.',
+    );
+  }
+
+  void closePondMirror() {
+    if (value.inputLocked) return;
+    value = value.copyWith(
+      pondCloseUpOpen: false,
+      message: value.pondSolved
+          ? '젖은 발자국 단서를 수첩에 기록했어요.'
+          : '별거울의 흔적을 다시 확대 조사할 수 있어요.',
+    );
+  }
+
+  void selectPondTrack(int trackIndex) {
+    if (value.inputLocked ||
+        !value.pondCloseUpOpen ||
+        value.pondSolved ||
+        trackIndex < 0 ||
+        trackIndex >= 7) {
+      return;
+    }
+
+    if (!PondTrackPuzzle.isExpectedTrack(
+      selectedIndex: trackIndex,
+      progress: value.pondTrackProgress,
+    )) {
+      value = value.copyWith(
+        message: PondTrackPuzzle.incorrectFeedback(
+          selectedIndex: trackIndex,
+          progress: value.pondTrackProgress,
+        ),
+      );
+      return;
+    }
+
+    final nextProgress = value.pondTrackProgress + 1;
+    final completed = PondTrackPuzzle.isCompleted(nextProgress);
+    value = value.copyWith(
+      pondTrackProgress: nextProgress,
+      pondTrackAnimating: completed,
+      inputLocked: completed,
+      message: completed
+          ? '네 발자국이 하나의 물빛 경로로 이어지고 있어요.'
+          : '젖은 발자국이 물빛 선으로 이어졌어요.',
+    );
+  }
+
+  void completePondTrackAnimation() {
+    if (!value.pondTrackAnimating) return;
+    value = value.copyWith(
+      pondTrackAnimating: false,
+      pondSolved: true,
+      clues: {...value.clues, EpisodeOneClue.wetTracks},
+      inputLocked: false,
+      message: '발자국은 바람 자국 위에 남았고 분수대 방향으로 이어졌어요.',
     );
   }
 
