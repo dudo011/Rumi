@@ -4,7 +4,7 @@ import 'package:rumi/features/adventure/garden_exploration_screen.dart';
 
 void main() {
   Future<void> waitForUi(WidgetTester tester) async {
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
   }
 
   Future<void> start(WidgetTester tester) async {
@@ -14,16 +14,34 @@ void main() {
     await waitForUi(tester);
   }
 
-  Future<void> reachSolved(WidgetTester tester) async {
+  Future<void> solvePedestal(WidgetTester tester) async {
     await tester.tap(find.byKey(const Key('pedestal-hotspot')));
     await waitForUi(tester);
-    expect(find.text('별받침대 확대 조사'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('scratch-option-4')));
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('scratch-check-answer')));
-    await tester.pump();
+    expect(find.byKey(const Key('pedestal-investigation-scene')), findsOneWidget);
+
+    for (final key in [
+      'inspect-empty-spot',
+      'inspect-scratch-mark',
+      'inspect-star-dust',
+    ]) {
+      await tester.tap(find.byKey(Key(key)));
+      await tester.pump(const Duration(milliseconds: 350));
+    }
+
+    for (var index = 0; index < 12; index++) {
+      await tester.tap(find.byKey(Key('star-dust-$index')));
+      await tester.pump(const Duration(milliseconds: 80));
+    }
+    await tester.pump(const Duration(milliseconds: 1000));
+
+    expect(find.textContaining('네 묶음 완성'), findsOneWidget);
+    expect(find.byKey(const Key('return-from-pedestal')), findsOneWidget);
     await tester.tap(find.byKey(const Key('return-from-pedestal')));
     await waitForUi(tester);
+  }
+
+  Future<void> reachSolved(WidgetTester tester) async {
+    await solvePedestal(tester);
 
     await tester.tap(find.byKey(const Key('trail-hotspot')));
     await waitForUi(tester);
@@ -59,6 +77,35 @@ void main() {
     await waitForUi(tester);
   }
 
+  testWidgets('별받침대는 관찰 후 별가루를 직접 묶어 해결한다', (tester) async {
+    tester.view.physicalSize = const Size(900, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(home: GardenExplorationScreen(onContinue: (_) {})),
+    );
+    await start(tester);
+
+    await tester.tap(find.byKey(const Key('pedestal-hotspot')));
+    await waitForUi(tester);
+
+    expect(find.text('별받침대 근접 조사'), findsOneWidget);
+    expect(find.byKey(const Key('inspect-empty-spot')), findsOneWidget);
+    expect(find.byKey(const Key('star-dust-0')), findsNothing);
+
+    await tester.tap(find.byKey(const Key('inspect-empty-spot')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('inspect-scratch-mark')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('inspect-star-dust')));
+    await tester.pump();
+
+    expect(find.byKey(const Key('star-dust-0')), findsOneWidget);
+    expect(find.textContaining('0/12'), findsOneWidget);
+  });
+
   testWidgets('조사 대상이 증거에 따라 단계적으로 열린다', (tester) async {
     tester.view.physicalSize = const Size(900, 1400);
     tester.view.devicePixelRatio = 1;
@@ -74,20 +121,13 @@ void main() {
     expect(find.byKey(const Key('trail-hotspot')), findsNothing);
     expect(find.byKey(const Key('chest-hotspot')), findsNothing);
 
-    await tester.tap(find.byKey(const Key('pedestal-hotspot')));
-    await waitForUi(tester);
-    await tester.tap(find.byKey(const Key('scratch-option-4')));
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('scratch-check-answer')));
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('return-from-pedestal')));
-    await waitForUi(tester);
+    await solvePedestal(tester);
 
     expect(find.byKey(const Key('trail-hotspot')), findsOneWidget);
     expect(find.byKey(const Key('chest-hotspot')), findsNothing);
   });
 
-  testWidgets('세 확대 장면과 추리 보드를 거쳐 사건을 해결한다', (tester) async {
+  testWidgets('세 조사 장면과 추리 보드를 거쳐 사건을 해결한다', (tester) async {
     tester.view.physicalSize = const Size(900, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
