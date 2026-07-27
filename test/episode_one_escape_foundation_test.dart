@@ -191,7 +191,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     await tester.tap(find.byKey(const Key('episode-one-clue-notebook')));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('별지기의 단서 수첩'), findsOneWidget);
     expect(find.text(EpisodeOneClue.wetTracks.label), findsOneWidget);
