@@ -68,9 +68,9 @@ class GardenExplorationScreen extends StatelessWidget {
                   ),
                 );
               },
-              icon: const Icon(Icons.account_tree_rounded),
+              icon: const Icon(Icons.balance_rounded),
               label: const Text(
-                '새 방탈출 기반 체험',
+                '새 방탈출 P0·P1 체험',
                 style: TextStyle(fontWeight: FontWeight.w900),
               ),
             ),
