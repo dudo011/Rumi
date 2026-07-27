@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'episode_one_game.dart';
 import 'episode_one_state.dart';
+import 'widgets/episode_one_inventory_overlay.dart';
 
 class EpisodeOneEscapeScreen extends StatefulWidget {
   const EpisodeOneEscapeScreen({super.key, this.controller});
@@ -10,7 +11,8 @@ class EpisodeOneEscapeScreen extends StatefulWidget {
   final EpisodeOneStateController? controller;
 
   @override
-  State<EpisodeOneEscapeScreen> createState() => _EpisodeOneEscapeScreenState();
+  State<EpisodeOneEscapeScreen> createState() =>
+      _EpisodeOneEscapeScreenState();
 }
 
 class _EpisodeOneEscapeScreenState extends State<EpisodeOneEscapeScreen> {
@@ -32,6 +34,63 @@ class _EpisodeOneEscapeScreenState extends State<EpisodeOneEscapeScreen> {
       _controller.dispose();
     }
     super.dispose();
+  }
+
+  void _showClues(EpisodeOneSnapshot snapshot) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFF24343E),
+      showDragHandle: true,
+      builder: (context) {
+        final clues = snapshot.clues.toList()
+          ..sort((first, second) => first.index.compareTo(second.index));
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  '별지기의 단서 수첩',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                if (clues.isEmpty)
+                  const Text(
+                    '아직 기록한 핵심 단서가 없어요.',
+                    style: TextStyle(color: Color(0xFFD6E8E2)),
+                  )
+                else
+                  for (final clue in clues)
+                    ListTile(
+                      key: Key('episode-one-clue-${clue.name}'),
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(
+                        Icons.auto_awesome_rounded,
+                        color: Color(0xFFFFD96A),
+                      ),
+                      title: Text(
+                        clue.label,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      subtitle: Text(
+                        clue.description,
+                        style: const TextStyle(color: Color(0xFFD6E8E2)),
+                      ),
+                    ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -56,7 +115,7 @@ class _EpisodeOneEscapeScreenState extends State<EpisodeOneEscapeScreen> {
             ),
             Positioned(
               left: 58,
-              right: 58,
+              right: 104,
               top: 8,
               child: ValueListenableBuilder<EpisodeOneSnapshot>(
                 valueListenable: _controller,
@@ -67,6 +126,8 @@ class _EpisodeOneEscapeScreenState extends State<EpisodeOneEscapeScreen> {
                       Text(
                         snapshot.displayLabel,
                         key: const Key('episode-one-current-scene'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           color: Colors.white,
@@ -87,10 +148,49 @@ class _EpisodeOneEscapeScreenState extends State<EpisodeOneEscapeScreen> {
                         style: const TextStyle(
                           color: Color(0xFFD6E8E2),
                           fontSize: 12,
+                          height: 1.2,
                           fontWeight: FontWeight.w700,
                           shadows: [
                             Shadow(color: Colors.black54, blurRadius: 6),
                           ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+            Positioned(
+              right: 52,
+              top: 6,
+              child: ValueListenableBuilder<EpisodeOneSnapshot>(
+                valueListenable: _controller,
+                builder: (context, snapshot, _) {
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      IconButton.filledTonal(
+                        key: const Key('episode-one-clue-notebook'),
+                        tooltip: '단서 수첩',
+                        onPressed: snapshot.inputLocked
+                            ? null
+                            : () => _showClues(snapshot),
+                        icon: const Icon(Icons.menu_book_rounded),
+                      ),
+                      Positioned(
+                        right: -2,
+                        top: -2,
+                        child: CircleAvatar(
+                          radius: 9,
+                          backgroundColor: const Color(0xFFFFD96A),
+                          foregroundColor: const Color(0xFF302440),
+                          child: Text(
+                            '${snapshot.clues.length}',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -111,7 +211,7 @@ class _EpisodeOneEscapeScreenState extends State<EpisodeOneEscapeScreen> {
             Positioned(
               left: 12,
               right: 12,
-              bottom: 10,
+              bottom: 78,
               child: ValueListenableBuilder<EpisodeOneSnapshot>(
                 valueListenable: _controller,
                 builder: (context, snapshot, _) {
@@ -179,6 +279,12 @@ class _EpisodeOneEscapeScreenState extends State<EpisodeOneEscapeScreen> {
                   );
                 },
               ),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: EpisodeOneInventoryOverlay(controller: _controller),
             ),
           ],
         ),
