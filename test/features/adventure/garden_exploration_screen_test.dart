@@ -10,12 +10,12 @@ void main() {
   }
 
   Future<void> start(WidgetTester tester) async {
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
     await tester.tap(find.byKey(const Key('start-investigation')));
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
   }
 
-  testWidgets('별받침대 장면은 선택 후 재시도할 수 있는 구조를 제공한다', (tester) async {
+  testWidgets('별받침대는 문제지보다 조사 지점을 먼저 제공한다', (tester) async {
     tester.view.physicalSize = const Size(900, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -25,17 +25,39 @@ void main() {
     await start(tester);
 
     await tester.tap(find.byKey(const Key('pedestal-hotspot')));
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
-    expect(find.textContaining('별가루 12개를 3개씩'), findsOneWidget);
-    expect(find.byKey(const Key('scratch-option-3')), findsOneWidget);
-    expect(find.byKey(const Key('scratch-option-4')), findsOneWidget);
-    expect(find.byKey(const Key('scratch-option-6')), findsOneWidget);
+    expect(find.byKey(const Key('pedestal-investigation-scene')), findsOneWidget);
+    expect(find.byKey(const Key('inspect-empty-spot')), findsOneWidget);
+    expect(find.byKey(const Key('inspect-scratch-mark')), findsOneWidget);
+    expect(find.byKey(const Key('inspect-star-dust')), findsOneWidget);
+    expect(find.byKey(const Key('star-dust-0')), findsNothing);
+    expect(find.byType(AlertDialog), findsNothing);
+  });
 
-    final checkButton = tester.widget<FilledButton>(
-      find.byKey(const Key('scratch-check-answer')),
-    );
-    expect(checkButton.onPressed, isNull);
+  testWidgets('세 지점을 조사하면 별가루 직접 묶기가 열린다', (tester) async {
+    tester.view.physicalSize = const Size(900, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(buildScreen());
+    await start(tester);
+    await tester.tap(find.byKey(const Key('pedestal-hotspot')));
+    await tester.pump(const Duration(milliseconds: 600));
+
+    for (final key in [
+      'inspect-empty-spot',
+      'inspect-scratch-mark',
+      'inspect-star-dust',
+    ]) {
+      await tester.tap(find.byKey(Key(key)));
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+
+    expect(find.byKey(const Key('star-dust-0')), findsOneWidget);
+    expect(find.byKey(const Key('star-dust-11')), findsOneWidget);
+    expect(find.textContaining('0/12'), findsOneWidget);
     expect(find.text('증거 0/3'), findsOneWidget);
   });
 
@@ -45,17 +67,5 @@ void main() {
 
     expect(find.byKey(const Key('chest-hotspot')), findsNothing);
     expect(find.byKey(const Key('move-stone')), findsNothing);
-  });
-
-  testWidgets('확대 장면은 팝업이 아니라 화면 전환으로 표시된다', (tester) async {
-    await tester.pumpWidget(buildScreen());
-    await start(tester);
-
-    await tester.tap(find.byKey(const Key('pedestal-hotspot')));
-    await tester.pump(const Duration(milliseconds: 500));
-
-    expect(find.text('별받침대 확대 조사'), findsOneWidget);
-    expect(find.byType(AlertDialog), findsNothing);
-    expect(find.byKey(const Key('scratch-check-answer')), findsOneWidget);
   });
 }
