@@ -269,10 +269,7 @@ void main() {
       find.byKey(const Key('episode-one-open-clockflower-ring')),
     );
     await tester.pump();
-    expect(
-      find.byKey(const Key('episode-one-clock-step-12')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('episode-one-clock-step-12')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('episode-one-clock-step-4')));
     await tester.pump();
@@ -320,10 +317,7 @@ void main() {
 
     expect(find.text('별지기의 단서 수첩'), findsOneWidget);
     expect(find.text(EpisodeOneClue.wetTracks.label), findsOneWidget);
-    expect(
-      find.byKey(const Key('episode-one-clue-wetTracks')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('episode-one-clue-wetTracks')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -360,10 +354,7 @@ void main() {
       find.byKey(const Key('episode-one-clockflower-overlay')),
       findsOneWidget,
     );
-    expect(
-      find.byKey(const Key('episode-one-clock-step-12')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('episode-one-clock-step-12')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

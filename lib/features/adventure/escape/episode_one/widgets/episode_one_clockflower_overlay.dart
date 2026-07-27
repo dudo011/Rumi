@@ -184,7 +184,8 @@ class _ClockflowerRingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selected = snapshot.clockflowerSelection;
-    final blueOpen = selected != null && ClockflowerPuzzle.blueOpensAt(selected);
+    final blueOpen =
+        selected != null && ClockflowerPuzzle.blueOpensAt(selected);
     final yellowOpen =
         selected != null && ClockflowerPuzzle.yellowOpensAt(selected);
 
@@ -235,10 +236,7 @@ class _ClockflowerRingView extends StatelessWidget {
             final dimension = math.min(constraints.maxWidth, 300.0);
             return SizedBox.square(
               dimension: dimension,
-              child: _TimeRing(
-                snapshot: snapshot,
-                controller: controller,
-              ),
+              child: _TimeRing(snapshot: snapshot, controller: controller),
             );
           },
         ),
@@ -260,35 +258,35 @@ class _ClockflowerRingView extends StatelessWidget {
                   ),
                 )
               : snapshot.clockflowerSolved
-                  ? const _ClockflowerSuccessCard(
-                      key: ValueKey('clockflower-solved'),
-                      title: '은빛 바람끈 획득',
-                      subtitle: '분수대의 멈춘 바람바퀴를 고칠 수 있을 것 같아요.',
-                    )
-                  : Container(
-                      key: ValueKey(selected),
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 11,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0x553F5266),
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Text(
-                        selected == null
-                            ? '시간고리의 칸을 하나 선택해 보세요.'
-                            : ClockflowerPuzzle.feedback(selected),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          height: 1.35,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
+              ? const _ClockflowerSuccessCard(
+                  key: ValueKey('clockflower-solved'),
+                  title: '은빛 바람끈 획득',
+                  subtitle: '분수대의 멈춘 바람바퀴를 고칠 수 있을 것 같아요.',
+                )
+              : Container(
+                  key: ValueKey(selected),
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 11,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0x553F5266),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Text(
+                    selected == null
+                        ? '시간고리의 칸을 하나 선택해 보세요.'
+                        : ClockflowerPuzzle.feedback(selected),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      height: 1.35,
+                      fontWeight: FontWeight.w800,
                     ),
+                  ),
+                ),
         ),
         const SizedBox(height: 12),
         SizedBox(
@@ -348,8 +346,8 @@ class _TimeRing extends StatelessWidget {
                   snapshot.clockflowerSolved
                       ? '함께 개화\n12번째 칸'
                       : selected == null
-                          ? '첫 공통\n개화 칸'
-                          : '$selected번째 칸',
+                      ? '첫 공통\n개화 칸'
+                      : '$selected번째 칸',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: Colors.white,
@@ -384,12 +382,16 @@ class _TimeRing extends StatelessWidget {
     final angle = -math.pi / 2 + (step - 1) * math.pi * 2 / 12;
     final left = center + math.cos(angle) * radius - buttonSize / 2;
     final top = center + math.sin(angle) * radius - buttonSize / 2;
-    final isSelected = selected == step ||
-        (snapshot.clockflowerSolved && step == ClockflowerPuzzle.firstCommonStep);
-    final blueMark = selected != null &&
+    final isSelected =
+        selected == step ||
+        (snapshot.clockflowerSolved &&
+            step == ClockflowerPuzzle.firstCommonStep);
+    final blueMark =
+        selected != null &&
         step <= selected &&
         ClockflowerPuzzle.blueOpensAt(step);
-    final yellowMark = selected != null &&
+    final yellowMark =
+        selected != null &&
         step <= selected &&
         ClockflowerPuzzle.yellowOpensAt(step);
 
@@ -431,9 +433,7 @@ class _TimeRing extends StatelessWidget {
                 Text(
                   '$step',
                   style: TextStyle(
-                    color: isSelected
-                        ? const Color(0xFF302440)
-                        : Colors.white,
+                    color: isSelected ? const Color(0xFF302440) : Colors.white,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -516,7 +516,8 @@ class _RingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _RingPainter oldDelegate) {
-    return oldDelegate.selectedStep != selectedStep || oldDelegate.solved != solved;
+    return oldDelegate.selectedStep != selectedStep ||
+        oldDelegate.solved != solved;
   }
 }
 
@@ -554,7 +555,12 @@ class _Clockflower extends StatelessWidget {
                 width: open ? 5 : 2,
               ),
               boxShadow: open
-                  ? [BoxShadow(color: color.withValues(alpha: 0.7), blurRadius: 22)]
+                  ? [
+                      BoxShadow(
+                        color: color.withValues(alpha: 0.7),
+                        blurRadius: 22,
+                      ),
+                    ]
                   : null,
             ),
             child: Icon(

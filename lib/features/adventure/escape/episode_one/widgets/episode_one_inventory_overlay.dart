@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 import '../episode_one_state.dart';
 
 class EpisodeOneInventoryOverlay extends StatelessWidget {
-  const EpisodeOneInventoryOverlay({
-    required this.controller,
-    super.key,
-  });
+  const EpisodeOneInventoryOverlay({required this.controller, super.key});
 
   final EpisodeOneStateController controller;
 
@@ -26,9 +23,7 @@ class EpisodeOneInventoryOverlay extends StatelessWidget {
             color: const Color(0xE6222E38),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: const Color(0x5578DFC3)),
-            boxShadow: const [
-              BoxShadow(color: Colors.black38, blurRadius: 12),
-            ],
+            boxShadow: const [BoxShadow(color: Colors.black38, blurRadius: 12)],
           ),
           child: Row(
             children: [
@@ -42,7 +37,8 @@ class EpisodeOneInventoryOverlay extends StatelessWidget {
                 Expanded(
                   child: _InventorySlot(
                     item: index < items.length ? items[index] : null,
-                    selected: index < items.length &&
+                    selected:
+                        index < items.length &&
                         snapshot.selectedItem == items[index],
                     enabled: !snapshot.inputLocked,
                     onTap: index < items.length
@@ -91,9 +87,7 @@ class _InventorySlot extends StatelessWidget {
           height: 54,
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
           decoration: BoxDecoration(
-            color: selected
-                ? const Color(0x665FE3C0)
-                : const Color(0x44384B55),
+            color: selected ? const Color(0x665FE3C0) : const Color(0x44384B55),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: selected

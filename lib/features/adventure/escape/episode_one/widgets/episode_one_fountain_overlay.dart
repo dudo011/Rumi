@@ -171,9 +171,7 @@ class _WheelSection extends StatelessWidget {
                   : controller.useSelectedItemOnFountainWheel,
               icon: const Icon(Icons.air_rounded),
               label: Text(
-                snapshot.fountainWheelRepaired
-                    ? '바람바퀴 수리 완료'
-                    : '선택한 아이템으로 수리',
+                snapshot.fountainWheelRepaired ? '바람바퀴 수리 완료' : '선택한 아이템으로 수리',
               ),
             ),
           ),
@@ -200,8 +198,8 @@ class _StoneSection extends StatelessWidget {
             !snapshot.fountainWheelRepaired
                 ? '바람바퀴를 고치면 돌을 덮은 먼지가 사라져요.'
                 : !snapshot.pondSolved
-                    ? '연못의 젖은 발자국 단서가 있어야 흔적을 비교할 수 있어요.'
-                    : '연못에서 본 작은 발가락이 있는 젖은 흔적과 같은 돌을 고르세요.',
+                ? '연못의 젖은 발자국 단서가 있어야 흔적을 비교할 수 있어요.'
+                : '연못에서 본 작은 발가락이 있는 젖은 흔적과 같은 돌을 고르세요.',
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: Color(0xFFD9E9E7),
@@ -218,7 +216,8 @@ class _StoneSection extends StatelessWidget {
                   child: _StoneButton(
                     stoneNumber: stone,
                     selected: snapshot.fountainStoneSelection == stone,
-                    enabled: snapshot.fountainWheelRepaired &&
+                    enabled:
+                        snapshot.fountainWheelRepaired &&
                         !snapshot.inputLocked &&
                         !snapshot.fountainStarKeyRevealed,
                     onTap: () => controller.selectFountainStone(stone),
@@ -293,8 +292,8 @@ class _ChestSection extends StatelessWidget {
             snapshot.fountainChestOpened
                 ? '상자 안에서 달빛 손잡이가 떠올랐어요.'
                 : snapshot.fountainStarKeyCollected
-                    ? '별열쇠를 선택해 별 모양 자물쇠에 사용하세요.'
-                    : '상자에는 별 모양 자물쇠가 걸려 있어요.',
+                ? '별열쇠를 선택해 별 모양 자물쇠에 사용하세요.'
+                : '상자에는 별 모양 자물쇠가 걸려 있어요.',
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: Color(0xFFD9E9E7),
@@ -312,9 +311,7 @@ class _ChestSection extends StatelessWidget {
                   : controller.useSelectedItemOnFountainChest,
               icon: const Icon(Icons.key_rounded),
               label: Text(
-                snapshot.fountainChestOpened
-                    ? '관리 상자 개방 완료'
-                    : '선택한 아이템으로 열기',
+                snapshot.fountainChestOpened ? '관리 상자 개방 완료' : '선택한 아이템으로 열기',
               ),
             ),
           ),
@@ -471,11 +468,7 @@ class _PinwheelPainter extends CustomPainter {
       canvas.drawPath(path, paint);
       canvas.restore();
     }
-    canvas.drawCircle(
-      center,
-      10,
-      Paint()..color = const Color(0xFFFFE39A),
-    );
+    canvas.drawCircle(center, 10, Paint()..color = const Color(0xFFFFE39A));
     canvas.drawLine(
       Offset(center.dx, center.dy + 10),
       Offset(center.dx, size.height),
@@ -532,14 +525,10 @@ class _StoneButton extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         height: 92,
         decoration: BoxDecoration(
-          color: selected
-              ? const Color(0x6687D8E5)
-              : const Color(0xCC56656B),
+          color: selected ? const Color(0x6687D8E5) : const Color(0xCC56656B),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: selected
-                ? const Color(0xFFFFE39A)
-                : const Color(0x778FAEB4),
+            color: selected ? const Color(0xFFFFE39A) : const Color(0x778FAEB4),
             width: selected ? 3 : 1.5,
           ),
         ),
@@ -593,8 +582,8 @@ class _KeyRevealCard extends StatelessWidget {
               collected
                   ? '별열쇠를 인벤토리에 보관했어요.'
                   : revealed
-                      ? '세 번째 돌 아래에서 별열쇠를 발견했어요.'
-                      : '돌 아래에서 별빛이 새어 나오고 있어요.',
+                  ? '세 번째 돌 아래에서 별열쇠를 발견했어요.'
+                  : '돌 아래에서 별빛이 새어 나오고 있어요.',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 11,

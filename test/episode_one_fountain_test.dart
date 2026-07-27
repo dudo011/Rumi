@@ -78,10 +78,7 @@ void main() {
     expect(controller.value.inventory, contains(EpisodeOneItem.moonHandle));
     expect(
       controller.value.clues,
-      containsAll({
-        EpisodeOneClue.wetTracks,
-        EpisodeOneClue.silverFurTrail,
-      }),
+      containsAll({EpisodeOneClue.wetTracks, EpisodeOneClue.silverFurTrail}),
     );
     expect(controller.value.progressLabel, '달빛 손잡이 획득');
   });
@@ -123,9 +120,7 @@ void main() {
 
     await tester.tap(find.byKey(const Key('episode-one-item-silverRibbon')));
     await tester.pump();
-    await tester.tap(
-      find.byKey(const Key('episode-one-use-ribbon-on-wheel')),
-    );
+    await tester.tap(find.byKey(const Key('episode-one-use-ribbon-on-wheel')));
     await tester.pump();
     expect(controller.value.fountainWheelRepairing, isTrue);
 

@@ -61,7 +61,9 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
     }
 
     if (snapshot.pondTrackAnimating) {
-      _pondTrackProgress = math.min(1, _pondTrackProgress + dt / 1.2).toDouble();
+      _pondTrackProgress = math
+          .min(1, _pondTrackProgress + dt / 1.2)
+          .toDouble();
       if (_pondTrackProgress >= 1) {
         controller.completePondTrackAnimation();
       }
@@ -191,40 +193,40 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
   bool get _compact => size.x < 520 || size.y < 720;
 
   Rect get _pedestalRect => Rect.fromCenter(
-        center: Offset(size.x * 0.5, size.y * 0.48),
-        width: math.min(size.x * 0.26, 190).toDouble(),
-        height: math.min(size.y * 0.22, 165).toDouble(),
-      );
+    center: Offset(size.x * 0.5, size.y * 0.48),
+    width: math.min(size.x * 0.26, 190).toDouble(),
+    height: math.min(size.y * 0.22, 165).toDouble(),
+  );
 
   Rect get _fallenPieceRect => Rect.fromCenter(
-        center: Offset(size.x * 0.39, size.y * 0.65),
-        width: 76,
-        height: 68,
-      );
+    center: Offset(size.x * 0.39, size.y * 0.65),
+    width: 76,
+    height: 68,
+  );
 
   Rect get _returnButton => Rect.fromCenter(
-        center: Offset(size.x * 0.5, size.y * 0.76),
-        width: math.min(size.x * 0.62, 380).toDouble(),
-        height: 52,
-      );
+    center: Offset(size.x * 0.5, size.y * 0.76),
+    width: math.min(size.x * 0.62, 380).toDouble(),
+    height: 52,
+  );
 
   Rect get _closeUpBackButton => Rect.fromCenter(
-        center: Offset(size.x * 0.18, size.y * 0.77),
-        width: math.min(size.x * 0.28, 160).toDouble(),
-        height: 48,
-      );
+    center: Offset(size.x * 0.18, size.y * 0.77),
+    width: math.min(size.x * 0.28, 160).toDouble(),
+    height: 48,
+  );
 
   Rect get _pedestalResetButton => Rect.fromCenter(
-        center: Offset(size.x * 0.82, size.y * 0.77),
-        width: math.min(size.x * 0.32, 178).toDouble(),
-        height: 48,
-      );
+    center: Offset(size.x * 0.82, size.y * 0.77),
+    width: math.min(size.x * 0.32, 178).toDouble(),
+    height: 48,
+  );
 
   Rect get _pondMirrorRect => Rect.fromCenter(
-        center: Offset(size.x * 0.5, size.y * 0.49),
-        width: math.min(size.x * 0.64, 480).toDouble(),
-        height: math.min(size.y * 0.38, 270).toDouble(),
-      );
+    center: Offset(size.x * 0.5, size.y * 0.49),
+    width: math.min(size.x * 0.64, 480).toDouble(),
+    height: math.min(size.y * 0.38, 270).toDouble(),
+  );
 
   Map<EpisodeOneScene, Rect> get _gardenTargets {
     final width = math.min(size.x * 0.28, 210).toDouble();
@@ -305,30 +307,30 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
     final rect = Offset.zero & Size(size.x, size.y);
     final colors = switch (scene) {
       EpisodeOneScene.centralGarden => const [
-          Color(0xFF111D2C),
-          Color(0xFF174D45),
-          Color(0xFF0B211B),
-        ],
+        Color(0xFF111D2C),
+        Color(0xFF174D45),
+        Color(0xFF0B211B),
+      ],
       EpisodeOneScene.pond => const [
-          Color(0xFF0C273E),
-          Color(0xFF1D6872),
-          Color(0xFF082631),
-        ],
+        Color(0xFF0C273E),
+        Color(0xFF1D6872),
+        Color(0xFF082631),
+      ],
       EpisodeOneScene.clockflowerGrove => const [
-          Color(0xFF271D45),
-          Color(0xFF554474),
-          Color(0xFF132925),
-        ],
+        Color(0xFF271D45),
+        Color(0xFF554474),
+        Color(0xFF132925),
+      ],
       EpisodeOneScene.fountain => const [
-          Color(0xFF1A2C41),
-          Color(0xFF3C6470),
-          Color(0xFF14252C),
-        ],
+        Color(0xFF1A2C41),
+        Color(0xFF3C6470),
+        Color(0xFF14252C),
+      ],
       EpisodeOneScene.greenhouse => const [
-          Color(0xFF2D2042),
-          Color(0xFF735D78),
-          Color(0xFF172925),
-        ],
+        Color(0xFF2D2042),
+        Color(0xFF735D78),
+        Color(0xFF172925),
+      ],
     };
 
     canvas.drawRect(
@@ -387,8 +389,8 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
         entry.key.label,
         available
             ? solved
-                ? '단서 기록됨'
-                : '조사하기'
+                  ? '단서 기록됨'
+                  : '조사하기'
             : '별길 잠김',
         available: available,
         solved: solved,
@@ -423,11 +425,11 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
     final position = snapshot.fallenPieceFitted
         ? end
         : (Offset.lerp(
-              start,
-              end,
-              Curves.easeInOut.transform(_pieceProgress),
-            ) ??
-            start);
+                start,
+                end,
+                Curves.easeInOut.transform(_pieceProgress),
+              ) ??
+              start);
     _drawCrescent(canvas, position, 22);
     if (!snapshot.fallenPieceFitted && !snapshot.fittingFallenPiece) {
       _drawText(
@@ -443,10 +445,7 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
     }
   }
 
-  void _drawPedestalCloseUp(
-    Canvas canvas,
-    EpisodeOneSnapshot snapshot,
-  ) {
+  void _drawPedestalCloseUp(Canvas canvas, EpisodeOneSnapshot snapshot) {
     _drawTitle(
       canvas,
       '별받침대 균형 장치',
@@ -492,7 +491,8 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
         canvas,
         _cupPlusRects[index],
         '+',
-        enabled: !snapshot.pedestalSolved &&
+        enabled:
+            !snapshot.pedestalSolved &&
             !snapshot.inputLocked &&
             snapshot.remainingPedestalDust > 0,
       );
@@ -568,7 +568,11 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
     final lensEnd = mirror.center;
     if (snapshot.pondLensInstalling || snapshot.pondLensInstalled) {
       final progress = snapshot.pondLensInstalled ? 1.0 : _pondLensProgress;
-      final position = Offset.lerp(lensStart, lensEnd, Curves.easeInOut.transform(progress))!;
+      final position = Offset.lerp(
+        lensStart,
+        lensEnd,
+        Curves.easeInOut.transform(progress),
+      )!;
       canvas.drawCircle(
         position,
         44,
@@ -605,11 +609,11 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
       canvas,
       snapshot.pondLensInstalled
           ? snapshot.pondSolved
-              ? '완성된 기억 흔적 다시 보기'
-              : '기억 흔적 확대 조사'
+                ? '완성된 기억 흔적 다시 보기'
+                : '기억 흔적 확대 조사'
           : snapshot.selectedItem == EpisodeOneItem.starLens
-              ? '선택한 별무늬 렌즈 사용'
-              : '인벤토리에서 렌즈 선택',
+          ? '선택한 별무늬 렌즈 사용'
+          : '인벤토리에서 렌즈 선택',
       Offset(mirror.center.dx, mirror.bottom - 24),
       fontSize: _compact ? 12 : 16,
       center: true,
@@ -807,8 +811,8 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
         ..color = solved
             ? const Color(0xCC4D8B7A)
             : available
-                ? const Color(0xCC304E58)
-                : const Color(0xBB202D36),
+            ? const Color(0xCC304E58)
+            : const Color(0xBB202D36),
     );
     canvas.drawRRect(
       RRect.fromRectAndRadius(rect, const Radius.circular(22)),
@@ -816,8 +820,8 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
         ..color = solved
             ? const Color(0xFFFFE39A)
             : available
-                ? const Color(0xAA8BD5C5)
-                : const Color(0x557A8B89)
+            ? const Color(0xAA8BD5C5)
+            : const Color(0x557A8B89)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 3,
     );
@@ -836,9 +840,7 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
       Offset(rect.center.dx, rect.center.dy + 14),
       fontSize: _compact ? 8 : 10,
       center: true,
-      color: available
-          ? const Color(0xFFFFE9AB)
-          : const Color(0xFFAAB9B5),
+      color: available ? const Color(0xFFFFE9AB) : const Color(0xFFAAB9B5),
       bold: true,
       maxWidth: rect.width - 12,
     );
@@ -853,9 +855,7 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
     canvas.drawRRect(
       RRect.fromRectAndRadius(rect, const Radius.circular(20)),
       Paint()
-        ..color = enabled
-            ? const Color(0xFFEBCB78)
-            : const Color(0xFF59656A),
+        ..color = enabled ? const Color(0xFFEBCB78) : const Color(0xFF59656A),
     );
     _drawText(
       canvas,
