@@ -12,6 +12,17 @@ void main() {
     expect(PedestalBalancePuzzle.remainingDust([2, 3, 4]), 3);
   });
 
+  test('P2는 4와 6의 첫 공배수인 12번째 칸에서만 해결된다', () {
+    expect(ClockflowerPuzzle.ringSize, 12);
+    expect(ClockflowerPuzzle.blueOpensAt(4), isTrue);
+    expect(ClockflowerPuzzle.blueOpensAt(8), isTrue);
+    expect(ClockflowerPuzzle.yellowOpensAt(6), isTrue);
+    expect(ClockflowerPuzzle.isSolved(12), isTrue);
+    expect(ClockflowerPuzzle.isSolved(6), isFalse);
+    expect(ClockflowerPuzzle.feedback(4), contains('파란'));
+    expect(ClockflowerPuzzle.feedback(6), contains('노란'));
+  });
+
   test('P3은 0·2·4·6 순서의 실제 발자국만 허용한다', () {
     expect(PondTrackPuzzle.correctOrder, [0, 2, 4, 6]);
     expect(
@@ -136,6 +147,68 @@ void main() {
     expect(controller.value.progressLabel, contains('연못 단서'));
   });
 
+  test('시계꽃 숲은 오답을 유지하지 않고 12번째 칸에서 은빛 바람끈을 준다', () {
+    final controller = EpisodeOneStateController();
+    addTearDown(controller.dispose);
+
+    _solveOpeningAndPedestal(controller);
+    controller.closePedestal();
+    expect(controller.navigateTo(EpisodeOneScene.clockflowerGrove), isTrue);
+    expect(controller.openClockflowerRing(), isTrue);
+
+    controller.selectClockflowerStep(4);
+    expect(controller.value.clockflowerSelection, 4);
+    expect(controller.value.clockflowerSolved, isFalse);
+    expect(controller.value.message, contains('파란'));
+
+    controller.selectClockflowerStep(6);
+    expect(controller.value.clockflowerSelection, 6);
+    expect(controller.value.clockflowerSolved, isFalse);
+    expect(controller.value.message, contains('노란'));
+
+    controller.selectClockflowerStep(12);
+    expect(controller.value.clockflowerSelection, 12);
+    expect(controller.value.clockflowerAnimating, isTrue);
+    expect(controller.value.inputLocked, isTrue);
+    expect(
+      controller.value.inventory,
+      isNot(contains(EpisodeOneItem.silverRibbon)),
+    );
+
+    controller.completeClockflowerAnimation();
+    expect(controller.value.clockflowerSolved, isTrue);
+    expect(controller.value.clockflowerAnimating, isFalse);
+    expect(controller.value.inputLocked, isFalse);
+    expect(controller.value.inventory, contains(EpisodeOneItem.silverRibbon));
+    expect(controller.value.progressLabel, contains('은빛 바람끈'));
+  });
+
+  test('연못과 시계꽃 숲은 원하는 순서로 해결할 수 있다', () {
+    final controller = EpisodeOneStateController();
+    addTearDown(controller.dispose);
+
+    _solveOpeningAndPedestal(controller);
+    controller.closePedestal();
+    _solveClockflower(controller);
+
+    controller.closeClockflowerRing();
+    controller.returnToGarden();
+    expect(controller.navigateTo(EpisodeOneScene.pond), isTrue);
+    controller.selectItem(EpisodeOneItem.starLens);
+    controller.useSelectedItemOnPondMirror();
+    controller.completePondLensInstallation();
+
+    for (final trackIndex in PondTrackPuzzle.correctOrder) {
+      controller.selectPondTrack(trackIndex);
+    }
+    controller.completePondTrackAnimation();
+
+    expect(controller.value.clockflowerSolved, isTrue);
+    expect(controller.value.pondSolved, isTrue);
+    expect(controller.value.progressLabel, '연못·숲 조사 완료');
+    expect(controller.value.inventory, contains(EpisodeOneItem.silverRibbon));
+  });
+
   testWidgets('인벤토리에서 별무늬 렌즈를 선택하고 해제할 수 있다', (tester) async {
     tester.view.physicalSize = const Size(900, 1400);
     tester.view.devicePixelRatio = 1;
@@ -163,6 +236,58 @@ void main() {
     await tester.tap(lensFinder);
     await tester.pump();
     expect(controller.value.selectedItem, isNull);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('시계꽃 시간고리에서 12번째 칸을 눌러 바람끈을 얻는다', (tester) async {
+    tester.view.physicalSize = const Size(900, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final controller = EpisodeOneStateController();
+    addTearDown(controller.dispose);
+    _solveOpeningAndPedestal(controller);
+    controller.closePedestal();
+    controller.navigateTo(EpisodeOneScene.clockflowerGrove);
+
+    await tester.pumpWidget(
+      MaterialApp(home: EpisodeOneEscapeScreen(controller: controller)),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.byKey(const Key('episode-one-clockflower-overlay')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('episode-one-open-clockflower-ring')),
+      findsOneWidget,
+    );
+
+    await tester.tap(
+      find.byKey(const Key('episode-one-open-clockflower-ring')),
+    );
+    await tester.pump();
+    expect(
+      find.byKey(const Key('episode-one-clock-step-12')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('episode-one-clock-step-4')));
+    await tester.pump();
+    expect(controller.value.clockflowerSelection, 4);
+
+    await tester.tap(find.byKey(const Key('episode-one-clock-step-12')));
+    await tester.pump();
+    expect(controller.value.clockflowerAnimating, isTrue);
+
+    await tester.pump(const Duration(milliseconds: 1300));
+    expect(controller.value.clockflowerSolved, isTrue);
+    expect(
+      find.byKey(const Key('episode-one-item-silverRibbon')),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 
@@ -202,13 +327,22 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('작은 화면에서도 HUD와 인벤토리가 넘치지 않는다', (tester) async {
+  testWidgets('작은 화면에서도 HUD·인벤토리·시계꽃 화면이 넘치지 않는다', (tester) async {
     tester.view.physicalSize = const Size(360, 640);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(const MaterialApp(home: EpisodeOneEscapeScreen()));
+    final controller = EpisodeOneStateController();
+    addTearDown(controller.dispose);
+    _solveOpeningAndPedestal(controller);
+    controller.closePedestal();
+    controller.navigateTo(EpisodeOneScene.clockflowerGrove);
+    controller.openClockflowerRing();
+
+    await tester.pumpWidget(
+      MaterialApp(home: EpisodeOneEscapeScreen(controller: controller)),
+    );
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(
@@ -222,6 +356,14 @@ void main() {
     expect(find.byKey(const Key('episode-one-progress-label')), findsOneWidget);
     expect(find.byKey(const Key('episode-one-inventory')), findsOneWidget);
     expect(find.byKey(const Key('episode-one-clue-notebook')), findsOneWidget);
+    expect(
+      find.byKey(const Key('episode-one-clockflower-overlay')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('episode-one-clock-step-12')),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 }
@@ -239,4 +381,12 @@ void _solveOpeningAndPedestal(EpisodeOneStateController controller) {
 
   expect(controller.value.pedestalMechanismAnimating, isTrue);
   controller.completePedestalMechanism();
+}
+
+void _solveClockflower(EpisodeOneStateController controller) {
+  expect(controller.navigateTo(EpisodeOneScene.clockflowerGrove), isTrue);
+  expect(controller.openClockflowerRing(), isTrue);
+  controller.selectClockflowerStep(12);
+  expect(controller.value.clockflowerAnimating, isTrue);
+  controller.completeClockflowerAnimation();
 }
