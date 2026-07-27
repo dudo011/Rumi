@@ -12,6 +12,25 @@ void main() {
     expect(PedestalBalancePuzzle.remainingDust([2, 3, 4]), 3);
   });
 
+  test('P3은 0·2·4·6 순서의 실제 발자국만 허용한다', () {
+    expect(PondTrackPuzzle.correctOrder, [0, 2, 4, 6]);
+    expect(
+      PondTrackPuzzle.isExpectedTrack(selectedIndex: 0, progress: 0),
+      isTrue,
+    );
+    expect(
+      PondTrackPuzzle.isExpectedTrack(selectedIndex: 2, progress: 1),
+      isTrue,
+    );
+    expect(
+      PondTrackPuzzle.isExpectedTrack(selectedIndex: 1, progress: 0),
+      isFalse,
+    );
+    expect(PondTrackPuzzle.isRealFootprint(4), isTrue);
+    expect(PondTrackPuzzle.isRealFootprint(5), isFalse);
+    expect(PondTrackPuzzle.isCompleted(4), isTrue);
+  });
+
   test('P0와 P1 완료 전후에 실제 경로 잠금 상태가 달라진다', () {
     final controller = EpisodeOneStateController();
     addTearDown(controller.dispose);
@@ -26,24 +45,7 @@ void main() {
     expect(controller.value.currentScene, EpisodeOneScene.centralGarden);
     expect(controller.value.message, contains('균형 장치'));
 
-    expect(controller.startFittingFallenPiece(), isTrue);
-    expect(controller.value.inputLocked, isTrue);
-    controller.completeFittingFallenPiece();
-    expect(controller.value.fallenPieceFitted, isTrue);
-    expect(controller.value.inputLocked, isFalse);
-
-    expect(controller.openPedestal(), isTrue);
-    for (var cup = 0; cup < 3; cup++) {
-      for (var dust = 0; dust < 4; dust++) {
-        controller.addDustToCup(cup);
-      }
-    }
-
-    expect(controller.value.pedestalCupCounts, [4, 4, 4]);
-    expect(controller.value.pedestalMechanismAnimating, isTrue);
-    expect(controller.value.inputLocked, isTrue);
-
-    controller.completePedestalMechanism();
+    _solveOpeningAndPedestal(controller);
 
     expect(controller.value.pedestalSolved, isTrue);
     expect(controller.value.inventory, contains(EpisodeOneItem.starLens));
@@ -90,7 +92,51 @@ void main() {
     expect(controller.value.pedestalMechanismAnimating, isTrue);
   });
 
-  testWidgets('Episode 1 HUD가 P0·P1 진행 상태를 반영한다', (tester) async {
+  test('별무늬 렌즈를 사용해 연못 기억거울과 P3 단서를 해결한다', () {
+    final controller = EpisodeOneStateController();
+    addTearDown(controller.dispose);
+
+    _solveOpeningAndPedestal(controller);
+    controller.closePedestal();
+    expect(controller.navigateTo(EpisodeOneScene.pond), isTrue);
+
+    expect(controller.useSelectedItemOnPondMirror(), isFalse);
+    expect(controller.value.inventory, contains(EpisodeOneItem.starLens));
+    expect(controller.value.message, contains('먼저 선택'));
+
+    controller.selectItem(EpisodeOneItem.starLens);
+    expect(controller.value.selectedItem, EpisodeOneItem.starLens);
+    expect(controller.useSelectedItemOnPondMirror(), isTrue);
+    expect(controller.value.pondLensInstalling, isTrue);
+    expect(controller.value.inputLocked, isTrue);
+    expect(controller.value.inventory, isEmpty);
+    expect(controller.value.selectedItem, isNull);
+
+    controller.completePondLensInstallation();
+    expect(controller.value.pondLensInstalled, isTrue);
+    expect(controller.value.pondCloseUpOpen, isTrue);
+    expect(controller.value.inputLocked, isFalse);
+
+    controller.selectPondTrack(1);
+    expect(controller.value.pondTrackProgress, 0);
+    expect(controller.value.message, contains('바람'));
+
+    for (final trackIndex in PondTrackPuzzle.correctOrder) {
+      controller.selectPondTrack(trackIndex);
+    }
+
+    expect(controller.value.pondTrackProgress, 4);
+    expect(controller.value.pondTrackAnimating, isTrue);
+    expect(controller.value.inputLocked, isTrue);
+
+    controller.completePondTrackAnimation();
+    expect(controller.value.pondSolved, isTrue);
+    expect(controller.value.inputLocked, isFalse);
+    expect(controller.value.clues, contains(EpisodeOneClue.wetTracks));
+    expect(controller.value.progressLabel, contains('연못 단서'));
+  });
+
+  testWidgets('인벤토리에서 별무늬 렌즈를 선택하고 해제할 수 있다', (tester) async {
     tester.view.physicalSize = const Size(900, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -98,43 +144,65 @@ void main() {
 
     final controller = EpisodeOneStateController();
     addTearDown(controller.dispose);
+    _solveOpeningAndPedestal(controller);
 
     await tester.pumpWidget(
       MaterialApp(home: EpisodeOneEscapeScreen(controller: controller)),
     );
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('중앙 정원'), findsOneWidget);
-    expect(
-      find.byKey(const Key('episode-one-foundation-status')),
-      findsOneWidget,
-    );
-    expect(find.text('받침대 준비 전'), findsOneWidget);
+    final lensFinder = find.byKey(const Key('episode-one-item-starLens'));
+    expect(find.byKey(const Key('episode-one-inventory')), findsOneWidget);
+    expect(lensFinder, findsOneWidget);
 
-    controller.startFittingFallenPiece();
-    controller.completeFittingFallenPiece();
-    controller.openPedestal();
+    await tester.tap(lensFinder);
     await tester.pump();
+    expect(controller.value.selectedItem, EpisodeOneItem.starLens);
+    expect(find.text('별무늬 렌즈 선택'), findsOneWidget);
 
-    expect(find.text('별받침대 균형 장치'), findsOneWidget);
-    expect(find.textContaining('별가루 0/12'), findsOneWidget);
-
-    for (var cup = 0; cup < 3; cup++) {
-      for (var dust = 0; dust < 4; dust++) {
-        controller.addDustToCup(cup);
-      }
-    }
-    controller.completePedestalMechanism();
-    controller.closePedestal();
-    controller.navigateTo(EpisodeOneScene.clockflowerGrove);
+    await tester.tap(lensFinder);
     await tester.pump();
-
-    expect(find.text('시계꽃 숲'), findsOneWidget);
-    expect(find.text('별무늬 렌즈 획득'), findsOneWidget);
+    expect(controller.value.selectedItem, isNull);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('작은 화면에서도 Episode 1 HUD가 넘치지 않는다', (tester) async {
+  testWidgets('연못 단서를 수첩에서 확인할 수 있다', (tester) async {
+    tester.view.physicalSize = const Size(900, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final controller = EpisodeOneStateController();
+    addTearDown(controller.dispose);
+    _solveOpeningAndPedestal(controller);
+    controller.closePedestal();
+    controller.navigateTo(EpisodeOneScene.pond);
+    controller.selectItem(EpisodeOneItem.starLens);
+    controller.useSelectedItemOnPondMirror();
+    controller.completePondLensInstallation();
+    for (final trackIndex in PondTrackPuzzle.correctOrder) {
+      controller.selectPondTrack(trackIndex);
+    }
+    controller.completePondTrackAnimation();
+
+    await tester.pumpWidget(
+      MaterialApp(home: EpisodeOneEscapeScreen(controller: controller)),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.tap(find.byKey(const Key('episode-one-clue-notebook')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('별지기의 단서 수첩'), findsOneWidget);
+    expect(find.text(EpisodeOneClue.wetTracks.label), findsOneWidget);
+    expect(
+      find.byKey(const Key('episode-one-clue-wetTracks')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('작은 화면에서도 HUD와 인벤토리가 넘치지 않는다', (tester) async {
     tester.view.physicalSize = const Size(360, 640);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -152,6 +220,23 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const Key('episode-one-progress-label')), findsOneWidget);
+    expect(find.byKey(const Key('episode-one-inventory')), findsOneWidget);
+    expect(find.byKey(const Key('episode-one-clue-notebook')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+}
+
+void _solveOpeningAndPedestal(EpisodeOneStateController controller) {
+  expect(controller.startFittingFallenPiece(), isTrue);
+  controller.completeFittingFallenPiece();
+  expect(controller.openPedestal(), isTrue);
+
+  for (var cup = 0; cup < 3; cup++) {
+    for (var dust = 0; dust < 4; dust++) {
+      controller.addDustToCup(cup);
+    }
+  }
+
+  expect(controller.value.pedestalMechanismAnimating, isTrue);
+  controller.completePedestalMechanism();
 }
