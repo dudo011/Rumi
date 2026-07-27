@@ -13,7 +13,9 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
   final EpisodeOneStateController controller;
 
   double _pieceProgress = 0;
-  double _mechanismProgress = 0;
+  double _pedestalProgress = 0;
+  double _pondLensProgress = 0;
+  double _pondTrackProgress = 0;
 
   @override
   Future<void> onLoad() async {
@@ -41,12 +43,30 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
     }
 
     if (snapshot.pedestalMechanismAnimating) {
-      _mechanismProgress = math.min(1, _mechanismProgress + dt / 2).toDouble();
-      if (_mechanismProgress >= 1) {
+      _pedestalProgress = math.min(1, _pedestalProgress + dt / 2).toDouble();
+      if (_pedestalProgress >= 1) {
         controller.completePedestalMechanism();
       }
     } else {
-      _mechanismProgress = snapshot.pedestalSolved ? 1 : 0;
+      _pedestalProgress = snapshot.pedestalSolved ? 1 : 0;
+    }
+
+    if (snapshot.pondLensInstalling) {
+      _pondLensProgress = math.min(1, _pondLensProgress + dt / 0.9).toDouble();
+      if (_pondLensProgress >= 1) {
+        controller.completePondLensInstallation();
+      }
+    } else {
+      _pondLensProgress = snapshot.pondLensInstalled ? 1 : 0;
+    }
+
+    if (snapshot.pondTrackAnimating) {
+      _pondTrackProgress = math.min(1, _pondTrackProgress + dt / 1.2).toDouble();
+      if (_pondTrackProgress >= 1) {
+        controller.completePondTrackAnimation();
+      }
+    } else {
+      _pondTrackProgress = snapshot.pondSolved ? 1 : 0;
     }
   }
 
@@ -56,25 +76,27 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
     if (snapshot.inputLocked) return;
 
     final point = event.localPosition.toOffset();
+
     if (snapshot.pedestalCloseUpOpen) {
       _handlePedestalTap(point);
       return;
     }
+    if (snapshot.pondCloseUpOpen) {
+      _handlePondTrackTap(point);
+      return;
+    }
 
     if (snapshot.currentScene == EpisodeOneScene.centralGarden) {
-      if (!snapshot.fallenPieceFitted && _fallenPieceRect.contains(point)) {
-        controller.startFittingFallenPiece();
+      _handleGardenTap(point);
+      return;
+    }
+    if (snapshot.currentScene == EpisodeOneScene.pond) {
+      if (_pondMirrorRect.contains(point)) {
+        controller.useSelectedItemOnPondMirror();
         return;
       }
-      if (_pedestalRect.contains(point)) {
-        controller.openPedestal();
-        return;
-      }
-      for (final entry in _gardenTargets.entries) {
-        if (entry.value.contains(point)) {
-          controller.navigateTo(entry.key);
-          return;
-        }
+      if (_returnButton.contains(point)) {
+        controller.returnToGarden();
       }
       return;
     }
@@ -84,8 +106,26 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
     }
   }
 
+  void _handleGardenTap(Offset point) {
+    final snapshot = controller.value;
+    if (!snapshot.fallenPieceFitted && _fallenPieceRect.contains(point)) {
+      controller.startFittingFallenPiece();
+      return;
+    }
+    if (_pedestalRect.contains(point)) {
+      controller.openPedestal();
+      return;
+    }
+    for (final entry in _gardenTargets.entries) {
+      if (entry.value.contains(point)) {
+        controller.navigateTo(entry.key);
+        return;
+      }
+    }
+  }
+
   void _handlePedestalTap(Offset point) {
-    if (_pedestalBackButton.contains(point)) {
+    if (_closeUpBackButton.contains(point)) {
       controller.closePedestal();
       return;
     }
@@ -108,48 +148,83 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
     }
   }
 
+  void _handlePondTrackTap(Offset point) {
+    if (_closeUpBackButton.contains(point)) {
+      controller.closePondMirror();
+      return;
+    }
+    for (var index = 0; index < _pondTrackRects.length; index++) {
+      if (_pondTrackRects[index].contains(point)) {
+        controller.selectPondTrack(index);
+        return;
+      }
+    }
+  }
+
   @override
   void render(Canvas canvas) {
     super.render(canvas);
     final snapshot = controller.value;
 
+    _drawBackground(canvas, snapshot.currentScene);
+
     if (snapshot.pedestalCloseUpOpen) {
       _drawPedestalCloseUp(canvas, snapshot);
       return;
     }
+    if (snapshot.pondCloseUpOpen) {
+      _drawPondTracks(canvas, snapshot);
+      return;
+    }
 
-    _drawBackground(canvas, snapshot.currentScene);
     if (snapshot.currentScene == EpisodeOneScene.centralGarden) {
       _drawCentralGarden(canvas, snapshot);
-    } else {
-      _drawDestination(canvas, snapshot.currentScene);
+      return;
     }
+    if (snapshot.currentScene == EpisodeOneScene.pond) {
+      _drawPond(canvas, snapshot);
+      return;
+    }
+    _drawPlaceholderScene(canvas, snapshot.currentScene);
   }
 
   bool get _compact => size.x < 520 || size.y < 720;
 
   Rect get _pedestalRect => Rect.fromCenter(
-    center: Offset(size.x * 0.5, size.y * 0.48),
-    width: math.min(size.x * 0.26, 190).toDouble(),
-    height: math.min(size.y * 0.22, 165).toDouble(),
-  );
+        center: Offset(size.x * 0.5, size.y * 0.48),
+        width: math.min(size.x * 0.26, 190).toDouble(),
+        height: math.min(size.y * 0.22, 165).toDouble(),
+      );
 
   Rect get _fallenPieceRect => Rect.fromCenter(
-    center: Offset(size.x * 0.39, size.y * 0.65),
-    width: 72,
-    height: 64,
-  );
+        center: Offset(size.x * 0.39, size.y * 0.65),
+        width: 76,
+        height: 68,
+      );
 
   Rect get _returnButton => Rect.fromCenter(
-    center: Offset(size.x * 0.5, size.y * 0.76),
-    width: math.min(size.x * 0.62, 380).toDouble(),
-    height: 58,
-  );
+        center: Offset(size.x * 0.5, size.y * 0.76),
+        width: math.min(size.x * 0.62, 380).toDouble(),
+        height: 52,
+      );
 
-  Rect get _pedestalBackButton => Rect.fromLTWH(18, size.y - 76, 126, 50);
+  Rect get _closeUpBackButton => Rect.fromCenter(
+        center: Offset(size.x * 0.18, size.y * 0.77),
+        width: math.min(size.x * 0.28, 160).toDouble(),
+        height: 48,
+      );
 
-  Rect get _pedestalResetButton =>
-      Rect.fromLTWH(size.x - 150, size.y - 76, 132, 50);
+  Rect get _pedestalResetButton => Rect.fromCenter(
+        center: Offset(size.x * 0.82, size.y * 0.77),
+        width: math.min(size.x * 0.32, 178).toDouble(),
+        height: 48,
+      );
+
+  Rect get _pondMirrorRect => Rect.fromCenter(
+        center: Offset(size.x * 0.5, size.y * 0.49),
+        width: math.min(size.x * 0.64, 480).toDouble(),
+        height: math.min(size.y * 0.38, 270).toDouble(),
+      );
 
   Map<EpisodeOneScene, Rect> get _gardenTargets {
     final width = math.min(size.x * 0.28, 210).toDouble();
@@ -180,10 +255,10 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
 
   List<Rect> get _cupRects {
     final width = math.min(size.x * 0.2, 126).toDouble();
-    final height = math.min(size.y * 0.24, 180).toDouble();
+    final height = math.min(size.y * 0.23, 172).toDouble();
     return List.generate(3, (index) {
       return Rect.fromCenter(
-        center: Offset(size.x * (0.25 + index * 0.25), size.y * 0.56),
+        center: Offset(size.x * (0.25 + index * 0.25), size.y * 0.52),
         width: width,
         height: height,
       );
@@ -193,7 +268,7 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
   List<Rect> get _cupPlusRects => _cupRects
       .map(
         (cup) => Rect.fromCenter(
-          center: Offset(cup.center.dx, cup.bottom + 28),
+          center: Offset(cup.center.dx, cup.bottom + 27),
           width: 52,
           height: 42,
         ),
@@ -210,34 +285,50 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
       )
       .toList(growable: false);
 
+  List<Rect> get _pondTrackRects {
+    final points = [
+      Offset(size.x * 0.17, size.y * 0.34),
+      Offset(size.x * 0.39, size.y * 0.34),
+      Offset(size.x * 0.30, size.y * 0.48),
+      Offset(size.x * 0.56, size.y * 0.46),
+      Offset(size.x * 0.48, size.y * 0.61),
+      Offset(size.x * 0.74, size.y * 0.59),
+      Offset(size.x * 0.69, size.y * 0.72),
+    ];
+    final radius = _compact ? 25.0 : 32.0;
+    return points
+        .map((point) => Rect.fromCircle(center: point, radius: radius))
+        .toList(growable: false);
+  }
+
   void _drawBackground(Canvas canvas, EpisodeOneScene scene) {
     final rect = Offset.zero & Size(size.x, size.y);
     final colors = switch (scene) {
       EpisodeOneScene.centralGarden => const [
-        Color(0xFF111D2C),
-        Color(0xFF174D45),
-        Color(0xFF0B211B),
-      ],
+          Color(0xFF111D2C),
+          Color(0xFF174D45),
+          Color(0xFF0B211B),
+        ],
       EpisodeOneScene.pond => const [
-        Color(0xFF10283E),
-        Color(0xFF1D6470),
-        Color(0xFF0B2632),
-      ],
+          Color(0xFF0C273E),
+          Color(0xFF1D6872),
+          Color(0xFF082631),
+        ],
       EpisodeOneScene.clockflowerGrove => const [
-        Color(0xFF271D45),
-        Color(0xFF554474),
-        Color(0xFF132925),
-      ],
+          Color(0xFF271D45),
+          Color(0xFF554474),
+          Color(0xFF132925),
+        ],
       EpisodeOneScene.fountain => const [
-        Color(0xFF1A2C41),
-        Color(0xFF3C6470),
-        Color(0xFF14252C),
-      ],
+          Color(0xFF1A2C41),
+          Color(0xFF3C6470),
+          Color(0xFF14252C),
+        ],
       EpisodeOneScene.greenhouse => const [
-        Color(0xFF2D2042),
-        Color(0xFF735D78),
-        Color(0xFF172925),
-      ],
+          Color(0xFF2D2042),
+          Color(0xFF735D78),
+          Color(0xFF172925),
+        ],
     };
 
     canvas.drawRect(
@@ -249,17 +340,12 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
           colors: colors,
         ).createShader(rect),
     );
-    _drawStars(canvas);
-  }
-
-  void _drawStars(Canvas canvas) {
     for (var index = 0; index < 20; index++) {
-      final point = Offset(
-        size.x * ((index * 37 % 97) / 100),
-        size.y * (0.12 + ((index * 23 % 42) / 100)),
-      );
       canvas.drawCircle(
-        point,
+        Offset(
+          size.x * ((index * 37 % 97) / 100),
+          size.y * (0.12 + ((index * 23 % 42) / 100)),
+        ),
         1.2 + index % 3,
         Paint()..color = const Color(0x66FFF0B0),
       );
@@ -267,45 +353,14 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
   }
 
   void _drawCentralGarden(Canvas canvas, EpisodeOneSnapshot snapshot) {
-    _drawText(
+    _drawTitle(
       canvas,
       '사라진 별빛 씨앗',
-      Offset(size.x * 0.5, size.y * 0.14),
-      fontSize: _compact ? 20 : 27,
-      weight: FontWeight.w900,
-      align: TextAlign.center,
-      maxWidth: size.x * 0.76,
-    );
-    _drawText(
-      canvas,
       snapshot.pedestalSolved
-          ? '균형이 돌아오자 연못과 시계꽃 숲의 별길이 켜졌어요.'
-          : '강한 바람이 지나간 뒤 별받침대가 비어 버렸어요.',
-      Offset(size.x * 0.5, size.y * 0.19),
-      fontSize: _compact ? 11 : 14,
-      color: const Color(0xFFD6E8E2),
-      align: TextAlign.center,
-      maxWidth: size.x * 0.76,
+          ? '연못과 시계꽃 숲으로 이어지는 별길이 켜졌어요.'
+          : '강한 은하 바람 뒤 별빛 씨앗이 사라졌어요.',
     );
 
-    _drawGardenGround(canvas, snapshot);
-    _drawGardenPaths(canvas);
-    _drawPedestal(canvas, snapshot);
-    _drawFallenPiece(canvas, snapshot);
-
-    for (final entry in _gardenTargets.entries) {
-      _drawSceneCard(
-        canvas,
-        entry.value,
-        scene: entry.key,
-        available: controller.canNavigateTo(entry.key),
-        visited: snapshot.visitedScenes.contains(entry.key),
-        pathsUnlocked: snapshot.gardenPathsUnlocked,
-      );
-    }
-  }
-
-  void _drawGardenGround(Canvas canvas, EpisodeOneSnapshot snapshot) {
     final ground = Path()
       ..moveTo(0, size.y * 0.68)
       ..quadraticBezierTo(size.x * 0.5, size.y * 0.58, size.x, size.y * 0.68)
@@ -314,130 +369,504 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
       ..close();
     canvas.drawPath(ground, Paint()..color = const Color(0x66356A45));
 
-    for (var index = 0; index < 10; index++) {
-      final x = size.x * (0.06 + (index % 5) * 0.22);
-      final y = size.y * (0.79 + (index % 2) * 0.06);
-      canvas.drawLine(
-        Offset(x, y + 20),
-        Offset(x, y),
-        Paint()
-          ..color = const Color(0xFF7BAA72)
-          ..strokeWidth = 4,
-      );
-      canvas.drawCircle(
-        Offset(x, y),
-        7 + index % 2,
-        Paint()
-          ..color = snapshot.pedestalSolved
-              ? const Color(0xFFFFC5E0)
-              : const Color(0xFF746278),
-      );
-    }
-  }
-
-  void _drawGardenPaths(Canvas canvas) {
-    final center = _pedestalRect.center;
     for (final entry in _gardenTargets.entries) {
-      final target = entry.value.center;
       final available = controller.canNavigateTo(entry.key);
-      final path = Path()
-        ..moveTo(center.dx, center.dy)
-        ..quadraticBezierTo(
-          (center.dx + target.dx) / 2,
-          (center.dy + target.dy) / 2 + 14,
-          target.dx,
-          target.dy,
-        );
-      canvas.drawPath(
-        path,
+      final solved = entry.key == EpisodeOneScene.pond && snapshot.pondSolved;
+      canvas.drawLine(
+        _pedestalRect.center,
+        entry.value.center,
         Paint()
           ..color = available
               ? const Color(0x88FFE39A)
               : const Color(0x334E8075)
-          ..style = PaintingStyle.stroke
           ..strokeWidth = available ? 5 : 3,
       );
+      _drawSceneCard(
+        canvas,
+        entry.value,
+        entry.key.label,
+        available
+            ? solved
+                ? '단서 기록됨'
+                : '조사하기'
+            : '별길 잠김',
+        available: available,
+        solved: solved,
+      );
     }
-  }
 
-  void _drawPedestal(Canvas canvas, EpisodeOneSnapshot snapshot) {
-    final rect = _pedestalRect;
     canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, const Radius.circular(32)),
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF9579A0), Color(0xFF4B405F)],
-        ).createShader(rect),
+      RRect.fromRectAndRadius(_pedestalRect, const Radius.circular(30)),
+      Paint()..color = const Color(0xCC665276),
     );
     canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, const Radius.circular(32)),
+      RRect.fromRectAndRadius(_pedestalRect, const Radius.circular(30)),
       Paint()
         ..color = snapshot.fallenPieceFitted
-            ? const Color(0xFFFFE59A)
-            : const Color(0x88C5B5CF)
+            ? const Color(0xFFFFE39A)
+            : const Color(0x889D91A6)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 3,
     );
-
-    final slot = Offset(rect.center.dx, rect.top + 35);
-    canvas.drawArc(
-      Rect.fromCircle(center: slot, radius: 28),
-      math.pi * 0.15,
-      math.pi * 1.7,
-      false,
-      Paint()
-        ..color = const Color(0xFF332A45)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 10,
-    );
-
     _drawText(
       canvas,
       snapshot.fallenPieceFitted ? '별받침대 조사' : '빈 별받침대',
-      Offset(rect.center.dx, rect.center.dy + 26),
-      fontSize: _compact ? 13 : 16,
-      weight: FontWeight.w900,
-      align: TextAlign.center,
-      maxWidth: rect.width - 12,
+      Offset(_pedestalRect.center.dx, _pedestalRect.center.dy + 30),
+      fontSize: _compact ? 12 : 15,
+      center: true,
+      bold: true,
+      maxWidth: _pedestalRect.width - 12,
     );
-    _drawText(
-      canvas,
-      snapshot.fallenPieceFitted ? '눌러서 안쪽 보기' : '반달 조각이 비어 있어요',
-      Offset(rect.center.dx, rect.center.dy + 49),
-      fontSize: _compact ? 9 : 11,
-      color: const Color(0xFFE7DDE9),
-      align: TextAlign.center,
-      maxWidth: rect.width - 16,
-    );
-  }
 
-  void _drawFallenPiece(Canvas canvas, EpisodeOneSnapshot snapshot) {
     final start = _fallenPieceRect.center;
-    final end = Offset(_pedestalRect.center.dx, _pedestalRect.top + 35);
+    final end = Offset(_pedestalRect.center.dx, _pedestalRect.top + 34);
     final position = snapshot.fallenPieceFitted
         ? end
         : (Offset.lerp(
-                start,
-                end,
-                Curves.easeInOutCubic.transform(_pieceProgress),
-              ) ??
-              start);
-
+              start,
+              end,
+              Curves.easeInOut.transform(_pieceProgress),
+            ) ??
+            start);
     _drawCrescent(canvas, position, 22);
     if (!snapshot.fallenPieceFitted && !snapshot.fittingFallenPiece) {
       _drawText(
         canvas,
         '떨어진 별조각',
         Offset(position.dx, position.dy + 34),
-        fontSize: _compact ? 10 : 12,
-        color: const Color(0xFFFFEEB7),
-        weight: FontWeight.w800,
-        align: TextAlign.center,
+        fontSize: 11,
+        center: true,
+        color: const Color(0xFFFFE7A0),
+        bold: true,
         maxWidth: 100,
       );
     }
+  }
+
+  void _drawPedestalCloseUp(
+    Canvas canvas,
+    EpisodeOneSnapshot snapshot,
+  ) {
+    _drawTitle(
+      canvas,
+      '별받침대 균형 장치',
+      snapshot.pedestalSolved
+          ? '세 균형컵의 높이가 같아져 별길이 켜졌어요.'
+          : '별가루 12개를 세 균형컵에 같은 수만큼 나누세요.',
+    );
+
+    _drawText(
+      canvas,
+      '남은 별가루 ${snapshot.remainingPedestalDust}개',
+      Offset(size.x * 0.5, size.y * 0.27),
+      fontSize: 15,
+      center: true,
+      bold: true,
+    );
+
+    final maxCount = snapshot.pedestalCupCounts.reduce(math.max);
+    for (var index = 0; index < 3; index++) {
+      final rect = _cupRects[index].shift(
+        Offset(0, (maxCount - snapshot.pedestalCupCounts[index]) * 5),
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(rect, const Radius.circular(24)),
+        Paint()..color = const Color(0xCC9B83A8),
+      );
+      _drawText(
+        canvas,
+        '${index + 1}번 컵\n${snapshot.pedestalCupCounts[index]}개',
+        rect.center,
+        fontSize: _compact ? 11 : 14,
+        center: true,
+        bold: true,
+        maxWidth: rect.width - 10,
+      );
+      _drawButton(
+        canvas,
+        _cupMinusRects[index],
+        '−',
+        enabled: !snapshot.pedestalSolved && !snapshot.inputLocked,
+      );
+      _drawButton(
+        canvas,
+        _cupPlusRects[index],
+        '+',
+        enabled: !snapshot.pedestalSolved &&
+            !snapshot.inputLocked &&
+            snapshot.remainingPedestalDust > 0,
+      );
+    }
+
+    if (snapshot.pedestalMechanismAnimating || snapshot.pedestalSolved) {
+      final center = Offset(size.x * 0.5, size.y * 0.70);
+      final progress = snapshot.pedestalSolved ? 1.0 : _pedestalProgress;
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: 38),
+        -math.pi / 2,
+        math.pi * 2 * progress,
+        false,
+        Paint()
+          ..color = const Color(0xFFFFE39A)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 8,
+      );
+      if (snapshot.pedestalSolved || progress > 0.7) {
+        canvas.drawCircle(center, 24, Paint()..color = const Color(0xFF7BD9E5));
+        _drawStar(canvas, center, 16);
+      }
+    }
+
+    _drawButton(
+      canvas,
+      _closeUpBackButton,
+      '정원으로',
+      enabled: !snapshot.inputLocked,
+    );
+    _drawButton(
+      canvas,
+      _pedestalResetButton,
+      '모두 되돌리기',
+      enabled: !snapshot.pedestalSolved && !snapshot.inputLocked,
+    );
+  }
+
+  void _drawPond(Canvas canvas, EpisodeOneSnapshot snapshot) {
+    _drawTitle(
+      canvas,
+      '반짝이는 연못',
+      snapshot.pondLensInstalled
+          ? '별거울이 과거의 흔적을 수면 위에 비추고 있어요.'
+          : '돌거울 중앙에 별 모양 홈이 비어 있어요.',
+    );
+
+    final mirror = _pondMirrorRect;
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: mirror.center,
+        width: mirror.width * 0.9,
+        height: mirror.height * 0.62,
+      ),
+      Paint()
+        ..shader = const RadialGradient(
+          colors: [Color(0xFFB8F3F1), Color(0xFF4FA9BF), Color(0xFF225A78)],
+        ).createShader(mirror),
+    );
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: mirror.center,
+        width: mirror.width * 0.9,
+        height: mirror.height * 0.62,
+      ),
+      Paint()
+        ..color = const Color(0xAAE7FFFF)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 5,
+    );
+
+    final lensStart = Offset(size.x * 0.77, size.y * 0.72);
+    final lensEnd = mirror.center;
+    if (snapshot.pondLensInstalling || snapshot.pondLensInstalled) {
+      final progress = snapshot.pondLensInstalled ? 1.0 : _pondLensProgress;
+      final position = Offset.lerp(lensStart, lensEnd, Curves.easeInOut.transform(progress))!;
+      canvas.drawCircle(
+        position,
+        44,
+        Paint()
+          ..color = const Color(0x447DEAF0)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12),
+      );
+      canvas.drawCircle(position, 32, Paint()..color = const Color(0xCC7BD9E5));
+      _drawStar(canvas, position, 20);
+    } else {
+      canvas.drawCircle(
+        mirror.center,
+        39,
+        Paint()
+          ..color = const Color(0xAA163B50)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 6,
+      );
+      _drawStarOutline(canvas, mirror.center, 24);
+    }
+
+    if (snapshot.pondLensInstalled) {
+      for (var index = 0; index < 4; index++) {
+        final x = mirror.left + mirror.width * (0.23 + index * 0.18);
+        canvas.drawCircle(
+          Offset(x, mirror.center.dy + math.sin(index.toDouble()) * 18),
+          8,
+          Paint()..color = const Color(0xAAFFE39A),
+        );
+      }
+    }
+
+    _drawText(
+      canvas,
+      snapshot.pondLensInstalled
+          ? snapshot.pondSolved
+              ? '완성된 기억 흔적 다시 보기'
+              : '기억 흔적 확대 조사'
+          : snapshot.selectedItem == EpisodeOneItem.starLens
+              ? '선택한 별무늬 렌즈 사용'
+              : '인벤토리에서 렌즈 선택',
+      Offset(mirror.center.dx, mirror.bottom - 24),
+      fontSize: _compact ? 12 : 16,
+      center: true,
+      bold: true,
+      maxWidth: mirror.width * 0.8,
+    );
+    _drawButton(canvas, _returnButton, '중앙 정원으로 돌아가기');
+  }
+
+  void _drawPondTracks(Canvas canvas, EpisodeOneSnapshot snapshot) {
+    _drawTitle(
+      canvas,
+      '연못의 기억 흔적',
+      snapshot.pondSolved
+          ? '젖은 발자국이 분수대 방향으로 이어져요.'
+          : '둥근 발바닥과 작은 발가락이 있는 흔적을 시작점부터 누르세요.',
+    );
+
+    final order = PondTrackPuzzle.correctOrder;
+    final foundCount = snapshot.pondTrackProgress;
+    for (var step = 1; step < foundCount; step++) {
+      final previous = _pondTrackRects[order[step - 1]].center;
+      final current = _pondTrackRects[order[step]].center;
+      canvas.drawLine(
+        previous,
+        current,
+        Paint()
+          ..color = const Color(0xFFFFE39A)
+          ..strokeWidth = 6
+          ..strokeCap = StrokeCap.round,
+      );
+    }
+
+    if (snapshot.pondTrackAnimating) {
+      final first = _pondTrackRects[order.first].center;
+      final last = _pondTrackRects[order.last].center;
+      final movingPoint = Offset.lerp(first, last, _pondTrackProgress)!;
+      canvas.drawCircle(
+        movingPoint,
+        26,
+        Paint()
+          ..color = const Color(0x66FFE39A)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10),
+      );
+    }
+
+    for (var index = 0; index < _pondTrackRects.length; index++) {
+      final orderIndex = order.indexOf(index);
+      final found = orderIndex >= 0 && orderIndex < foundCount;
+      if (PondTrackPuzzle.isRealFootprint(index)) {
+        _drawFootprint(
+          canvas,
+          _pondTrackRects[index],
+          found: found,
+          solved: snapshot.pondSolved,
+        );
+      } else {
+        _drawWindMark(canvas, _pondTrackRects[index]);
+      }
+    }
+
+    _drawText(
+      canvas,
+      snapshot.pondSolved
+          ? EpisodeOneClue.wetTracks.description
+          : '찾은 발자국 $foundCount/${order.length}',
+      Offset(size.x * 0.5, size.y * 0.82),
+      fontSize: _compact ? 11 : 14,
+      center: true,
+      bold: true,
+      maxWidth: size.x * 0.72,
+      color: const Color(0xFFFFEDB2),
+    );
+    _drawButton(
+      canvas,
+      _closeUpBackButton,
+      '연못으로',
+      enabled: !snapshot.inputLocked,
+    );
+  }
+
+  void _drawFootprint(
+    Canvas canvas,
+    Rect rect, {
+    required bool found,
+    required bool solved,
+  }) {
+    final color = found || solved
+        ? const Color(0xFFFFE39A)
+        : const Color(0xAA8ADBE8);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: rect.center,
+        width: rect.width * 0.72,
+        height: rect.height * 0.88,
+      ),
+      Paint()..color = color,
+    );
+    final toeRadius = math.max(3.0, rect.width * 0.09);
+    for (var toe = 0; toe < 3; toe++) {
+      canvas.drawCircle(
+        Offset(
+          rect.center.dx + (toe - 1) * toeRadius * 1.8,
+          rect.top + toeRadius * 1.2,
+        ),
+        toeRadius,
+        Paint()..color = color,
+      );
+    }
+  }
+
+  void _drawWindMark(Canvas canvas, Rect rect) {
+    final center = rect.center;
+    final paint = Paint()
+      ..color = const Color(0xAA829099)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 5
+      ..strokeCap = StrokeCap.round;
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: rect.width * 0.34),
+      -math.pi * 0.2,
+      math.pi * 1.35,
+      false,
+      paint,
+    );
+    canvas.drawLine(
+      Offset(center.dx - rect.width * 0.28, center.dy + rect.height * 0.18),
+      Offset(center.dx + rect.width * 0.30, center.dy + rect.height * 0.24),
+      paint,
+    );
+  }
+
+  void _drawPlaceholderScene(Canvas canvas, EpisodeOneScene scene) {
+    _drawTitle(canvas, scene.label, scene.objective);
+    final rect = Rect.fromCenter(
+      center: Offset(size.x * 0.5, size.y * 0.49),
+      width: math.min(size.x * 0.62, 470).toDouble(),
+      height: math.min(size.y * 0.34, 250).toDouble(),
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(34)),
+      Paint()..color = const Color(0x55465A68),
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(34)),
+      Paint()
+        ..color = const Color(0x99FFE39A)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3,
+    );
+    _drawText(
+      canvas,
+      '다음 구현 단계에서 이 장소의 퍼즐이 열립니다.',
+      rect.center,
+      fontSize: _compact ? 13 : 16,
+      center: true,
+      bold: true,
+      maxWidth: rect.width * 0.8,
+    );
+    _drawButton(canvas, _returnButton, '중앙 정원으로 돌아가기');
+  }
+
+  void _drawTitle(Canvas canvas, String title, String subtitle) {
+    _drawText(
+      canvas,
+      title,
+      Offset(size.x * 0.5, size.y * 0.14),
+      fontSize: _compact ? 20 : 28,
+      center: true,
+      bold: true,
+      maxWidth: size.x * 0.78,
+    );
+    _drawText(
+      canvas,
+      subtitle,
+      Offset(size.x * 0.5, size.y * 0.20),
+      fontSize: _compact ? 10 : 13,
+      center: true,
+      color: const Color(0xFFD7E8E2),
+      maxWidth: size.x * 0.78,
+    );
+  }
+
+  void _drawSceneCard(
+    Canvas canvas,
+    Rect rect,
+    String title,
+    String status, {
+    required bool available,
+    required bool solved,
+  }) {
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(22)),
+      Paint()
+        ..color = solved
+            ? const Color(0xCC4D8B7A)
+            : available
+                ? const Color(0xCC304E58)
+                : const Color(0xBB202D36),
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(22)),
+      Paint()
+        ..color = solved
+            ? const Color(0xFFFFE39A)
+            : available
+                ? const Color(0xAA8BD5C5)
+                : const Color(0x557A8B89)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3,
+    );
+    _drawText(
+      canvas,
+      '${solved ? '✓ ' : ''}$title',
+      Offset(rect.center.dx, rect.center.dy - 10),
+      fontSize: _compact ? 10 : 14,
+      center: true,
+      bold: true,
+      maxWidth: rect.width - 12,
+    );
+    _drawText(
+      canvas,
+      status,
+      Offset(rect.center.dx, rect.center.dy + 14),
+      fontSize: _compact ? 8 : 10,
+      center: true,
+      color: available
+          ? const Color(0xFFFFE9AB)
+          : const Color(0xFFAAB9B5),
+      bold: true,
+      maxWidth: rect.width - 12,
+    );
+  }
+
+  void _drawButton(
+    Canvas canvas,
+    Rect rect,
+    String label, {
+    bool enabled = true,
+  }) {
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(20)),
+      Paint()
+        ..color = enabled
+            ? const Color(0xFFEBCB78)
+            : const Color(0xFF59656A),
+    );
+    _drawText(
+      canvas,
+      label,
+      rect.center,
+      fontSize: label.length <= 2 ? 24 : (_compact ? 11 : 14),
+      center: true,
+      color: enabled ? const Color(0xFF302440) : const Color(0xFFB8C1C3),
+      bold: true,
+      maxWidth: rect.width - 12,
+    );
   }
 
   void _drawCrescent(Canvas canvas, Offset center, double radius) {
@@ -446,358 +875,6 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
       Offset(center.dx + radius * 0.45, center.dy - radius * 0.18),
       radius * 0.82,
       Paint()..color = const Color(0xFF6E527A),
-    );
-  }
-
-  void _drawPedestalCloseUp(Canvas canvas, EpisodeOneSnapshot snapshot) {
-    final rect = Offset.zero & Size(size.x, size.y);
-    canvas.drawRect(
-      rect,
-      Paint()
-        ..shader = const RadialGradient(
-          center: Alignment(0, -0.2),
-          radius: 1.1,
-          colors: [Color(0xFF66507A), Color(0xFF263649), Color(0xFF0E1821)],
-        ).createShader(rect),
-    );
-    _drawStars(canvas);
-
-    _drawText(
-      canvas,
-      '별받침대 균형 장치',
-      Offset(size.x * 0.5, size.y * 0.13),
-      fontSize: _compact ? 20 : 28,
-      weight: FontWeight.w900,
-      align: TextAlign.center,
-      maxWidth: size.x * 0.8,
-    );
-    _drawText(
-      canvas,
-      snapshot.pedestalSolved
-          ? '세 컵의 균형이 맞아 별길이 다시 켜졌어요.'
-          : '별가루 12개를 세 컵에 같은 수만큼 나누세요.',
-      Offset(size.x * 0.5, size.y * 0.19),
-      fontSize: _compact ? 11 : 14,
-      color: const Color(0xFFE4DAE9),
-      align: TextAlign.center,
-      maxWidth: size.x * 0.82,
-    );
-
-    _drawDustReservoir(canvas, snapshot);
-    _drawCups(canvas, snapshot);
-    _drawMechanism(canvas, snapshot);
-    _drawButton(
-      canvas,
-      _pedestalBackButton,
-      '정원으로',
-      enabled: !snapshot.inputLocked,
-    );
-    _drawButton(
-      canvas,
-      _pedestalResetButton,
-      '모두 되돌리기',
-      enabled: !snapshot.inputLocked && !snapshot.pedestalSolved,
-    );
-  }
-
-  void _drawDustReservoir(Canvas canvas, EpisodeOneSnapshot snapshot) {
-    final box = Rect.fromCenter(
-      center: Offset(size.x * 0.5, size.y * 0.29),
-      width: math.min(size.x * 0.72, 500).toDouble(),
-      height: 72,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(box, const Radius.circular(22)),
-      Paint()..color = const Color(0x773A2E4A),
-    );
-    _drawText(
-      canvas,
-      '남은 별가루 ${snapshot.remainingPedestalDust}개',
-      Offset(box.left + 12, box.top + 8),
-      fontSize: 12,
-      color: const Color(0xFFFFEEB7),
-      weight: FontWeight.w800,
-      maxWidth: 140,
-    );
-
-    final startX = box.center.dx - 86;
-    for (var index = 0; index < snapshot.remainingPedestalDust; index++) {
-      final row = index ~/ 6;
-      final column = index % 6;
-      canvas.drawCircle(
-        Offset(startX + column * 34, box.top + 42 + row * 20),
-        6,
-        Paint()..color = const Color(0xFFFFD968),
-      );
-    }
-  }
-
-  void _drawCups(Canvas canvas, EpisodeOneSnapshot snapshot) {
-    final cups = _cupRects;
-    final maxCount = snapshot.pedestalCupCounts.reduce(
-      (first, second) => first > second ? first : second,
-    );
-
-    for (var index = 0; index < cups.length; index++) {
-      final count = snapshot.pedestalCupCounts[index];
-      final shifted = cups[index].shift(Offset(0, (maxCount - count) * 5.0));
-      final cupPath = Path()
-        ..moveTo(shifted.left + 8, shifted.top + 18)
-        ..lineTo(shifted.right - 8, shifted.top + 18)
-        ..lineTo(shifted.right - 20, shifted.bottom)
-        ..lineTo(shifted.left + 20, shifted.bottom)
-        ..close();
-
-      canvas.drawPath(
-        cupPath,
-        Paint()
-          ..shader = const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFD9C7E0), Color(0xFF7D668A)],
-          ).createShader(shifted),
-      );
-      canvas.drawPath(
-        cupPath,
-        Paint()
-          ..color = snapshot.pedestalSolved
-              ? const Color(0xFFFFE39A)
-              : const Color(0x99F1E8F4)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 3,
-      );
-
-      for (var dust = 0; dust < count; dust++) {
-        canvas.drawCircle(
-          Offset(
-            shifted.center.dx + (dust.isEven ? -12 : 12),
-            shifted.bottom - 24 - (dust ~/ 2) * 22,
-          ),
-          8,
-          Paint()..color = const Color(0xFFFFD968),
-        );
-      }
-
-      _drawText(
-        canvas,
-        '${index + 1}번 · $count개',
-        Offset(shifted.center.dx, shifted.center.dy + 2),
-        fontSize: _compact ? 10 : 13,
-        color: const Color(0xFF332A45),
-        weight: FontWeight.w900,
-        align: TextAlign.center,
-        maxWidth: shifted.width - 12,
-      );
-      _drawButton(
-        canvas,
-        _cupMinusRects[index],
-        '−',
-        enabled: !snapshot.inputLocked && !snapshot.pedestalSolved,
-      );
-      _drawButton(
-        canvas,
-        _cupPlusRects[index],
-        '+',
-        enabled:
-            !snapshot.inputLocked &&
-            !snapshot.pedestalSolved &&
-            snapshot.remainingPedestalDust > 0,
-      );
-    }
-  }
-
-  void _drawMechanism(Canvas canvas, EpisodeOneSnapshot snapshot) {
-    if (!snapshot.pedestalMechanismAnimating && !snapshot.pedestalSolved) {
-      return;
-    }
-
-    final center = Offset(size.x * 0.5, size.y * 0.83);
-    final progress = snapshot.pedestalSolved ? 1.0 : _mechanismProgress;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: 40),
-      -math.pi / 2,
-      math.pi * 2 * progress,
-      false,
-      Paint()
-        ..color = const Color(0xFFFFE39A)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 8
-        ..strokeCap = StrokeCap.round,
-    );
-
-    if (snapshot.pedestalSolved || progress > 0.7) {
-      canvas.drawCircle(center, 24, Paint()..color = const Color(0xAA7BD9E5));
-      _drawStar(canvas, center, 16);
-    }
-  }
-
-  void _drawDestination(Canvas canvas, EpisodeOneScene scene) {
-    _drawText(
-      canvas,
-      scene.label,
-      Offset(size.x * 0.5, size.y * 0.2),
-      fontSize: _compact ? 23 : 31,
-      weight: FontWeight.w900,
-      align: TextAlign.center,
-      maxWidth: size.x * 0.8,
-    );
-
-    final focus = Rect.fromCenter(
-      center: Offset(size.x * 0.5, size.y * 0.48),
-      width: math.min(size.x * 0.66, 500).toDouble(),
-      height: math.min(size.y * 0.34, 260).toDouble(),
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(focus, const Radius.circular(36)),
-      Paint()..color = const Color(0x443B5263),
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(focus, const Radius.circular(36)),
-      Paint()
-        ..color = const Color(0x99FFE7A1)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 3,
-    );
-    _drawDestinationSymbol(canvas, scene, focus.center);
-    _drawText(
-      canvas,
-      _destinationDescription(scene),
-      Offset(focus.center.dx, focus.bottom + 36),
-      fontSize: _compact ? 11 : 14,
-      color: const Color(0xFFE0E7E5),
-      weight: FontWeight.w700,
-      align: TextAlign.center,
-      maxWidth: size.x * 0.75,
-    );
-    _drawButton(canvas, _returnButton, '중앙 정원으로 돌아가기');
-  }
-
-  void _drawDestinationSymbol(
-    Canvas canvas,
-    EpisodeOneScene scene,
-    Offset center,
-  ) {
-    switch (scene) {
-      case EpisodeOneScene.pond:
-        canvas.drawOval(
-          Rect.fromCenter(center: center, width: 210, height: 90),
-          Paint()..color = const Color(0xAA66C9DA),
-        );
-        _drawStar(canvas, center, 32);
-        break;
-      case EpisodeOneScene.clockflowerGrove:
-        canvas.drawCircle(
-          Offset(center.dx - 48, center.dy),
-          38,
-          Paint()..color = const Color(0xFF77B9F2),
-        );
-        canvas.drawCircle(
-          Offset(center.dx + 48, center.dy),
-          38,
-          Paint()..color = const Color(0xFFFFD86E),
-        );
-        break;
-      case EpisodeOneScene.fountain:
-        canvas.drawCircle(
-          center,
-          70,
-          Paint()
-            ..color = const Color(0xFF94C8D2)
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 16,
-        );
-        canvas.drawLine(
-          Offset(center.dx, center.dy - 68),
-          Offset(center.dx, center.dy + 18),
-          Paint()
-            ..color = const Color(0xFFCEE9EC)
-            ..strokeWidth = 8,
-        );
-        break;
-      case EpisodeOneScene.greenhouse:
-        final house = Rect.fromCenter(center: center, width: 170, height: 150);
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(house, const Radius.circular(26)),
-          Paint()..color = const Color(0x4477D4B0),
-        );
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(house, const Radius.circular(26)),
-          Paint()
-            ..color = const Color(0xFFB9E8D3)
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 5,
-        );
-        _drawCrescent(canvas, center, 24);
-        break;
-      case EpisodeOneScene.centralGarden:
-        break;
-    }
-  }
-
-  String _destinationDescription(EpisodeOneScene scene) {
-    return switch (scene) {
-      EpisodeOneScene.centralGarden => '',
-      EpisodeOneScene.pond => '별무늬 렌즈가 맞을 것 같은 돌거울이 수면을 바라보고 있어요.',
-      EpisodeOneScene.clockflowerGrove => '파란 꽃과 노란 꽃이 서로 다른 간격으로 열리고 있어요.',
-      EpisodeOneScene.fountain => '바람바퀴의 끈이 끊어져 있고 관리 상자는 잠겨 있어요.',
-      EpisodeOneScene.greenhouse => '문에는 손잡이가 빠진 초승달 모양의 빈 홈이 있어요.',
-    };
-  }
-
-  void _drawSceneCard(
-    Canvas canvas,
-    Rect rect, {
-    required EpisodeOneScene scene,
-    required bool available,
-    required bool visited,
-    required bool pathsUnlocked,
-  }) {
-    final status = switch (scene) {
-      EpisodeOneScene.pond || EpisodeOneScene.clockflowerGrove =>
-        pathsUnlocked ? (visited ? '조사함' : '별길 열림') : '별길 잠김',
-      EpisodeOneScene.fountain => visited ? '조사함' : '장치 멈춤',
-      EpisodeOneScene.greenhouse => visited ? '조사함' : '손잡이 없음',
-      EpisodeOneScene.centralGarden => '',
-    };
-
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, const Radius.circular(22)),
-      Paint()
-        ..color = !available
-            ? const Color(0xBB202D36)
-            : visited
-            ? const Color(0xCC4D8B7A)
-            : const Color(0xCC304E58),
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, const Radius.circular(22)),
-      Paint()
-        ..color = !available
-            ? const Color(0x557A8B89)
-            : visited
-            ? const Color(0xFFFFE39A)
-            : const Color(0xAA8BD5C5)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 3,
-    );
-    _drawText(
-      canvas,
-      '${visited ? '✓ ' : ''}${scene.label}',
-      Offset(rect.center.dx, rect.center.dy - 10),
-      fontSize: _compact ? 11 : 15,
-      weight: FontWeight.w900,
-      align: TextAlign.center,
-      maxWidth: rect.width - 14,
-    );
-    _drawText(
-      canvas,
-      status,
-      Offset(rect.center.dx, rect.center.dy + 14),
-      fontSize: _compact ? 8 : 10,
-      color: available ? const Color(0xFFFFE9AB) : const Color(0xFFAAB9B5),
-      weight: FontWeight.w700,
-      align: TextAlign.center,
-      maxWidth: rect.width - 12,
     );
   }
 
@@ -820,26 +897,28 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
     canvas.drawPath(path, Paint()..color = const Color(0xFFFFE27C));
   }
 
-  void _drawButton(
-    Canvas canvas,
-    Rect rect,
-    String label, {
-    bool enabled = true,
-  }) {
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, const Radius.circular(22)),
+  void _drawStarOutline(Canvas canvas, Offset center, double radius) {
+    final path = Path();
+    for (var index = 0; index < 10; index++) {
+      final angle = -math.pi / 2 + index * math.pi / 5;
+      final pointRadius = index.isEven ? radius : radius * 0.45;
+      final point = Offset(
+        center.dx + math.cos(angle) * pointRadius,
+        center.dy + math.sin(angle) * pointRadius,
+      );
+      if (index == 0) {
+        path.moveTo(point.dx, point.dy);
+      } else {
+        path.lineTo(point.dx, point.dy);
+      }
+    }
+    path.close();
+    canvas.drawPath(
+      path,
       Paint()
-        ..color = enabled ? const Color(0xFFEBCB78) : const Color(0xFF59656A),
-    );
-    _drawText(
-      canvas,
-      label,
-      rect.center,
-      fontSize: label.length <= 2 ? 24 : (_compact ? 12 : 15),
-      color: enabled ? const Color(0xFF302440) : const Color(0xFFB8C1C3),
-      weight: FontWeight.w900,
-      align: TextAlign.center,
-      maxWidth: rect.width - 14,
+        ..color = const Color(0xFF88C5D1)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4,
     );
   }
 
@@ -849,8 +928,8 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
     Offset anchor, {
     required double fontSize,
     Color color = Colors.white,
-    FontWeight weight = FontWeight.w600,
-    TextAlign align = TextAlign.left,
+    bool bold = false,
+    bool center = false,
     double? maxWidth,
   }) {
     final painter = TextPainter(
@@ -859,15 +938,15 @@ class EpisodeOneSceneComponent extends PositionComponent with TapCallbacks {
         style: TextStyle(
           color: color,
           fontSize: fontSize,
-          fontWeight: weight,
+          fontWeight: bold ? FontWeight.w900 : FontWeight.w600,
           height: 1.35,
         ),
       ),
       textDirection: TextDirection.ltr,
-      textAlign: align,
+      textAlign: center ? TextAlign.center : TextAlign.left,
     )..layout(maxWidth: maxWidth ?? size.x);
 
-    final offset = align == TextAlign.center
+    final offset = center
         ? Offset(anchor.dx - painter.width / 2, anchor.dy - painter.height / 2)
         : anchor;
     painter.paint(canvas, offset);
