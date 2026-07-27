@@ -112,7 +112,7 @@ class _InventorySlot extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      Icons.filter_vintage_rounded,
+                      _iconFor(currentItem),
                       size: 22,
                       color: selected
                           ? const Color(0xFFFFE39A)
@@ -134,5 +134,12 @@ class _InventorySlot extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  IconData _iconFor(EpisodeOneItem item) {
+    return switch (item) {
+      EpisodeOneItem.starLens => Icons.filter_vintage_rounded,
+      EpisodeOneItem.silverRibbon => Icons.air_rounded,
+    };
   }
 }
