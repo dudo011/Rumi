@@ -7,73 +7,59 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
   }
 
-  Future<void> waitForWidget(
-    WidgetTester tester,
-    Finder finder,
-  ) async {
-    for (var attempt = 0; attempt < 20; attempt++) {
-      await tester.pump(const Duration(milliseconds: 100));
-      if (finder.evaluate().isNotEmpty) {
-        return;
-      }
-    }
-    expect(finder, findsOneWidget);
-  }
-
-  Future<void> startInvestigation(WidgetTester tester) async {
+  Future<void> start(WidgetTester tester) async {
     await waitForUi(tester);
-    expect(find.text('🌟 별빛 씨앗이 사라졌어요!'), findsOneWidget);
+    expect(find.text('별빛 씨앗이 사라졌어요!'), findsOneWidget);
     await tester.tap(find.byKey(const Key('start-investigation')));
     await waitForUi(tester);
   }
 
-  Future<void> solveSingleChoice(
-    WidgetTester tester,
-    String puzzleKey,
-    int correctIndex,
-  ) async {
-    await tester.tap(find.byKey(Key('$puzzleKey-option-$correctIndex')));
+  Future<void> reachSolved(WidgetTester tester) async {
+    await tester.tap(find.byKey(const Key('pedestal-hotspot')));
+    await waitForUi(tester);
+    expect(find.text('별받침대 확대 조사'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('scratch-option-4')));
     await tester.pump();
-    await tester.tap(find.byKey(Key('$puzzleKey-check-answer')));
-    await waitForUi(tester);
-    expect(find.text('✨ 새로운 증거 발견!'), findsOneWidget);
-    await tester.tap(find.textContaining('수첩에 저장'));
-    await waitForUi(tester);
-  }
-
-  Future<void> reachDeduction(WidgetTester tester) async {
-    await tester.tap(find.byTooltip('빈 별받침대 조사'));
-    await waitForUi(tester);
-    await solveSingleChoice(tester, 'scratch', 1);
-
-    expect(find.byTooltip('오른쪽 길의 작은 발자국 조사'), findsOneWidget);
-    await tester.tap(find.byTooltip('오른쪽 길의 작은 발자국 조사'));
-    await waitForUi(tester);
-    await solveSingleChoice(tester, 'footprints', 2);
-
-    expect(find.byTooltip('분수대의 잠긴 상자 조사'), findsOneWidget);
-    await tester.tap(find.byTooltip('분수대의 잠긴 상자 조사'));
+    await tester.tap(find.byKey(const Key('scratch-check-answer')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('return-from-pedestal')));
     await waitForUi(tester);
 
-    await tester.tap(find.byTooltip('작은 돌 아래 조사'));
-    await waitForWidget(tester, find.text('🔑 낡은 별열쇠 발견!'));
-    await tester.tap(find.text('열쇠 챙기기'));
+    await tester.tap(find.byKey(const Key('trail-hotspot')));
+    await waitForUi(tester);
+    expect(find.text('오른쪽 길 확대 조사'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('trail-option-12')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('trail-check-answer')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('return-from-trail')));
     await waitForUi(tester);
 
-    await tester.tap(find.byTooltip('분수대의 잠긴 상자 조사'));
+    await tester.tap(find.byKey(const Key('chest-hotspot')));
     await waitForUi(tester);
-    for (final value in [1, 2, 3, 4, 6]) {
+    expect(find.text('분수대 상자 확대 조사'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('inspect-lock')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('move-stone')));
+    await tester.pump();
+
+    for (final value in [1, 2, 3, 4, 6, 12]) {
       await tester.tap(find.byKey(Key('factor-$value')));
       await tester.pump();
     }
     await tester.tap(find.byKey(const Key('check-puzzle-answer')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('open-deduction')));
     await waitForUi(tester);
-    expect(find.text('✨ 새로운 증거 발견!'), findsOneWidget);
-    await tester.tap(find.textContaining('수첩에 저장'));
+
+    expect(find.text('추리 보드'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('deduction-option-1')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('check-deduction')));
     await waitForUi(tester);
   }
 
-  testWidgets('스토리 질문에서 시작해 증거가 단계적으로 열린다', (tester) async {
+  testWidgets('조사 대상이 증거에 따라 단계적으로 열린다', (tester) async {
     tester.view.physicalSize = const Size(900, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -82,23 +68,26 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(home: GardenExplorationScreen(onContinue: (_) {})),
     );
-    await startInvestigation(tester);
+    await start(tester);
 
-    expect(find.textContaining('현재 생각 · 아직 모르겠다'), findsOneWidget);
-    expect(find.byTooltip('빈 별받침대 조사'), findsOneWidget);
-    expect(find.byTooltip('오른쪽 길의 작은 발자국 조사'), findsNothing);
-    expect(find.byTooltip('분수대의 잠긴 상자 조사'), findsNothing);
+    expect(find.byKey(const Key('pedestal-hotspot')), findsOneWidget);
+    expect(find.byKey(const Key('trail-hotspot')), findsNothing);
+    expect(find.byKey(const Key('chest-hotspot')), findsNothing);
 
-    await tester.tap(find.byTooltip('빈 별받침대 조사'));
+    await tester.tap(find.byKey(const Key('pedestal-hotspot')));
     await waitForUi(tester);
-    expect(find.text('긁힌 별가루 해석'), findsOneWidget);
-    await solveSingleChoice(tester, 'scratch', 1);
+    await tester.tap(find.byKey(const Key('scratch-option-4')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('scratch-check-answer')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('return-from-pedestal')));
+    await waitForUi(tester);
 
-    expect(find.textContaining('씨앗이 오른쪽으로 밀려난 것 같다'), findsOneWidget);
-    expect(find.byTooltip('오른쪽 길의 작은 발자국 조사'), findsOneWidget);
+    expect(find.byKey(const Key('trail-hotspot')), findsOneWidget);
+    expect(find.byKey(const Key('chest-hotspot')), findsNothing);
   });
 
-  testWidgets('세 증거를 연결해 올바른 가설로 사건을 해결한다', (tester) async {
+  testWidgets('세 확대 장면과 추리 보드를 거쳐 사건을 해결한다', (tester) async {
     tester.view.physicalSize = const Size(900, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -110,39 +99,21 @@ void main() {
         home: GardenExplorationScreen(onContinue: (_) => continued = true),
       ),
     );
-    await startInvestigation(tester);
-    await reachDeduction(tester);
+    await start(tester);
+    await reachSolved(tester);
 
-    final deductionDialog = find.text('🕵️ 정원에서 무슨 일이 있었을까요?');
-    await waitForWidget(tester, deductionDialog);
-    await tester.tap(find.byKey(const Key('deduction-option-1')));
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('check-deduction')));
+    expect(find.text('사건 해결!'), findsOneWidget);
+    expect(find.byKey(const Key('continue-adventure')), findsOneWidget);
 
-    final resolutionDialog = find.text('🌸 사건 해결!');
-    await waitForWidget(tester, resolutionDialog);
-    await tester.tap(find.byKey(const Key('close-resolution')));
-
-    final completionTitle = find.text('별빛 씨앗의 비밀을 밝혀냈어요!');
-    await waitForWidget(tester, completionTitle);
-
-    final continueLabel = find.text('다음 모험 보기');
-    expect(continueLabel, findsOneWidget);
-    final continueButton = find.ancestor(
-      of: continueLabel,
-      matching: find.byType(FilledButton),
+    final button = tester.widget<FilledButton>(
+      find.byKey(const Key('continue-adventure')),
     );
-    expect(continueButton, findsOneWidget);
-
-    final button = tester.widget<FilledButton>(continueButton);
-    expect(button.onPressed, isNotNull);
     button.onPressed!.call();
     await tester.pump();
-
     expect(continued, isTrue);
   });
 
-  testWidgets('작은 화면에서도 시작 화면과 목표 표시가 넘치지 않는다', (tester) async {
+  testWidgets('작은 화면에서도 시작 화면과 목표 영역이 넘치지 않는다', (tester) async {
     tester.view.physicalSize = const Size(360, 640);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -151,10 +122,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(home: GardenExplorationScreen(onContinue: (_) {})),
     );
-    await startInvestigation(tester);
+    await start(tester);
 
     expect(find.text('사라진 별빛 씨앗'), findsOneWidget);
-    expect(find.textContaining('현재 목표'), findsOneWidget);
+    expect(find.byKey(const Key('current-objective')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
