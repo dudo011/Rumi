@@ -125,8 +125,20 @@ void main() {
 
     final completionTitle = find.text('별빛 씨앗의 비밀을 밝혀냈어요!');
     await waitForWidget(tester, completionTitle);
-    expect(find.text('다음 모험 보기'), findsOneWidget);
-    await tester.tap(find.text('다음 모험 보기'));
+
+    final continueLabel = find.text('다음 모험 보기');
+    expect(continueLabel, findsOneWidget);
+    final continueButton = find.ancestor(
+      of: continueLabel,
+      matching: find.byType(FilledButton),
+    );
+    expect(continueButton, findsOneWidget);
+
+    final button = tester.widget<FilledButton>(continueButton);
+    expect(button.onPressed, isNotNull);
+    button.onPressed!.call();
+    await tester.pump();
+
     expect(continued, isTrue);
   });
 
