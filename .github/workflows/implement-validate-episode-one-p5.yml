@@ -1,0 +1,426 @@
+name: Implement and validate Episode 1 P5
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/implement-validate-episode-one-p5.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  implement-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Connect greenhouse state and screen
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(text: str, old: str, new: str, label: str) -> str:
+              if old not in text:
+                  raise SystemExit(f'patch target not found: {label}')
+              return text.replace(old, new, 1)
+
+          state_path = Path('lib/features/adventure/escape/episode_one/episode_one_state.dart')
+          state = state_path.read_text(encoding='utf-8')
+
+          state = replace_once(
+              state,
+              'enum EpisodeOneClue { wetTracks, silverFurTrail }',
+              'enum EpisodeOneClue { wetTracks, silverFurTrail, warmNest }',
+              'clue enum',
+          )
+          state = replace_once(
+              state,
+              "      EpisodeOneClue.silverFurTrail => '은빛 털과 접힌 잎',\n",
+              "      EpisodeOneClue.silverFurTrail => '은빛 털과 접힌 잎',\n"
+              "      EpisodeOneClue.warmNest => '따뜻한 이끼와 감싼 씨앗',\n",
+              'clue label',
+          )
+          state = replace_once(
+              state,
+              "      EpisodeOneClue.silverFurTrail =>\n        '분수대 뒤의 은빛 털과 접힌 잎은 포포가 바람 뒤에 씨앗을 따라 온실 방향으로 이동했음을 보여줘요.',\n",
+              "      EpisodeOneClue.silverFurTrail =>\n        '분수대 뒤의 은빛 털과 접힌 잎은 포포가 바람 뒤에 씨앗을 따라 온실 방향으로 이동했음을 보여줘요.',\n"
+              "      EpisodeOneClue.warmNest =>\n        '씨앗은 따뜻한 달빛 이끼 위에 잎으로 감싸여 있었고 포포는 곁에서 씨앗을 지키고 있었어요.',\n",
+              'clue description',
+          )
+          state = replace_once(
+              state,
+              '    required this.fountainChestOpened,\n    required Set<EpisodeOneClue> clues,',
+              '    required this.fountainChestOpened,\n'
+              '    required this.greenhouseDoorOpening,\n'
+              '    required this.greenhouseDoorOpened,\n'
+              '    required this.greenhouseBedSelection,\n'
+              '    required this.greenhouseBalanceAnimating,\n'
+              '    required this.seedFound,\n'
+              '    required Set<EpisodeOneClue> clues,',
+              'constructor greenhouse fields',
+          )
+          state = replace_once(
+              state,
+              '      fountainChestOpened: false,\n      clues: const {},',
+              '      fountainChestOpened: false,\n'
+              '      greenhouseDoorOpening: false,\n'
+              '      greenhouseDoorOpened: false,\n'
+              '      greenhouseBedSelection: null,\n'
+              '      greenhouseBalanceAnimating: false,\n'
+              '      seedFound: false,\n'
+              '      clues: const {},',
+              'initial greenhouse fields',
+          )
+          state = replace_once(
+              state,
+              '  final bool fountainChestOpened;\n  final Set<EpisodeOneClue> clues;',
+              '  final bool fountainChestOpened;\n'
+              '  final bool greenhouseDoorOpening;\n'
+              '  final bool greenhouseDoorOpened;\n'
+              '  final int? greenhouseBedSelection;\n'
+              '  final bool greenhouseBalanceAnimating;\n'
+              '  final bool seedFound;\n'
+              '  final Set<EpisodeOneClue> clues;',
+              'snapshot greenhouse fields',
+          )
+          state = replace_once(
+              state,
+              '  bool get fountainSolved => fountainChestOpened;\n',
+              '  bool get fountainSolved => fountainChestOpened;\n\n'
+              '  bool get greenhouseSolved => seedFound;\n',
+              'greenhouse solved getter',
+          )
+          state = replace_once(
+              state,
+              "      return '달빛 손잡이와 포포의 이동 흔적을 확인했어요.';\n    }\n\n    if (currentScene != EpisodeOneScene.centralGarden) {",
+              "      return '달빛 손잡이와 포포의 이동 흔적을 확인했어요.';\n"
+              "    }\n\n"
+              "    if (currentScene == EpisodeOneScene.greenhouse) {\n"
+              "      if (greenhouseDoorOpening) {\n"
+              "        return '달빛 손잡이가 돌아가며 온실 문이 열리고 있어요.';\n"
+              "      }\n"
+              "      if (!greenhouseDoorOpened) {\n"
+              "        return selectedItem == EpisodeOneItem.moonHandle\n"
+              "            ? '선택한 달빛 손잡이를 온실 문에 사용하세요.'\n"
+              "            : '초승달 모양 홈에 맞는 손잡이가 필요해요.';\n"
+              "      }\n"
+              "      if (greenhouseBalanceAnimating) {\n"
+              "        return '여섯 화단이 빛나며 안쪽 이끼 보관대가 열리고 있어요.';\n"
+              "      }\n"
+              "      if (seedFound) {\n"
+              "        return '따뜻한 이끼 위의 별빛 씨앗과 포포를 발견했어요.';\n"
+              "      }\n"
+              "      return '별 18개와 달 24개를 가장 많은 같은 화단에 나누세요.';\n"
+              "    }\n\n"
+              "    if (currentScene != EpisodeOneScene.centralGarden) {",
+              'greenhouse objective',
+          )
+          state = replace_once(
+              state,
+              "    return '달빛 손잡이를 들고 온실 문을 조사하세요.';\n",
+              "    if (!seedFound) {\n"
+              "      return '달빛 손잡이를 들고 온실 문을 조사하세요.';\n"
+              "    }\n"
+              "    return '세 가지 핵심 증거를 연결해 사건의 진실을 확인하세요.';\n",
+              'central objective after fountain',
+          )
+          state = replace_once(
+              state,
+              '  String get progressLabel {\n    if (currentScene == EpisodeOneScene.fountain) {',
+              '  String get progressLabel {\n'
+              '    if (currentScene == EpisodeOneScene.greenhouse) {\n'
+              "      if (seedFound) return '씨앗과 포포 발견';\n"
+              "      if (greenhouseBalanceAnimating) return '이끼 보관대 개방 중';\n"
+              "      if (greenhouseDoorOpened) {\n"
+              "        return greenhouseBedSelection == null\n"
+              "            ? '달빛 화단 조사'\n"
+              "            : '화단 ${greenhouseBedSelection!}개 선택';\n"
+              "      }\n"
+              "      if (greenhouseDoorOpening) return '온실 문 개방 중';\n"
+              "      return '온실 문 잠김';\n"
+              "    }\n"
+              '    if (currentScene == EpisodeOneScene.fountain) {',
+              'greenhouse progress',
+          )
+          state = replace_once(
+              state,
+              '    bool? fountainChestOpening,\n    bool? fountainChestOpened,\n    Set<EpisodeOneClue>? clues,',
+              '    bool? fountainChestOpening,\n'
+              '    bool? fountainChestOpened,\n'
+              '    bool? greenhouseDoorOpening,\n'
+              '    bool? greenhouseDoorOpened,\n'
+              '    int? greenhouseBedSelection,\n'
+              '    bool clearGreenhouseBedSelection = false,\n'
+              '    bool? greenhouseBalanceAnimating,\n'
+              '    bool? seedFound,\n'
+              '    Set<EpisodeOneClue>? clues,',
+              'copyWith greenhouse params',
+          )
+          state = replace_once(
+              state,
+              '      fountainChestOpening: fountainChestOpening ?? this.fountainChestOpening,\n      fountainChestOpened: fountainChestOpened ?? this.fountainChestOpened,\n      clues: clues ?? this.clues,',
+              '      fountainChestOpening: fountainChestOpening ?? this.fountainChestOpening,\n'
+              '      fountainChestOpened: fountainChestOpened ?? this.fountainChestOpened,\n'
+              '      greenhouseDoorOpening:\n'
+              '          greenhouseDoorOpening ?? this.greenhouseDoorOpening,\n'
+              '      greenhouseDoorOpened:\n'
+              '          greenhouseDoorOpened ?? this.greenhouseDoorOpened,\n'
+              '      greenhouseBedSelection: clearGreenhouseBedSelection\n'
+              '          ? null\n'
+              '          : (greenhouseBedSelection ?? this.greenhouseBedSelection),\n'
+              '      greenhouseBalanceAnimating:\n'
+              '          greenhouseBalanceAnimating ?? this.greenhouseBalanceAnimating,\n'
+              '      seedFound: seedFound ?? this.seedFound,\n'
+              '      clues: clues ?? this.clues,',
+              'copyWith greenhouse values',
+          )
+          state = replace_once(
+              state,
+              "        EpisodeOneScene.fountain =>\n          value.fountainSolved\n              ? '열린 관리 상자와 포포가 남긴 흔적을 다시 확인할 수 있어요.'\n              : '바람바퀴의 끈이 끊어져 있고 관리 상자는 굳게 잠겨 있어요.',\n        _ => scene.objective,",
+              "        EpisodeOneScene.fountain =>\n"
+              "          value.fountainSolved\n"
+              "              ? '열린 관리 상자와 포포가 남긴 흔적을 다시 확인할 수 있어요.'\n"
+              "              : '바람바퀴의 끈이 끊어져 있고 관리 상자는 굳게 잠겨 있어요.',\n"
+              "        EpisodeOneScene.greenhouse => value.seedFound\n"
+              "            ? '따뜻한 이끼 위의 씨앗과 포포를 다시 확인할 수 있어요.'\n"
+              "            : value.greenhouseDoorOpened\n"
+              "            ? '별과 달 에너지가 잠긴 이끼 보관대를 둘러싸고 있어요.'\n"
+              "            : '온실 문에는 초승달 모양 손잡이가 빠져 있어요.',\n"
+              "        _ => scene.objective,",
+              'greenhouse navigate message',
+          )
+          greenhouse_methods = r'''
+  bool useSelectedItemOnGreenhouseDoor() {
+    if (value.inputLocked || value.currentScene != EpisodeOneScene.greenhouse) {
+      return false;
+    }
+    if (value.greenhouseDoorOpened) {
+      value = value.copyWith(message: '달빛 온실 문은 이미 열려 있어요.');
+      return true;
+    }
+    if (value.selectedItem != EpisodeOneItem.moonHandle) {
+      value = value.copyWith(
+        message: value.inventory.contains(EpisodeOneItem.moonHandle)
+            ? '인벤토리에서 달빛 손잡이를 먼저 선택하세요.'
+            : '초승달 모양 홈에 맞는 손잡이가 필요해요.',
+      );
+      return false;
+    }
+
+    final inventory = {...value.inventory}..remove(EpisodeOneItem.moonHandle);
+    value = value.copyWith(
+      inventory: inventory,
+      clearSelectedItem: true,
+      greenhouseDoorOpening: true,
+      inputLocked: true,
+      message: '달빛 손잡이가 문에 맞춰지고 잠금 고리가 돌아가고 있어요.',
+    );
+    return true;
+  }
+
+  void completeGreenhouseDoorOpening() {
+    if (!value.greenhouseDoorOpening) return;
+    value = value.copyWith(
+      greenhouseDoorOpening: false,
+      greenhouseDoorOpened: true,
+      inputLocked: false,
+      message: '온실 문이 열렸어요. 별 18개와 달 24개가 화단 장치를 비추고 있어요.',
+    );
+  }
+
+  void selectGreenhouseBedCount(int bedCount) {
+    if (value.inputLocked ||
+        value.currentScene != EpisodeOneScene.greenhouse ||
+        !value.greenhouseDoorOpened ||
+        value.seedFound ||
+        !GreenhouseBalancePuzzle.isValidChoice(bedCount)) {
+      return;
+    }
+
+    final solved = GreenhouseBalancePuzzle.isSolved(bedCount);
+    value = value.copyWith(
+      greenhouseBedSelection: bedCount,
+      greenhouseBalanceAnimating: solved,
+      inputLocked: solved,
+      message: GreenhouseBalancePuzzle.feedback(bedCount),
+    );
+  }
+
+  void completeGreenhouseBalanceAnimation() {
+    if (!value.greenhouseBalanceAnimating) return;
+    value = value.copyWith(
+      greenhouseBalanceAnimating: false,
+      seedFound: true,
+      clues: {...value.clues, EpisodeOneClue.warmNest},
+      inputLocked: false,
+      message: '따뜻한 이끼 위에 잎으로 감싼 별빛 씨앗과 곁을 지키던 포포를 발견했어요.',
+    );
+  }
+
+'''
+          state = replace_once(
+              state,
+              '  void showMessage(String message) {',
+              greenhouse_methods + '  void showMessage(String message) {',
+              'greenhouse controller methods',
+          )
+          state_path.write_text(state, encoding='utf-8')
+
+          screen_path = Path('lib/features/adventure/escape/episode_one/episode_one_escape_screen.dart')
+          screen = screen_path.read_text(encoding='utf-8')
+          screen = replace_once(
+              screen,
+              "import 'widgets/episode_one_fountain_overlay.dart';\n",
+              "import 'widgets/episode_one_fountain_overlay.dart';\n"
+              "import 'widgets/episode_one_greenhouse_overlay.dart';\n",
+              'greenhouse overlay import',
+          )
+          fountain_block = '''            Positioned(
+              left: 0,
+              right: 0,
+              top: 68,
+              bottom: 70,
+              child: EpisodeOneFountainOverlay(controller: _controller),
+            ),
+'''
+          screen = replace_once(
+              screen,
+              fountain_block,
+              fountain_block + '''            Positioned(
+              left: 0,
+              right: 0,
+              top: 68,
+              bottom: 70,
+              child: EpisodeOneGreenhouseOverlay(controller: _controller),
+            ),
+''',
+              'greenhouse overlay placement',
+          )
+          screen_path.write_text(screen, encoding='utf-8')
+
+          garden_path = Path('lib/features/adventure/garden_exploration_screen.dart')
+          garden = garden_path.read_text(encoding='utf-8')
+          garden = replace_once(
+              garden,
+              "title: Text('새 방탈출 P0~P4 체험'),",
+              "title: Text('새 방탈출 P0~P5 체험'),",
+              'preview label',
+          )
+          garden_path.write_text(garden, encoding='utf-8')
+          PY
+
+      - name: Format and validate
+        shell: bash
+        run: |
+          set +e
+          flutter pub get > /tmp/pub-get.log 2>&1
+          PUB_RESULT=$?
+          dart format \
+            lib/features/adventure/escape/episode_one \
+            lib/features/adventure/garden_exploration_screen.dart \
+            test/episode_one_escape_foundation_test.dart \
+            test/episode_one_fountain_test.dart \
+            test/episode_one_greenhouse_test.dart > /tmp/format.log 2>&1
+          FORMAT_RESULT=$?
+          flutter analyze > /tmp/analyze.log 2>&1
+          ANALYZE_RESULT=$?
+          flutter test > /tmp/test.log 2>&1
+          TEST_RESULT=$?
+          flutter build web --release --base-href /Rumi/ --pwa-strategy=none > /tmp/build.log 2>&1
+          BUILD_RESULT=$?
+
+          status_text() {
+            if [ "$1" -eq 0 ]; then echo "성공"; else echo "실패"; fi
+          }
+
+          {
+            echo '# Episode 1 P5 자동 검증 결과'
+            echo
+            echo "- 검증 기준 커밋: $(git rev-parse HEAD)"
+            echo "- flutter pub get: $(status_text "$PUB_RESULT")"
+            echo "- dart format: $(status_text "$FORMAT_RESULT")"
+            echo "- flutter analyze: $(status_text "$ANALYZE_RESULT")"
+            echo "- flutter test: $(status_text "$TEST_RESULT")"
+            echo "- flutter build web: $(status_text "$BUILD_RESULT")"
+            for item in pub-get format analyze test build; do
+              result_var=$(echo "$item" | tr '[:lower:]-' '[:upper:]_')_RESULT
+              eval result=\$$result_var
+              if [ "$result" -ne 0 ]; then
+                echo
+                echo "## ${item} 오류"
+                echo '```text'
+                tail -n 120 "/tmp/${item}.log"
+                echo '```'
+              fi
+            done
+          } > docs/EPISODE_01_P5_VALIDATION.md
+
+          if [ "$PUB_RESULT" -eq 0 ] && [ "$FORMAT_RESULT" -eq 0 ] && \
+             [ "$ANALYZE_RESULT" -eq 0 ] && [ "$TEST_RESULT" -eq 0 ] && \
+             [ "$BUILD_RESULT" -eq 0 ]; then
+            python - <<'PY'
+          from pathlib import Path
+
+          path = Path('PROJECT_CONTEXT.md')
+          text = path.read_text(encoding='utf-8').rstrip()
+          heading = '## 22. Episode 1 달빛 온실 P5 구현 (2026-07-28)'
+          if heading not in text:
+              text += r'''
+
+## 22. Episode 1 달빛 온실 P5 구현 (2026-07-28)
+
+### 구현 완료 범위
+
+- 분수대에서 얻은 달빛 손잡이 선택과 온실 문 설치
+- 손잡이 회전, 온실 문 개방 연출과 중복 입력 차단
+- 별 에너지 18개와 달 에너지 24개의 화단 분배 장치
+- 화단 수 2·3·4·6·8 선택과 선택별 남는 에너지 피드백
+- 두 에너지를 남김없이 나누는 가장 많은 6개 화단에서만 P5 해결
+- 6개 화단에 별 3개와 달 4개씩 표시
+- 이끼 보관대 개방과 별빛 씨앗·포포 발견
+- `따뜻한 이끼와 감싼 씨앗` 핵심 증거 기록
+- 기존 P0~P4, 인벤토리와 단서 수첩 상태 유지
+
+### 추가 파일
+
+- `lib/features/adventure/escape/episode_one/widgets/episode_one_greenhouse_overlay.dart`
+- `test/episode_one_greenhouse_test.dart`
+- `docs/EPISODE_01_P5_VALIDATION.md`
+
+### 자동 검증
+
+- `flutter pub get`: 성공
+- `dart format`: 성공
+- `flutter analyze`: 성공
+- `flutter test`: 성공
+- `flutter build web --release --base-href /Rumi/ --pwa-strategy=none`: 성공
+
+### 다음 작업
+
+1. 핵심 증거 3개를 사용하는 최종 추리 Overlay
+2. 포포의 보호 행동을 설명하는 결말 대사
+3. 씨앗의 중앙 정원 귀환과 별빛 꽃 개화
+4. +110 XP와 Episode 1 완료 기록
+'''
+          path.write_text(text + '\n', encoding='utf-8')
+          PY
+          fi
+
+          rm .github/workflows/implement-validate-episode-one-p5.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'feat: complete episode one greenhouse P5'
+          git push origin HEAD:main
