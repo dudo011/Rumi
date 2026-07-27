@@ -4,6 +4,7 @@ import 'flame/pedestal_flame_prototype_screen.dart';
 import 'garden_mystery_v2_screen.dart';
 
 /// 기존 모험은 유지하면서 Flame 단일 장면 프로토타입을 비교 체험할 수 있게 한다.
+/// Flame 분석 오류 수정 후 CI와 웹 배포를 다시 실행한다.
 class GardenExplorationScreen extends StatelessWidget {
   const GardenExplorationScreen({required this.onContinue, super.key});
 
