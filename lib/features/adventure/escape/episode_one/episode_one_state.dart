@@ -38,8 +38,7 @@ extension EpisodeOneClueMetadata on EpisodeOneClue {
 
   String get description {
     return switch (this) {
-      EpisodeOneClue.wetTracks =>
-        '둥근 발자국은 바람 자국 위에 남았고 분수대 방향으로 이어졌어요.',
+      EpisodeOneClue.wetTracks => '둥근 발자국은 바람 자국 위에 남았고 분수대 방향으로 이어졌어요.',
       EpisodeOneClue.silverFurTrail =>
         '분수대 뒤의 은빛 털과 접힌 잎은 포포가 바람 뒤에 씨앗을 따라 온실 방향으로 이동했음을 보여줘요.',
       EpisodeOneClue.warmNest =>
@@ -63,8 +62,7 @@ extension EpisodeOneSceneMetadata on EpisodeOneScene {
     return switch (this) {
       EpisodeOneScene.centralGarden => '빈 별받침대 주변을 살펴보세요.',
       EpisodeOneScene.pond => '별 모양 홈이 있는 연못의 돌거울을 살펴보세요.',
-      EpisodeOneScene.clockflowerGrove =>
-        '서로 다른 간격으로 피는 두 시계꽃과 시간고리를 살펴보세요.',
+      EpisodeOneScene.clockflowerGrove => '서로 다른 간격으로 피는 두 시계꽃과 시간고리를 살펴보세요.',
       EpisodeOneScene.fountain => '멈춘 바람바퀴와 잠긴 관리 상자를 살펴보세요.',
       EpisodeOneScene.greenhouse => '손잡이가 빠진 달빛 온실 문을 살펴보세요.',
     };
@@ -441,8 +439,7 @@ class EpisodeOneSnapshot {
       fountainChestOpened: fountainChestOpened ?? this.fountainChestOpened,
       greenhouseDoorOpening:
           greenhouseDoorOpening ?? this.greenhouseDoorOpening,
-      greenhouseDoorOpened:
-          greenhouseDoorOpened ?? this.greenhouseDoorOpened,
+      greenhouseDoorOpened: greenhouseDoorOpened ?? this.greenhouseDoorOpened,
       greenhouseBedSelection: clearGreenhouseBedSelection
           ? null
           : (greenhouseBedSelection ?? this.greenhouseBedSelection),
@@ -489,14 +486,16 @@ class EpisodeOneStateController extends ValueNotifier<EpisodeOneSnapshot> {
         EpisodeOneScene.pond => '연못의 돌거울 중앙에 별 모양 홈이 비어 있어요.',
         EpisodeOneScene.clockflowerGrove =>
           '파란 꽃은 4칸마다, 노란 꽃은 6칸마다 잠깐씩 열리고 있어요.',
-        EpisodeOneScene.fountain => value.fountainSolved
-            ? '열린 관리 상자와 포포가 남긴 흔적을 다시 확인할 수 있어요.'
-            : '바람바퀴의 끈이 끊어져 있고 관리 상자는 굳게 잠겨 있어요.',
-        EpisodeOneScene.greenhouse => value.seedFound
-            ? '따뜻한 이끼 위의 씨앗과 포포를 다시 확인할 수 있어요.'
-            : value.greenhouseDoorOpened
-            ? '별과 달 에너지가 잠긴 이끼 보관대를 둘러싸고 있어요.'
-            : '온실 문에는 초승달 모양 손잡이가 빠져 있어요.',
+        EpisodeOneScene.fountain =>
+          value.fountainSolved
+              ? '열린 관리 상자와 포포가 남긴 흔적을 다시 확인할 수 있어요.'
+              : '바람바퀴의 끈이 끊어져 있고 관리 상자는 굳게 잠겨 있어요.',
+        EpisodeOneScene.greenhouse =>
+          value.seedFound
+              ? '따뜻한 이끼 위의 씨앗과 포포를 다시 확인할 수 있어요.'
+              : value.greenhouseDoorOpened
+              ? '별과 달 에너지가 잠긴 이끼 보관대를 둘러싸고 있어요.'
+              : '온실 문에는 초승달 모양 손잡이가 빠져 있어요.',
         _ => scene.objective,
       },
     );
@@ -812,8 +811,7 @@ class EpisodeOneStateController extends ValueNotifier<EpisodeOneSnapshot> {
       return false;
     }
 
-    final inventory = {...value.inventory}
-      ..remove(EpisodeOneItem.silverRibbon);
+    final inventory = {...value.inventory}..remove(EpisodeOneItem.silverRibbon);
     value = value.copyWith(
       inventory: inventory,
       clearSelectedItem: true,

@@ -151,10 +151,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text(EpisodeOneClue.warmNest.label), findsOneWidget);
-    expect(
-      find.byKey(const Key('episode-one-clue-warmNest')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('episode-one-clue-warmNest')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

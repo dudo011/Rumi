@@ -55,10 +55,7 @@ void main() {
     await tester.tap(find.byKey(const Key('episode-one-deduction-action')));
     await tester.pump();
 
-    expect(
-      find.byKey(const Key('episode-one-deduction-wrong')),
-      findsNothing,
-    );
+    expect(find.byKey(const Key('episode-one-deduction-wrong')), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -103,10 +100,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 3400));
     await tester.pump();
 
-    expect(
-      find.byKey(const Key('episode-one-finale-ending')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('episode-one-finale-ending')), findsOneWidget);
     expect(find.text('Episode 1 사건 해결!'), findsOneWidget);
     expect(find.textContaining('+110 XP'), findsOneWidget);
     expect(find.textContaining('꽃숲 3단계'), findsOneWidget);
@@ -158,10 +152,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(store.completeCalls, 2);
-    expect(
-      find.byKey(const Key('episode-one-finale-ending')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('episode-one-finale-ending')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -185,10 +176,7 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(
-      find.byKey(const Key('episode-one-finale-overlay')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('episode-one-finale-overlay')), findsOneWidget);
     expect(
       find.byKey(const Key('episode-one-final-deduction')),
       findsOneWidget,

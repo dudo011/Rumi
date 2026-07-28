@@ -164,10 +164,7 @@ class _GreenhouseDoor extends StatelessWidget {
 }
 
 class _GreenhouseInterior extends StatelessWidget {
-  const _GreenhouseInterior({
-    required this.snapshot,
-    required this.controller,
-  });
+  const _GreenhouseInterior({required this.snapshot, required this.controller});
 
   final EpisodeOneSnapshot snapshot;
   final EpisodeOneStateController controller;
@@ -233,17 +230,20 @@ class _GreenhouseInterior extends StatelessWidget {
                   builder: (context, value, child) {
                     return Transform.scale(
                       scale: 0.9 + value * 0.1,
-                      child: Opacity(opacity: 0.45 + value * 0.55, child: child),
+                      child: Opacity(
+                        opacity: 0.45 + value * 0.55,
+                        child: child,
+                      ),
                     );
                   },
                   child: const _DiscoveryCard(discovered: false),
                 )
               : snapshot.seedFound
-                  ? const _DiscoveryCard(
-                      key: ValueKey('greenhouse-seed-found'),
-                      discovered: true,
-                    )
-                  : _FeedbackCard(selection: snapshot.greenhouseBedSelection),
+              ? const _DiscoveryCard(
+                  key: ValueKey('greenhouse-seed-found'),
+                  discovered: true,
+                )
+              : _FeedbackCard(selection: snapshot.greenhouseBedSelection),
         ),
         const SizedBox(height: 12),
         SizedBox(
@@ -372,10 +372,7 @@ class _BedChoicePanel extends StatelessWidget {
         children: [
           const Text(
             '화단 수 선택',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w900,
-            ),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 10),
           Wrap(

@@ -223,15 +223,11 @@ class _EpisodeOneFinaleOverlayState extends State<EpisodeOneFinaleOverlay> {
               correct: index == 1,
               onTap: () => _selectHypothesis(index),
             ),
-            if (index != _hypotheses.length - 1)
-              const SizedBox(height: 10),
+            if (index != _hypotheses.length - 1) const SizedBox(height: 10),
           ],
           if (_checked) ...[
             const SizedBox(height: 14),
-            _FeedbackCard(
-              correct: _correct,
-              text: _feedbackForSelection(),
-            ),
+            _FeedbackCard(correct: _correct, text: _feedbackForSelection()),
           ],
           const SizedBox(height: 18),
           FilledButton.icon(
@@ -248,8 +244,8 @@ class _EpisodeOneFinaleOverlayState extends State<EpisodeOneFinaleOverlay> {
               !_checked
                   ? '증거와 비교하기'
                   : _correct
-                      ? '씨앗을 받침대로 돌려보내기'
-                      : '단서 보고 다시 생각하기',
+                  ? '씨앗을 받침대로 돌려보내기'
+                  : '단서 보고 다시 생각하기',
               style: const TextStyle(fontWeight: FontWeight.w900),
             ),
           ),
@@ -324,9 +320,9 @@ class _EpisodeOneFinaleOverlayState extends State<EpisodeOneFinaleOverlay> {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFFFFE39A).withValues(
-                                  alpha: 0.35 + value * 0.5,
-                                ),
+                                color: const Color(
+                                  0xFFFFE39A,
+                                ).withValues(alpha: 0.35 + value * 0.5),
                                 blurRadius: 30 + value * 30,
                                 spreadRadius: 4 + value * 8,
                               ),
@@ -347,8 +343,8 @@ class _EpisodeOneFinaleOverlayState extends State<EpisodeOneFinaleOverlay> {
                       flowerProgress > 0.65
                           ? '별빛 꽃이 피었어요!'
                           : value > 0.35
-                              ? '받침대의 세 고리가 빛나고 있어요.'
-                              : '별빛 씨앗이 중앙 정원으로 돌아가요.',
+                          ? '받침대의 세 고리가 빛나고 있어요.'
+                          : '별빛 씨앗이 중앙 정원으로 돌아가요.',
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.white,
@@ -358,9 +354,7 @@ class _EpisodeOneFinaleOverlayState extends State<EpisodeOneFinaleOverlay> {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      _saving
-                          ? '모험 완료 기록을 안전하게 저장하고 있어요.'
-                          : '완료 기록을 저장했어요.',
+                      _saving ? '모험 완료 기록을 안전하게 저장하고 있어요.' : '완료 기록을 저장했어요.',
                       style: const TextStyle(
                         color: Color(0xFFD9ECE5),
                         fontSize: 12,
@@ -785,19 +779,19 @@ class _HypothesisTile extends StatelessWidget {
             color: showCorrect
                 ? const Color(0x6653C8A9)
                 : showWrong
-                    ? const Color(0x666A4557)
-                    : selected
-                        ? const Color(0x665C4D7D)
-                        : const Color(0x443B4D59),
+                ? const Color(0x666A4557)
+                : selected
+                ? const Color(0x665C4D7D)
+                : const Color(0x443B4D59),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: showCorrect
                   ? const Color(0xFF9BE7D0)
                   : showWrong
-                      ? const Color(0xFFFFB5C9)
-                      : selected
-                          ? const Color(0xFFFFE39A)
-                          : const Color(0x5578DFC3),
+                  ? const Color(0xFFFFB5C9)
+                  : selected
+                  ? const Color(0xFFFFE39A)
+                  : const Color(0x5578DFC3),
               width: selected || showCorrect ? 2.5 : 1,
             ),
           ),
@@ -826,10 +820,7 @@ class _HypothesisTile extends StatelessWidget {
                 ),
               ),
               if (showCorrect)
-                const Icon(
-                  Icons.check_circle_rounded,
-                  color: Color(0xFF9BE7D0),
-                )
+                const Icon(Icons.check_circle_rounded, color: Color(0xFF9BE7D0))
               else if (showWrong)
                 const Icon(Icons.help_rounded, color: Color(0xFFFFC2D2)),
             ],
@@ -867,9 +858,7 @@ class _FeedbackCard extends StatelessWidget {
         children: [
           Icon(
             correct ? Icons.lightbulb_rounded : Icons.menu_book_rounded,
-            color: correct
-                ? const Color(0xFFFFE39A)
-                : const Color(0xFFFFC2D2),
+            color: correct ? const Color(0xFFFFE39A) : const Color(0xFFFFC2D2),
           ),
           const SizedBox(width: 10),
           Expanded(

@@ -21,8 +21,7 @@ class EpisodeOneEscapeScreen extends StatefulWidget {
   final ProgressStore store;
 
   @override
-  State<EpisodeOneEscapeScreen> createState() =>
-      _EpisodeOneEscapeScreenState();
+  State<EpisodeOneEscapeScreen> createState() => _EpisodeOneEscapeScreenState();
 }
 
 class _EpisodeOneEscapeScreenState extends State<EpisodeOneEscapeScreen> {
