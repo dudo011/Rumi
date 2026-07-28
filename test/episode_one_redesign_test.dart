@@ -13,10 +13,7 @@ void main() {
     expect(controller.value.completed, isTrue);
     expect(controller.value.progressLabel, '필수 활동 14/14');
     expect(controller.value.clues.length, 6);
-    expect(
-      controller.value.clues,
-      contains(EpisodeOneRedesignClue.silverFur),
-    );
+    expect(controller.value.clues, contains(EpisodeOneRedesignClue.silverFur));
     expect(controller.value.message, contains('씨앗이 먼저 떨어졌고'));
   });
 
@@ -25,7 +22,10 @@ void main() {
     addTearDown(controller.dispose);
 
     controller.fitFallenPiece();
-    expect(controller.value.activity, EpisodeOneRedesignActivity.testTwelveGroups);
+    expect(
+      controller.value.activity,
+      EpisodeOneRedesignActivity.testTwelveGroups,
+    );
 
     expect(controller.submitCurrent(), isFalse);
     expect(controller.submitCurrent(), isFalse);
@@ -170,10 +170,7 @@ void _selectNumbers(
   }
 }
 
-void _selectTexts(
-  EpisodeOneRedesignController controller,
-  List<String> texts,
-) {
+void _selectTexts(EpisodeOneRedesignController controller, List<String> texts) {
   for (final text in texts) {
     controller.toggleText(text);
   }

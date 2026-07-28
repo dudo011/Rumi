@@ -143,9 +143,8 @@ class _EpisodeOneRedesignScreenState extends State<EpisodeOneRedesignScreen> {
                       child: ListView.separated(
                         shrinkWrap: true,
                         itemCount: clues.length,
-                        separatorBuilder: (_, _) => const Divider(
-                          color: Color(0x334FD0B1),
-                        ),
+                        separatorBuilder: (_, _) =>
+                            const Divider(color: Color(0x334FD0B1)),
                         itemBuilder: (context, index) {
                           final clue = clues[index];
                           return ListTile(
@@ -226,7 +225,9 @@ class _EpisodeOneRedesignScreenState extends State<EpisodeOneRedesignScreen> {
                             padding: const EdgeInsets.only(bottom: 8),
                             child: Center(
                               child: ConstrainedBox(
-                                constraints: const BoxConstraints(maxWidth: 760),
+                                constraints: const BoxConstraints(
+                                  maxWidth: 760,
+                                ),
                                 child: Column(
                                   crossAxisAlignment:
                                       CrossAxisAlignment.stretch,
@@ -245,8 +246,9 @@ class _EpisodeOneRedesignScreenState extends State<EpisodeOneRedesignScreen> {
                                       rewardSaved: _rewardSaved,
                                       rewardError: _rewardError,
                                       onRetryReward: _saveReward,
-                                      onReturnHome: () => Navigator.of(context)
-                                          .popUntil((route) => route.isFirst),
+                                      onReturnHome: () => Navigator.of(
+                                        context,
+                                      ).popUntil((route) => route.isFirst),
                                     ),
                                   ],
                                 ),
@@ -428,7 +430,8 @@ class _ScenePanel extends StatelessWidget {
       EpisodeOneRedesignActivity.arrangeEighteen ||
       EpisodeOneRedesignActivity.removeDuplicatePairs ||
       EpisodeOneRedesignActivity.findMissingDivisor ||
-      EpisodeOneRedesignActivity.removeNonDivisor => Icons.local_florist_rounded,
+      EpisodeOneRedesignActivity.removeNonDivisor =>
+        Icons.local_florist_rounded,
       EpisodeOneRedesignActivity.arrangeTwentyFour ||
       EpisodeOneRedesignActivity.findTwentyFourDivisors ||
       EpisodeOneRedesignActivity.rejectFalseRecord => Icons.handyman_rounded,
@@ -595,7 +598,10 @@ class _ActivityPanel extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFE9DFF5),
                   borderRadius: BorderRadius.circular(20),
@@ -613,7 +619,11 @@ class _ActivityPanel extends StatelessWidget {
               if (snapshot.supportSuggested)
                 const Row(
                   children: [
-                    Icon(Icons.favorite_rounded, size: 16, color: Color(0xFFD66D9A)),
+                    Icon(
+                      Icons.favorite_rounded,
+                      size: 16,
+                      color: Color(0xFFD66D9A),
+                    ),
                     SizedBox(width: 4),
                     Text(
                       '보강 힌트 준비됨',
@@ -710,13 +720,11 @@ class _ActivityPanel extends StatelessWidget {
         numbers: const [4, 5, 6, 7],
         selected: snapshot.selectedNumbers,
         onTap: controller.toggleNumber,
-        singleChoice: true,
       ),
       EpisodeOneRedesignActivity.removeNonDivisor => _NumberChoices(
         numbers: const [2, 3, 4, 6, 9],
         selected: snapshot.selectedNumbers,
         onTap: controller.toggleNumber,
-        singleChoice: true,
       ),
       EpisodeOneRedesignActivity.arrangeTwentyFour => _TextChoices(
         choices: const ['1×24', '2×12', '3×8', '4×6', '5×5'],
@@ -744,13 +752,14 @@ class _ActivityPanel extends StatelessWidget {
     };
   }
 
-  String _submitLabel(EpisodeOneRedesignActivity activity) => switch (activity) {
-    EpisodeOneRedesignActivity.fitFallenPiece => '조각 맞추기',
-    EpisodeOneRedesignActivity.testTwelveGroups => '실험 기록하기',
-    EpisodeOneRedesignActivity.orderTwelveDivisors => '방향판 작동',
-    EpisodeOneRedesignActivity.orderEvidence => '중간 결론 확정',
-    _ => '장치 확인',
-  };
+  String _submitLabel(EpisodeOneRedesignActivity activity) =>
+      switch (activity) {
+        EpisodeOneRedesignActivity.fitFallenPiece => '조각 맞추기',
+        EpisodeOneRedesignActivity.testTwelveGroups => '실험 기록하기',
+        EpisodeOneRedesignActivity.orderTwelveDivisors => '방향판 작동',
+        EpisodeOneRedesignActivity.orderEvidence => '중간 결론 확정',
+        _ => '장치 확인',
+      };
 }
 
 class _ObjectAction extends StatelessWidget {
@@ -798,7 +807,10 @@ class _ObjectAction extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     description,
-                    style: const TextStyle(color: Color(0xFF745F38), height: 1.35),
+                    style: const TextStyle(
+                      color: Color(0xFF745F38),
+                      height: 1.35,
+                    ),
                   ),
                 ],
               ),
@@ -853,13 +865,11 @@ class _NumberChoices extends StatelessWidget {
     required this.numbers,
     required this.selected,
     required this.onTap,
-    this.singleChoice = false,
   });
 
   final List<int> numbers;
   final Set<int> selected;
   final ValueChanged<int> onTap;
-  final bool singleChoice;
 
   @override
   Widget build(BuildContext context) {
@@ -1362,11 +1372,7 @@ class _MessageBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.search_rounded,
-            size: 18,
-            color: Color(0xFFFFE39A),
-          ),
+          const Icon(Icons.search_rounded, size: 18, color: Color(0xFFFFE39A)),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

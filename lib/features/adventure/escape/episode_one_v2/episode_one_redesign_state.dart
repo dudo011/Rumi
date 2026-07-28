@@ -96,8 +96,7 @@ extension EpisodeOneRedesignActivityMetadata on EpisodeOneRedesignActivity {
       '12개의 별가루를 2·3·4·5개씩 묶어 보고 남는 수를 확인하세요.',
     EpisodeOneRedesignActivity.findTwelveDivisors =>
       '12개를 남김없이 놓을 수 있는 받침대를 모두 선택하세요.',
-    EpisodeOneRedesignActivity.pairTwelveFactors =>
-      '곱해서 12가 되는 세 쌍을 모두 연결하세요.',
+    EpisodeOneRedesignActivity.pairTwelveFactors => '곱해서 12가 되는 세 쌍을 모두 연결하세요.',
     EpisodeOneRedesignActivity.orderTwelveDivisors =>
       '12의 약수를 작은 수부터 차례대로 눌러 방향판을 여세요.',
     EpisodeOneRedesignActivity.arrangeEighteen =>
@@ -180,13 +179,12 @@ class EpisodeOneRedesignSnapshot {
   final bool challengeCompleted;
 
   EpisodeOneRedesignActivity get activity =>
-      EpisodeOneRedesignActivity.values[activityIndex.clamp(0, 13)];
+      EpisodeOneRedesignActivity.values[activityIndex.clamp(0, 13).toInt()];
 
   int get completedActivityCount => completed ? 14 : activityIndex;
 
-  String get progressLabel => completed
-      ? '필수 활동 14/14'
-      : '필수 활동 ${activityIndex + 1}/14';
+  String get progressLabel =>
+      completed ? '필수 활동 14/14' : '필수 활동 ${activityIndex + 1}/14';
 
   bool get supportSuggested => activityErrors >= 2;
 
@@ -194,9 +192,8 @@ class EpisodeOneRedesignSnapshot {
 
   String get title => completed ? '중앙 정원의 흔적을 찾았어요' : activity.title;
 
-  String get objective => completed
-      ? '연못 아래의 잠긴 수문이 다음 조사를 기다리고 있어요.'
-      : activity.objective;
+  String get objective =>
+      completed ? '연못 아래의 잠긴 수문이 다음 조사를 기다리고 있어요.' : activity.objective;
 
   EpisodeOneRedesignSnapshot copyWith({
     int? activityIndex,
@@ -235,8 +232,7 @@ class EpisodeOneRedesignSnapshot {
 
 class EpisodeOneRedesignController
     extends ValueNotifier<EpisodeOneRedesignSnapshot> {
-  EpisodeOneRedesignController()
-    : super(EpisodeOneRedesignSnapshot.initial());
+  EpisodeOneRedesignController() : super(EpisodeOneRedesignSnapshot.initial());
 
   static const orderedTwelve = [1, 2, 3, 4, 6, 12];
   static const correctTimeline = [1, 2, 3, 4, 5];
@@ -274,7 +270,9 @@ class EpisodeOneRedesignController
   void toggleNumber(int number) {
     if (value.completed && value.challengeOpen) {
       final selected = {...value.selectedNumbers};
-      selected.contains(number) ? selected.remove(number) : selected.add(number);
+      selected.contains(number)
+          ? selected.remove(number)
+          : selected.add(number);
       value = value.copyWith(selectedNumbers: selected);
       return;
     }
@@ -308,7 +306,8 @@ class EpisodeOneRedesignController
   }
 
   void selectOrderedNumber(int number) {
-    if (value.activity != EpisodeOneRedesignActivity.orderTwelveDivisors) return;
+    if (value.activity != EpisodeOneRedesignActivity.orderTwelveDivisors)
+      return;
     final expectedIndex = value.orderedNumbers.length;
     if (expectedIndex >= orderedTwelve.length) return;
     if (number != orderedTwelve[expectedIndex]) {
@@ -348,46 +347,55 @@ class EpisodeOneRedesignController
     return switch (value.activity) {
       EpisodeOneRedesignActivity.fitFallenPiece => fitFallenPiece(),
       EpisodeOneRedesignActivity.testTwelveGroups => _submitGroupExperiment(),
-      EpisodeOneRedesignActivity.findTwelveDivisors => _submitNumbers(
-        const {1, 2, 3, 4, 6, 12},
-        '12개를 남김없이 놓을 수 있는 여섯 받침대가 모두 빛났어요.',
-      ),
-      EpisodeOneRedesignActivity.pairTwelveFactors => _submitTexts(
-        const {'1×12', '2×6', '3×4'},
-        '세 곱셈 짝이 맞물리며 받침대의 두 번째 고리가 열렸어요.',
-      ),
-      EpisodeOneRedesignActivity.orderTwelveDivisors =>
-        _submitOrderedTwelve(),
-      EpisodeOneRedesignActivity.arrangeEighteen => _submitNumbers(
-        const {1, 2, 3, 6, 9, 18},
-        '18개의 흔적이 가능한 배열마다 같은 방향을 가리켰어요.',
-      ),
-      EpisodeOneRedesignActivity.removeDuplicatePairs => _submitTexts(
-        const {'6×3', '9×2', '18×1'},
-        '뒤집어 적힌 세 기록을 겹치자 곱셈 짝이 세 개로 정리됐어요.',
-      ),
-      EpisodeOneRedesignActivity.findMissingDivisor => _submitNumbers(
-        const {6},
-        '빠진 수 6을 넣자 6번 화분의 잠금이 풀렸어요.',
-      ),
+      EpisodeOneRedesignActivity.findTwelveDivisors => _submitNumbers(const {
+        1,
+        2,
+        3,
+        4,
+        6,
+        12,
+      }, '12개를 남김없이 놓을 수 있는 여섯 받침대가 모두 빛났어요.'),
+      EpisodeOneRedesignActivity.pairTwelveFactors => _submitTexts(const {
+        '1×12',
+        '2×6',
+        '3×4',
+      }, '세 곱셈 짝이 맞물리며 받침대의 두 번째 고리가 열렸어요.'),
+      EpisodeOneRedesignActivity.orderTwelveDivisors => _submitOrderedTwelve(),
+      EpisodeOneRedesignActivity.arrangeEighteen => _submitNumbers(const {
+        1,
+        2,
+        3,
+        6,
+        9,
+        18,
+      }, '18개의 흔적이 가능한 배열마다 같은 방향을 가리켰어요.'),
+      EpisodeOneRedesignActivity.removeDuplicatePairs => _submitTexts(const {
+        '6×3',
+        '9×2',
+        '18×1',
+      }, '뒤집어 적힌 세 기록을 겹치자 곱셈 짝이 세 개로 정리됐어요.'),
+      EpisodeOneRedesignActivity.findMissingDivisor => _submitNumbers(const {
+        6,
+      }, '빠진 수 6을 넣자 6번 화분의 잠금이 풀렸어요.'),
       EpisodeOneRedesignActivity.removeNonDivisor => _submitNumbers(
         const {4},
         '18개를 4개씩 묶으면 2개가 남았어요. 숫자 잎 4를 제거했어요.',
         clue: EpisodeOneRedesignClue.eighteenScratches,
       ),
-      EpisodeOneRedesignActivity.arrangeTwentyFour => _submitTexts(
-        const {'1×24', '2×12', '3×8', '4×6'},
-        '24개의 씨앗이 네 가지 직사각형 배열을 만들었어요.',
-      ),
+      EpisodeOneRedesignActivity.arrangeTwentyFour => _submitTexts(const {
+        '1×24',
+        '2×12',
+        '3×8',
+        '4×6',
+      }, '24개의 씨앗이 네 가지 직사각형 배열을 만들었어요.'),
       EpisodeOneRedesignActivity.findTwentyFourDivisors => _submitNumbers(
         const {1, 2, 3, 4, 6, 8, 12, 24},
         '여덟 약수 홈이 모두 채워지며 도구 보관소가 열렸어요.',
         clue: EpisodeOneRedesignClue.twentyFourSeeds,
       ),
-      EpisodeOneRedesignActivity.rejectFalseRecord => _submitTexts(
-        const {'C'},
-        '작다는 이유만으로 약수가 될 수는 없어요. 잘못된 기록 뒤에서 발자국 판을 찾았어요.',
-      ),
+      EpisodeOneRedesignActivity.rejectFalseRecord => _submitTexts(const {
+        'C',
+      }, '작다는 이유만으로 약수가 될 수는 없어요. 잘못된 기록 뒤에서 발자국 판을 찾았어요.'),
       EpisodeOneRedesignActivity.chooseFootprintPath => _submitNumbers(
         const {6},
         '6칸 경로는 24칸을 남김없이 지나며 오른쪽 긁힘 방향과도 일치했어요.',
@@ -399,7 +407,7 @@ class EpisodeOneRedesignController
 
   void requestHint() {
     if (value.completed) return;
-    final nextLevel = (value.hintLevel + 1).clamp(1, 3);
+    final nextLevel = (value.hintLevel + 1).clamp(1, 3).toInt();
     value = value.copyWith(
       hintLevel: nextLevel,
       message: _hintFor(value.activity, nextLevel),
@@ -419,9 +427,7 @@ class EpisodeOneRedesignController
     if (!value.completed || !value.challengeOpen) return false;
     const expected = {1, 2, 3, 5, 6, 10, 15, 30};
     if (!setEquals(value.selectedNumbers, expected)) {
-      value = value.copyWith(
-        message: '30이 되는 곱셈 짝을 1부터 차례로 확인해 보세요.',
-      );
+      value = value.copyWith(message: '30이 되는 곱셈 짝을 1부터 차례로 확인해 보세요.');
       return false;
     }
     value = value.copyWith(
@@ -502,19 +508,14 @@ class EpisodeOneRedesignController
     value = value.copyWith(
       activityErrors: errors,
       totalErrors: value.totalErrors + 1,
-      message: errors >= 2
-          ? '$message 꽃루미의 힌트를 열어도 진행이나 보상은 줄지 않아요.'
-          : message,
+      message: errors >= 2 ? '$message 꽃루미의 힌트를 열어도 진행이나 보상은 줄지 않아요.' : message,
     );
   }
 
-  void _advance({
-    required String message,
-    EpisodeOneRedesignClue? clue,
-  }) {
+  void _advance({required String message, EpisodeOneRedesignClue? clue}) {
     final nextIndex = value.activityIndex + 1;
     value = value.copyWith(
-      activityIndex: nextIndex.clamp(0, 13),
+      activityIndex: nextIndex.clamp(0, 13).toInt(),
       selectedNumbers: const {},
       selectedTexts: const {},
       orderedNumbers: const [],

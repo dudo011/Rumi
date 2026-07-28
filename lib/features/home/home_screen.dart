@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/storage/progress_store.dart';
-import '../adventure/escape/episode_one/episode_one_escape_screen.dart';
+import '../adventure/escape/episode_one_v2/episode_one_redesign_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, this.store = const ProgressStore()});
@@ -31,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _startAdventure() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => EpisodeOneEscapeScreen(store: widget.store),
+        builder: (_) => EpisodeOneRedesignScreen(store: widget.store),
       ),
     );
     await _loadProgress();
@@ -223,7 +223,7 @@ class _AdventureCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '새로운 사건',
+                        'Chapter 1 · Episode 1',
                         style: TextStyle(
                           color: Color(0xFF9A4D72),
                           fontWeight: FontWeight.w800,
@@ -231,7 +231,7 @@ class _AdventureCard extends StatelessWidget {
                       ),
                       SizedBox(height: 3),
                       Text(
-                        '사라진 별빛 씨앗',
+                        '중앙 정원의 흔적',
                         style: TextStyle(
                           color: Color(0xFF3F3156),
                           fontSize: 22,
@@ -245,7 +245,7 @@ class _AdventureCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             const Text(
-              '오늘 밤 피어날 별빛 꽃의 씨앗이 사라졌어요. 꽃루미와 정원을 탐험하고 단서를 찾아보세요.',
+              '별빛 씨앗이 사라진 순서를 밝히기 위해 중앙 정원의 물건을 조사하고 약수 규칙으로 흔적을 해석하세요.',
               style: TextStyle(color: Color(0xFF6F6478), height: 1.5),
             ),
             const SizedBox(height: 16),
@@ -253,9 +253,9 @@ class _AdventureCard extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _Tag(icon: Icons.calculate_rounded, label: '약수와 배수'),
-                _Tag(icon: Icons.schedule_rounded, label: '약 10분'),
-                _Tag(icon: Icons.search_rounded, label: '단서 3개'),
+                _Tag(icon: Icons.calculate_rounded, label: '약수'),
+                _Tag(icon: Icons.schedule_rounded, label: '15~18분'),
+                _Tag(icon: Icons.search_rounded, label: '단서 6개'),
               ],
             ),
             const SizedBox(height: 18),
