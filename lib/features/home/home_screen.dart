@@ -223,7 +223,7 @@ class _AdventureCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Chapter 1 · Episode 1',
+                        '사라진 별빛 씨앗',
                         style: TextStyle(
                           color: Color(0xFF9A4D72),
                           fontWeight: FontWeight.w800,

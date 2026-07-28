@@ -306,8 +306,9 @@ class EpisodeOneRedesignController
   }
 
   void selectOrderedNumber(int number) {
-    if (value.activity != EpisodeOneRedesignActivity.orderTwelveDivisors)
+    if (value.activity != EpisodeOneRedesignActivity.orderTwelveDivisors) {
       return;
+    }
     final expectedIndex = value.orderedNumbers.length;
     if (expectedIndex >= orderedTwelve.length) return;
     if (number != orderedTwelve[expectedIndex]) {

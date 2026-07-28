@@ -324,13 +324,16 @@ class _TopBar extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox.square(
-          dimension: 44,
-          child: IconButton.filledTonal(
-            key: const Key('episode-one-v2-back'),
-            tooltip: '모험 나가기',
-            onPressed: onBack,
-            icon: const Icon(Icons.arrow_back_rounded),
+        KeyedSubtree(
+          key: const Key('episode-one-foundation-back'),
+          child: SizedBox.square(
+            dimension: 44,
+            child: IconButton.filledTonal(
+              key: const Key('episode-one-v2-back'),
+              tooltip: '모험 나가기',
+              onPressed: onBack,
+              icon: const Icon(Icons.arrow_back_rounded),
+            ),
           ),
         ),
         const SizedBox(width: 7),
@@ -1198,14 +1201,48 @@ class _ConclusionChoice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RadioListTile<String>(
-      key: Key('episode-one-v2-conclusion-$code'),
-      value: code,
-      groupValue: selected ? code : null,
-      onChanged: (_) => onTap(code),
-      title: Text('$code. $text'),
-      contentPadding: EdgeInsets.zero,
-      dense: true,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: InkWell(
+        key: Key('episode-one-v2-conclusion-$code'),
+        onTap: () => onTap(code),
+        borderRadius: BorderRadius.circular(14),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+          decoration: BoxDecoration(
+            color: selected ? const Color(0xFFE8DDF5) : const Color(0xFFF4F0F6),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: selected
+                  ? const Color(0xFF79559D)
+                  : const Color(0xFFD8CEDF),
+              width: selected ? 2 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                selected
+                    ? Icons.radio_button_checked_rounded
+                    : Icons.radio_button_off_rounded,
+                color: const Color(0xFF7255A0),
+              ),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Text(
+                  '$code. $text',
+                  style: const TextStyle(
+                    color: Color(0xFF4D4058),
+                    height: 1.35,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
