@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/storage/progress_store.dart';
-import '../adventure/garden_exploration_screen.dart';
-import '../adventure/starlight_seed_episode_screen.dart';
+import '../adventure/escape/episode_one/episode_one_escape_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, this.store = const ProgressStore()});
@@ -32,15 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _startAdventure() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => GardenExplorationScreen(
-          onContinue: (context) {
-            Navigator.of(context).pushReplacement<void, void>(
-              MaterialPageRoute<void>(
-                builder: (_) => StarlightSeedEpisodeScreen(store: widget.store),
-              ),
-            );
-          },
-        ),
+        builder: (_) => EpisodeOneEscapeScreen(store: widget.store),
       ),
     );
     await _loadProgress();
@@ -73,7 +64,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             Text(
                               '완료한 모험 ${progress.completedAdventures}회 · 모은 경험치 ${progress.experience} XP',
                               textAlign: TextAlign.center,
-                              style: const TextStyle(color: Color(0xFF786E82), fontWeight: FontWeight.w600),
+                              style: const TextStyle(
+                                color: Color(0xFF786E82),
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),
@@ -89,6 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class _Header extends StatelessWidget {
   const _Header({required this.progress});
+
   final PlayerProgress progress;
 
   @override
@@ -98,15 +93,28 @@ class _Header extends StatelessWidget {
         const CircleAvatar(
           radius: 27,
           backgroundColor: Color(0xFFFFD8E8),
-          child: Icon(Icons.local_florist_rounded, color: Color(0xFF72509B)),
+          child: Icon(
+            Icons.local_florist_rounded,
+            color: Color(0xFF72509B),
+          ),
         ),
         const SizedBox(width: 14),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('${progress.nickname} 별지기님', style: const TextStyle(color: Color(0xFF392C50), fontSize: 22, fontWeight: FontWeight.w900)),
-              const Text('오늘도 꽃루미가 기다리고 있어요.', style: TextStyle(color: Color(0xFF7A7084))),
+              Text(
+                '${progress.nickname} 별지기님',
+                style: const TextStyle(
+                  color: Color(0xFF392C50),
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const Text(
+                '오늘도 꽃루미가 기다리고 있어요.',
+                style: TextStyle(color: Color(0xFF7A7084)),
+              ),
             ],
           ),
         ),
@@ -117,6 +125,7 @@ class _Header extends StatelessWidget {
 
 class _GardenCard extends StatelessWidget {
   const _GardenCard({required this.progress});
+
   final PlayerProgress progress;
 
   @override
@@ -125,18 +134,36 @@ class _GardenCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFFE0F2DF), Color(0xFFFFECF4)]),
+        gradient: const LinearGradient(
+          colors: [Color(0xFFE0F2DF), Color(0xFFFFECF4)],
+        ),
         borderRadius: BorderRadius.circular(28),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('꽃숲 · 성장 ${progress.gardenLevel}단계', style: const TextStyle(color: Color(0xFF405C45), fontSize: 20, fontWeight: FontWeight.w900)),
+          Text(
+            '꽃숲 · 성장 ${progress.gardenLevel}단계',
+            style: const TextStyle(
+              color: Color(0xFF405C45),
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
           const SizedBox(height: 20),
           Wrap(
             spacing: 12,
             runSpacing: 12,
-            children: List.generate(flowers, (index) => Icon(Icons.local_florist_rounded, size: 38 + (index % 3) * 4, color: index.isEven ? const Color(0xFFE875A4) : const Color(0xFF8B6BB3))),
+            children: List.generate(
+              flowers,
+              (index) => Icon(
+                Icons.local_florist_rounded,
+                size: 38 + (index % 3) * 4,
+                color: index.isEven
+                    ? const Color(0xFFE875A4)
+                    : const Color(0xFF8B6BB3),
+              ),
+            ),
           ),
           const SizedBox(height: 20),
           LinearProgressIndicator(
@@ -147,7 +174,13 @@ class _GardenCard extends StatelessWidget {
             backgroundColor: Colors.white.withValues(alpha: 0.75),
           ),
           const SizedBox(height: 8),
-          Text('다음 성장까지 ${100 - progress.levelExperience} XP', style: const TextStyle(color: Color(0xFF5F7161), fontWeight: FontWeight.w600)),
+          Text(
+            '다음 성장까지 ${100 - progress.levelExperience} XP',
+            style: const TextStyle(
+              color: Color(0xFF5F7161),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );
@@ -156,6 +189,7 @@ class _GardenCard extends StatelessWidget {
 
 class _AdventureCard extends StatelessWidget {
   const _AdventureCard({required this.onPressed});
+
   final VoidCallback onPressed;
 
   @override
@@ -175,19 +209,38 @@ class _AdventureCard extends StatelessWidget {
                   width: 64,
                   height: 64,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Color(0xFF7158AE), Color(0xFFD37DA5)]),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF7158AE), Color(0xFFD37DA5)],
+                    ),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 34),
+                  child: const Icon(
+                    Icons.auto_awesome_rounded,
+                    color: Colors.white,
+                    size: 34,
+                  ),
                 ),
                 const SizedBox(width: 18),
                 const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('새로운 사건', style: TextStyle(color: Color(0xFF9A4D72), fontWeight: FontWeight.w800)),
+                      Text(
+                        '새로운 사건',
+                        style: TextStyle(
+                          color: Color(0xFF9A4D72),
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                       SizedBox(height: 3),
-                      Text('사라진 별빛 씨앗', style: TextStyle(color: Color(0xFF3F3156), fontSize: 22, fontWeight: FontWeight.w900)),
+                      Text(
+                        '사라진 별빛 씨앗',
+                        style: TextStyle(
+                          color: Color(0xFF3F3156),
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -240,7 +293,14 @@ class _Tag extends StatelessWidget {
         children: [
           Icon(icon, size: 16, color: const Color(0xFF7255A0)),
           const SizedBox(width: 5),
-          Text(label, style: const TextStyle(color: Color(0xFF655475), fontSize: 12, fontWeight: FontWeight.w700)),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Color(0xFF655475),
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ],
       ),
     );
