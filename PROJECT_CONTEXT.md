@@ -463,3 +463,48 @@ P5 직후 최종 추리가 화면을 즉시 덮지 않도록 다음 순서로 �
 5. 사용자 피드백에 따른 난이도·힌트·문구 조정
 
 신규 Episode 개발보다 Episode 1 실기기 플레이와 사용자 테스트를 우선한다.
+
+## 22. Episode 1 단일 실행 버전 전환 및 구버전 정리 (2026-07-28)
+
+### 실행 경로 변경
+
+```text
+Home
+→ 사건 조사하기
+→ 최종 Episode 1 「사라진 별빛 씨앗」
+```
+
+Home 화면은 중간 정원 조사 화면이나 개발 메뉴를 거치지 않고
+`EpisodeOneEscapeScreen`을 직접 실행한다.
+
+### 제거한 이전 실행 버전
+
+- 초기 객관식 문제풀이형 `AdventureScreen`
+- 기존 정원 조사 및 미스터리 프로토타입
+- 기존 퀴즈형 `StarlightSeedEpisodeScreen`
+- 초기 Flame Episode 1 프로토타입
+- Flame 방탈출 기술 검증용 실행 화면
+- 위 버전에만 사용된 문제 모델과 15문항 문제 은행
+- 위 버전 전용 자동 테스트
+
+### 유지한 항목
+
+- `lib/features/adventure/escape/episode_one/` 최종 Episode 1
+- 최종 Episode 1 자동 테스트
+- 경험치, 완료 횟수와 꽃숲 성장 저장 기능
+- 방탈출 분석 보고서, 디자인 바이블, 상세 설계서와 검증 문서
+- 향후 오디오 개선에 다시 사용할 수 있는 `flame_audio` 의존성
+
+### 확인 상태
+
+- 최종 Episode 1 직접 진입 테스트를 추가했다.
+- 삭제한 파일의 import를 Home에서 제거했다.
+- 임시 정리용 GitHub Actions 워크플로는 저장소에서 제거했다.
+- 전체 Flutter 분석·테스트·Web 빌드는 GitHub Actions 또는 Codespaces에서 최종 재확인이 필요하다.
+
+### 다음 작업
+
+1. GitHub Actions의 전체 분석·테스트·Web 빌드 결과 확인
+2. Galaxy 태블릿에서 최종 Episode 1 단일 진입 흐름 재확인
+3. Episode 1 비주얼 디자인 시스템과 정식 아트 방향 확정
+4. 배경·캐릭터·UI·애니메이션·오디오 개선
