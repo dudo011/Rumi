@@ -95,6 +95,16 @@ class _EpisodeOneRedesignScreenState extends State<EpisodeOneRedesignScreen> {
     }
   }
 
+  void _handleBackAttempt() {
+    if (_controller.undoCurrentInput()) return;
+    final message = _controller.value.completed
+        ? '조사가 끝났어요. 결말 화면의 정원으로 돌아가기 버튼을 이용하세요.'
+        : '단서 6개를 모두 찾기 전에는 메인 화면으로 나갈 수 없어요.';
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
   void _showClues(EpisodeOneRedesignSnapshot snapshot) {
     showModalBottomSheet<void>(
       context: context,
@@ -186,86 +196,92 @@ class _EpisodeOneRedesignScreenState extends State<EpisodeOneRedesignScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: const Key('episode-one-v2-screen'),
-      backgroundColor: const Color(0xFF08141C),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final media = MediaQuery.of(context);
-          final safe = media.padding;
-          final compact =
-              constraints.maxWidth < 480 || constraints.maxHeight < 720;
-          return Stack(
-            fit: StackFit.expand,
-            children: [
-              const _FullScreenBackground(),
-              ValueListenableBuilder<EpisodeOneRedesignSnapshot>(
-                valueListenable: _controller,
-                builder: (context, snapshot, _) {
-                  return Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      safe.left + (compact ? 10 : 16),
-                      safe.top + 6,
-                      safe.right + (compact ? 10 : 16),
-                      safe.bottom + 8,
-                    ),
-                    child: Column(
-                      children: [
-                        _TopBar(
-                          snapshot: snapshot,
-                          compact: compact,
-                          onBack: () => Navigator.of(context).maybePop(),
-                          onClues: () => _showClues(snapshot),
-                          onReset: _confirmReset,
-                        ),
-                        SizedBox(height: compact ? 8 : 12),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            key: const Key('episode-one-v2-scroll'),
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Center(
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 760,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    _ScenePanel(
-                                      snapshot: snapshot,
-                                      compact: compact,
-                                    ),
-                                    SizedBox(height: compact ? 10 : 14),
-                                    _ActivityPanel(
-                                      controller: _controller,
-                                      snapshot: snapshot,
-                                      compact: compact,
-                                      onSubmit: _handleSubmit,
-                                      savingReward: _savingReward,
-                                      rewardSaved: _rewardSaved,
-                                      rewardError: _rewardError,
-                                      onRetryReward: _saveReward,
-                                      onReturnHome: () => Navigator.of(
-                                        context,
-                                      ).popUntil((route) => route.isFirst),
-                                    ),
-                                  ],
+    return PopScope<Object?>(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) _handleBackAttempt();
+      },
+      child: Scaffold(
+        key: const Key('episode-one-v2-screen'),
+        backgroundColor: const Color(0xFF08141C),
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final media = MediaQuery.of(context);
+            final safe = media.padding;
+            final compact =
+                constraints.maxWidth < 480 || constraints.maxHeight < 720;
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                const _FullScreenBackground(),
+                ValueListenableBuilder<EpisodeOneRedesignSnapshot>(
+                  valueListenable: _controller,
+                  builder: (context, snapshot, _) {
+                    return Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        safe.left + (compact ? 10 : 16),
+                        safe.top + 6,
+                        safe.right + (compact ? 10 : 16),
+                        safe.bottom + 8,
+                      ),
+                      child: Column(
+                        children: [
+                          _TopBar(
+                            snapshot: snapshot,
+                            compact: compact,
+                            onUndo: _controller.undoCurrentInput,
+                            onClues: () => _showClues(snapshot),
+                            onReset: _confirmReset,
+                          ),
+                          SizedBox(height: compact ? 8 : 12),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              key: const Key('episode-one-v2-scroll'),
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Center(
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 760,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      _ScenePanel(
+                                        snapshot: snapshot,
+                                        compact: compact,
+                                      ),
+                                      SizedBox(height: compact ? 10 : 14),
+                                      _ActivityPanel(
+                                        controller: _controller,
+                                        snapshot: snapshot,
+                                        compact: compact,
+                                        onSubmit: _handleSubmit,
+                                        savingReward: _savingReward,
+                                        rewardSaved: _rewardSaved,
+                                        rewardError: _rewardError,
+                                        onRetryReward: _saveReward,
+                                        onReturnHome: () => Navigator.of(
+                                          context,
+                                        ).popUntil((route) => route.isFirst),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                        SizedBox(height: compact ? 6 : 8),
-                        _MessageBar(snapshot: snapshot, compact: compact),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ],
-          );
-        },
+                          SizedBox(height: compact ? 6 : 8),
+                          _MessageBar(snapshot: snapshot, compact: compact),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -308,14 +324,14 @@ class _TopBar extends StatelessWidget {
   const _TopBar({
     required this.snapshot,
     required this.compact,
-    required this.onBack,
+    required this.onUndo,
     required this.onClues,
     required this.onReset,
   });
 
   final EpisodeOneRedesignSnapshot snapshot;
   final bool compact;
-  final VoidCallback onBack;
+  final VoidCallback onUndo;
   final VoidCallback onClues;
   final VoidCallback onReset;
 
@@ -324,16 +340,13 @@ class _TopBar extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        KeyedSubtree(
-          key: const Key('episode-one-foundation-back'),
-          child: SizedBox.square(
-            dimension: 44,
-            child: IconButton.filledTonal(
-              key: const Key('episode-one-v2-back'),
-              tooltip: '모험 나가기',
-              onPressed: onBack,
-              icon: const Icon(Icons.arrow_back_rounded),
-            ),
+        SizedBox.square(
+          dimension: 44,
+          child: IconButton.filledTonal(
+            key: const Key('episode-one-v2-undo'),
+            tooltip: '현재 선택 하나 되돌리기',
+            onPressed: snapshot.canUndoCurrentInput ? onUndo : null,
+            icon: const Icon(Icons.undo_rounded),
           ),
         ),
         const SizedBox(width: 7),

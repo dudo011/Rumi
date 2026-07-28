@@ -78,15 +78,49 @@ void main() {
     );
     await tester.pump();
 
-    final backButton = find.byKey(const Key('episode-one-v2-back'));
+    final undoButton = find.byKey(const Key('episode-one-v2-undo'));
     final messageBar = find.byKey(const Key('episode-one-v2-message-bar'));
 
-    expect(backButton, findsOneWidget);
+    expect(undoButton, findsOneWidget);
+    expect(find.byKey(const Key('episode-one-v2-back')), findsNothing);
     expect(messageBar, findsOneWidget);
-    expect(tester.getTopLeft(backButton).dy, greaterThanOrEqualTo(28));
+    expect(tester.getTopLeft(undoButton).dy, greaterThanOrEqualTo(28));
     expect(tester.getBottomRight(messageBar).dy, lessThanOrEqualTo(616));
     expect(find.byKey(const Key('episode-one-v2-activity-1')), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  test('현재 활동의 마지막 입력만 되돌릴 수 있다', () {
+    final controller = EpisodeOneRedesignController();
+    addTearDown(controller.dispose);
+
+    controller.fitFallenPiece();
+    controller.testGroupSize(2);
+    controller.testGroupSize(3);
+
+    expect(controller.value.testedGroupSizes, containsAll({2, 3}));
+    expect(controller.undoCurrentInput(), isTrue);
+    expect(controller.value.testedGroupSizes.length, 1);
+    expect(controller.value.message, contains('되돌렸어요'));
+  });
+
+  testWidgets('시스템 뒤로가기는 메인으로 나가지 않고 현재 입력을 되돌린다', (tester) async {
+    final controller = EpisodeOneRedesignController();
+    addTearDown(controller.dispose);
+    controller.fitFallenPiece();
+    controller.testGroupSize(2);
+
+    await tester.pumpWidget(
+      MaterialApp(home: EpisodeOneRedesignScreen(controller: controller)),
+    );
+    await tester.pump();
+
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+
+    expect(find.byKey(const Key('episode-one-v2-screen')), findsOneWidget);
+    expect(controller.value.testedGroupSizes, isEmpty);
+    expect(find.byKey(const Key('episode-one-v2-screen')), findsOneWidget);
   });
 
   testWidgets('첫 별조각을 누르면 두 번째 학습 활동으로 이어진다', (tester) async {

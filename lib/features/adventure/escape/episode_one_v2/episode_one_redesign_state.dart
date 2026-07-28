@@ -188,6 +188,13 @@ class EpisodeOneRedesignSnapshot {
 
   bool get supportSuggested => activityErrors >= 2;
 
+  bool get canUndoCurrentInput =>
+      selectedNumbers.isNotEmpty ||
+      selectedTexts.isNotEmpty ||
+      orderedNumbers.isNotEmpty ||
+      timelineOrder.isNotEmpty ||
+      testedGroupSizes.isNotEmpty;
+
   String get sceneLabel => completed ? '반짝이는 연못 입구' : activity.sceneLabel;
 
   String get title => completed ? '중앙 정원의 흔적을 찾았어요' : activity.title;
@@ -239,6 +246,53 @@ class EpisodeOneRedesignController
 
   void reset() {
     value = EpisodeOneRedesignSnapshot.initial();
+  }
+
+  bool undoCurrentInput() {
+    final snapshot = value;
+    if (!snapshot.canUndoCurrentInput) return false;
+
+    if (snapshot.timelineOrder.isNotEmpty) {
+      final updated = [...snapshot.timelineOrder]..removeLast();
+      value = snapshot.copyWith(
+        timelineOrder: updated,
+        message: '방금 놓은 증거 카드를 되돌렸어요.',
+      );
+      return true;
+    }
+    if (snapshot.orderedNumbers.isNotEmpty) {
+      final updated = [...snapshot.orderedNumbers]..removeLast();
+      value = snapshot.copyWith(
+        orderedNumbers: updated,
+        message: '방금 놓은 숫자를 되돌렸어요.',
+      );
+      return true;
+    }
+    if (snapshot.selectedTexts.isNotEmpty) {
+      final updated = {...snapshot.selectedTexts}
+        ..remove(snapshot.selectedTexts.last);
+      value = snapshot.copyWith(
+        selectedTexts: updated,
+        message: '방금 선택한 기록을 되돌렸어요.',
+      );
+      return true;
+    }
+    if (snapshot.selectedNumbers.isNotEmpty) {
+      final updated = {...snapshot.selectedNumbers}
+        ..remove(snapshot.selectedNumbers.last);
+      value = snapshot.copyWith(
+        selectedNumbers: updated,
+        message: '방금 선택한 숫자를 되돌렸어요.',
+      );
+      return true;
+    }
+    final updated = {...snapshot.testedGroupSizes}
+      ..remove(snapshot.testedGroupSizes.last);
+    value = snapshot.copyWith(
+      testedGroupSizes: updated,
+      message: '방금 확인한 묶음 실험을 되돌렸어요.',
+    );
+    return true;
   }
 
   bool fitFallenPiece() {
