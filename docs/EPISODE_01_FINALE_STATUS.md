@@ -2,7 +2,7 @@
 
 - 작성일: 2026-07-28
 - 대상: Episode 1 「사라진 별빛 씨앗」 최종 추리와 결말
-- 상태: 코드 구현 완료, Flutter 명령 검증 대기
+- 상태: 코드 구현 및 전체 자동 검증 완료
 
 ## 구현 완료 범위
 
@@ -68,7 +68,7 @@ flutter test
 flutter build web --release --base-href /Rumi/ --pwa-strategy=none
 ```
 
-현재 연결된 실행 환경에는 Flutter와 Dart 실행 명령이 없어 결과를 아직 확정하지 않았다. 전체 검증 성공 뒤 `PROJECT_CONTEXT.md`에 Episode 1 구현 완료 상태를 반영한다.
+GitHub Actions에서 포맷, 정적 분석, 전체 테스트와 Web 빌드를 모두 통과했다. 상세 결과는 `docs/EPISODE_01_FULL_VALIDATION.md`에 기록했다.
 
 ## 검증 후 남은 작업
 

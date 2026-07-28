@@ -409,3 +409,57 @@ lib/features/adventure/escape/episode_one/
 2. 중앙 정원 정식 장면 구현
 3. P0 떨어진 별조각 결합 구현
 4. P1 별받침대 균형 장치와 실제 경로 잠금 구현
+
+## 21. Episode 1 본편 구현 및 자동 검증 완료 (2026-07-28)
+
+### 구현 완료 범위
+
+- P0 떨어진 별조각 결합
+- P1 별가루 12개를 세 컵에 4·4·4로 균등 분배
+- P2 시계꽃 숲의 4칸·6칸 주기와 첫 공통 개화 12번째 칸
+- P3 연못 기억거울의 젖은 발자국 순서 추적
+- P4 분수대 바람바퀴·돌·별열쇠·관리 상자 연쇄 장치
+- P5 온실의 별 18개와 달 24개를 6개 화단에 최대 균등 분배
+- 핵심 증거 3개를 연결하는 최종 추리
+- 포포가 씨앗을 보호했다는 결말
+- 씨앗 귀환과 별빛 꽃 개화 연출
+- `ProgressStore.completeAdventure(earnedExperience: 110)`을 통한 경험치와 완료 횟수 저장
+- 저장 실패 재시도와 Home 화면 복귀
+
+### 최종 흐름 보완
+
+P5 직후 최종 추리가 화면을 즉시 덮지 않도록 다음 순서로 조정했다.
+
+```text
+씨앗과 포포 발견
+→ 마지막 단서와 발견 대사 확인
+→ 단서 수첩 확인
+→ 사건 해결하기
+→ 최종 추리
+```
+
+### 자동 검증
+
+최종 검증 커밋 `eb551e84ab07ab183a4f93cdaec70d4ec3342cce`에서 다음 항목을 모두 통과했다.
+
+- `flutter pub get`
+- `dart format`
+- `flutter analyze`
+- `flutter test`
+- `flutter build web --release --base-href /Rumi/ --pwa-strategy=none`
+
+상세 결과는 `docs/EPISODE_01_FULL_VALIDATION.md`에 기록했다.
+
+### 실기기 검증 문서
+
+- `docs/EPISODE_01_DEVICE_PLAYTEST.md`
+
+### 남은 작업
+
+1. Galaxy 태블릿에서 Episode 1 처음부터 끝까지 실제 플레이
+2. 세로·가로 화면의 SafeArea, 스크롤, 터치 영역 확인
+3. 경험치 +110, 완료 횟수와 꽃숲 성장 반영 확인
+4. 초등학교 5학년 대상 10분 사용자 테스트
+5. 사용자 피드백에 따른 난이도·힌트·문구 조정
+
+신규 Episode 개발보다 Episode 1 실기기 플레이와 사용자 테스트를 우선한다.
