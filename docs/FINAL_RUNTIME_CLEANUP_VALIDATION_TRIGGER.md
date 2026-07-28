@@ -1,3 +1,3 @@
 Trigger the pull-request validation workflow for the final Episode 1 single-runtime cleanup. Do not merge this branch.
 
-Rerun after the workflow was updated to format files before validation.
+Rerun after removing the remaining obsolete garden exploration test.
