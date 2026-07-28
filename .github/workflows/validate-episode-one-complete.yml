@@ -3,10 +3,6 @@ name: Validate complete Episode 1
 on:
   pull_request:
     branches: [main]
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/validate-episode-one-complete.yml'
 
 permissions:
   contents: write
@@ -129,76 +125,6 @@ jobs:
               echo '```'
             fi
           } > docs/EPISODE_01_FULL_VALIDATION.md
-
-          if [ "$ALL_SUCCESS" -eq 1 ]; then
-            python - <<'PY'
-          from pathlib import Path
-
-          status_path = Path('docs/EPISODE_01_FINALE_STATUS.md')
-          if status_path.exists():
-              text = status_path.read_text(encoding='utf-8')
-              text = text.replace(
-                  '- 상태: 코드 구현 완료, Flutter 명령 검증 대기',
-                  '- 상태: 코드 구현 및 전체 자동 검증 완료',
-                  1,
-              )
-              text = text.replace(
-                  '현재 연결된 실행 환경에는 Flutter와 Dart 실행 명령이 없어 결과를 아직 확정하지 않았다. 전체 검증 성공 뒤 `PROJECT_CONTEXT.md`에 Episode 1 구현 완료 상태를 반영한다.',
-                  'GitHub Actions에서 format, analyze, 전체 test와 Web build를 모두 통과했다. 상세 결과는 `docs/EPISODE_01_FULL_VALIDATION.md`에 기록했다.',
-                  1,
-              )
-              status_path.write_text(text, encoding='utf-8')
-
-          context_path = Path('PROJECT_CONTEXT.md')
-          context = context_path.read_text(encoding='utf-8')
-          heading = '## 22. Episode 1 본편 구현 및 자동 검증 완료 (2026-07-28)'
-          if heading not in context:
-              context = context.rstrip() + '''
-
-## 22. Episode 1 본편 구현 및 자동 검증 완료 (2026-07-28)
-
-### 구현 완료 범위
-
-- P0 떨어진 별조각 결합
-- P1 별받침대 별가루 12개를 4·4·4로 균등 분배
-- P2 시계꽃 숲의 4칸·6칸 주기와 첫 공통 개화 12번째 칸
-- P3 연못 기억거울의 젖은 발자국 순서 추적
-- P4 분수대 바람바퀴·돌·별열쇠·관리 상자 연쇄 장치
-- P5 온실의 별 18개와 달 24개를 6개 화단에 최대 균등 분배
-- 핵심 증거 3개를 연결하는 최종 추리
-- 포포가 씨앗을 보호했다는 결말
-- 씨앗 귀환과 별빛 꽃 개화 연출
-- `ProgressStore.completeAdventure(earnedExperience: 110)`을 통한 경험치와 완료 횟수 저장
-- 저장 실패 재시도와 Home 화면 복귀
-
-### 자동 검증
-
-다음 항목을 모두 통과했다.
-
-- `flutter pub get`
-- `dart format`
-- `flutter analyze`
-- `flutter test`
-- `flutter build web --release --base-href /Rumi/ --pwa-strategy=none`
-
-상세 결과는 `docs/EPISODE_01_FULL_VALIDATION.md`에 기록했다.
-
-### 남은 확인
-
-1. Galaxy 태블릿에서 Episode 1 처음부터 끝까지 실제 플레이
-2. 터치 영역, SafeArea, 스크롤과 화면 겹침 확인
-3. 애니메이션 속도와 건너뛰기 동작 확인
-4. 경험치 +110, 완료 횟수와 꽃숲 성장 반영 확인
-5. 초등학교 5학년 대상 10분 사용자 테스트
-6. 사용자 피드백에 따른 난이도·힌트·문구 조정
-
-### 다음 개발 단계
-
-자동 검증 이후에는 신규 기능을 바로 추가하지 않고 실기기 전체 플레이와 사용자 테스트를 먼저 진행한다.
-'''
-              context_path.write_text(context, encoding='utf-8')
-          PY
-          fi
 
           echo "$ALL_SUCCESS" > /tmp/all-success
 
