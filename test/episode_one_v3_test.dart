@@ -18,6 +18,22 @@ void main() {
     expect(controller.value.learningProgressLabel, '학습 활동 14/14');
   });
 
+  test('약수 단계는 선수 지식 없이 문제와 판단 기준을 설명한다', () {
+    expect(
+      EpisodeOneV3Stage.revealTwelveDivisors.problemPrompt,
+      contains('12개를 남김없이'),
+    );
+    expect(
+      EpisodeOneV3Stage.revealTwelveDivisors.decisionRule,
+      contains('12의 약수'),
+    );
+    expect(
+      EpisodeOneV3Stage.revealTwelveDivisors.interactionGuide,
+      contains('모두 선택'),
+    );
+    expect(EpisodeOneV3Stage.testTwelveGroups.submitLabel, '실험 결과 확인하기');
+  });
+
   test('발자국 퍼즐은 필터·시작점·간격·방향 경로를 모두 요구한다', () {
     final controller = EpisodeOneV3Controller();
     addTearDown(controller.dispose);
@@ -122,6 +138,36 @@ void main() {
     expect(tester.getTopLeft(undo).dy, greaterThanOrEqualTo(28));
     expect(tester.getBottomRight(messageBar).dy, lessThanOrEqualTo(616));
     expect(find.byIcon(Icons.arrow_back_rounded), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('선택지 위에 문제·판단 기준·조작 방법을 표시한다', (tester) async {
+    final controller = EpisodeOneV3Controller();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(home: EpisodeOneV3Screen(controller: controller)),
+    );
+    await tester.pump();
+
+    expect(
+      find.byKey(const Key('episode-one-v3-instruction-identifyFragment')),
+      findsOneWidget,
+    );
+    expect(find.text('지금 풀 문제'), findsOneWidget);
+    expect(
+      find.byKey(const Key('episode-one-v3-problem-prompt')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('episode-one-v3-decision-rule')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('episode-one-v3-interaction-guide')),
+      findsOneWidget,
+    );
+    expect(find.text('선택 확인하기'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

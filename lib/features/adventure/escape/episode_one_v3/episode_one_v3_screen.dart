@@ -632,6 +632,8 @@ class _PuzzlePanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          _StageInstructionCard(stage: snapshot.stage, compact: compact),
+          const SizedBox(height: 12),
           _StageContent(
             controller: controller,
             snapshot: snapshot,
@@ -659,7 +661,7 @@ class _PuzzlePanel extends StatelessWidget {
                   key: const Key('episode-one-v3-submit'),
                   onPressed: onSubmit,
                   icon: const Icon(Icons.lock_open_rounded),
-                  label: const Text('장치 확인하기'),
+                  label: Text(snapshot.stage.submitLabel),
                 ),
               ),
             ],
@@ -678,6 +680,131 @@ class _PuzzlePanel extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+class _StageInstructionCard extends StatelessWidget {
+  const _StageInstructionCard({required this.stage, required this.compact});
+
+  final EpisodeOneV3Stage stage;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: Key('episode-one-v3-instruction-${stage.name}'),
+      padding: EdgeInsets.all(compact ? 13 : 15),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF8DF),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE2C878), width: 1.3),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.assignment_rounded,
+                color: Color(0xFF76591A),
+                size: 22,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '지금 풀 문제',
+                      style: TextStyle(
+                        color: Color(0xFF76591A),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      stage.problemPrompt,
+                      key: const Key('episode-one-v3-problem-prompt'),
+                      style: TextStyle(
+                        color: const Color(0xFF342D22),
+                        fontSize: compact ? 14 : 15,
+                        height: 1.4,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          const Divider(height: 1, color: Color(0x44A9853A)),
+          const SizedBox(height: 9),
+          _InstructionLine(
+            icon: Icons.rule_rounded,
+            label: '판단 기준',
+            text: stage.decisionRule,
+            compact: compact,
+          ),
+          const SizedBox(height: 7),
+          _InstructionLine(
+            icon: Icons.touch_app_rounded,
+            label: '조작 방법',
+            text: stage.interactionGuide,
+            compact: compact,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InstructionLine extends StatelessWidget {
+  const _InstructionLine({
+    required this.icon,
+    required this.label,
+    required this.text,
+    required this.compact,
+  });
+
+  final IconData icon;
+  final String label;
+  final String text;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: const Color(0xFF80652D), size: 18),
+        const SizedBox(width: 7),
+        Expanded(
+          child: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: '$label  ',
+                  style: const TextStyle(fontWeight: FontWeight.w900),
+                ),
+                TextSpan(text: text),
+              ],
+            ),
+            key: Key(
+              'episode-one-v3-${label == '판단 기준' ? 'decision-rule' : 'interaction-guide'}',
+            ),
+            style: TextStyle(
+              color: const Color(0xFF514633),
+              fontSize: compact ? 11.5 : 12.5,
+              height: 1.35,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
