@@ -1,0 +1,218 @@
+name: Validate complete Episode 1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/validate-episode-one-complete.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Format and validate
+        shell: bash
+        run: |
+          set +e
+
+          flutter pub get > /tmp/pub-get.log 2>&1
+          PUB_RESULT=$?
+
+          dart format \
+            lib/features/adventure/escape/episode_one \
+            lib/features/adventure/garden_exploration_screen.dart \
+            test/episode_one_escape_foundation_test.dart \
+            test/episode_one_fountain_test.dart \
+            test/episode_one_greenhouse_test.dart \
+            test/episode_one_finale_test.dart \
+            > /tmp/format.log 2>&1
+          FORMAT_RESULT=$?
+
+          flutter analyze > /tmp/analyze.log 2>&1
+          ANALYZE_RESULT=$?
+
+          flutter test > /tmp/test.log 2>&1
+          TEST_RESULT=$?
+
+          flutter build web --release --base-href /Rumi/ --pwa-strategy=none \
+            > /tmp/build.log 2>&1
+          BUILD_RESULT=$?
+
+          status_text() {
+            if [ "$1" -eq 0 ]; then
+              echo "성공"
+            else
+              echo "실패"
+            fi
+          }
+
+          ALL_SUCCESS=0
+          if [ "$PUB_RESULT" -eq 0 ] && \
+             [ "$FORMAT_RESULT" -eq 0 ] && \
+             [ "$ANALYZE_RESULT" -eq 0 ] && \
+             [ "$TEST_RESULT" -eq 0 ] && \
+             [ "$BUILD_RESULT" -eq 0 ]; then
+            ALL_SUCCESS=1
+          fi
+
+          mkdir -p docs
+          {
+            echo "# Episode 1 전체 자동 검증 결과"
+            echo
+            echo "- 검증일: $(date -u +%Y-%m-%d)"
+            echo "- 검증 기준 커밋: $(git rev-parse HEAD)"
+            echo "- flutter pub get: $(status_text "$PUB_RESULT")"
+            echo "- dart format: $(status_text "$FORMAT_RESULT")"
+            echo "- flutter analyze: $(status_text "$ANALYZE_RESULT")"
+            echo "- flutter test: $(status_text "$TEST_RESULT")"
+            echo "- flutter build web: $(status_text "$BUILD_RESULT")"
+            echo
+            if [ "$ALL_SUCCESS" -eq 1 ]; then
+              echo "## 최종 판정"
+              echo
+              echo "Episode 1 P0~P5, 최종 추리, 결말과 보상 저장 코드가 전체 자동 검증을 통과했다."
+            else
+              echo "## 최종 판정"
+              echo
+              echo "실패 항목이 있어 수정과 재검증이 필요하다."
+              echo
+            fi
+            if [ "$PUB_RESULT" -ne 0 ]; then
+              echo "## pub get 오류"
+              echo '```text'
+              tail -n 100 /tmp/pub-get.log
+              echo '```'
+              echo
+            fi
+            if [ "$FORMAT_RESULT" -ne 0 ]; then
+              echo "## format 오류"
+              echo '```text'
+              tail -n 100 /tmp/format.log
+              echo '```'
+              echo
+            fi
+            if [ "$ANALYZE_RESULT" -ne 0 ]; then
+              echo "## analyze 오류"
+              echo '```text'
+              tail -n 140 /tmp/analyze.log
+              echo '```'
+              echo
+            fi
+            if [ "$TEST_RESULT" -ne 0 ]; then
+              echo "## test 오류"
+              echo '```text'
+              tail -n 180 /tmp/test.log
+              echo '```'
+              echo
+            fi
+            if [ "$BUILD_RESULT" -ne 0 ]; then
+              echo "## build 오류"
+              echo '```text'
+              tail -n 120 /tmp/build.log
+              echo '```'
+            fi
+          } > docs/EPISODE_01_FULL_VALIDATION.md
+
+          if [ "$ALL_SUCCESS" -eq 1 ]; then
+            python - <<'PY'
+          from pathlib import Path
+
+          status_path = Path('docs/EPISODE_01_FINALE_STATUS.md')
+          if status_path.exists():
+              text = status_path.read_text(encoding='utf-8')
+              text = text.replace(
+                  '- 상태: 코드 구현 완료, Flutter 명령 검증 대기',
+                  '- 상태: 코드 구현 및 전체 자동 검증 완료',
+                  1,
+              )
+              text = text.replace(
+                  '현재 연결된 실행 환경에는 Flutter와 Dart 실행 명령이 없어 결과를 아직 확정하지 않았다. 전체 검증 성공 뒤 `PROJECT_CONTEXT.md`에 Episode 1 구현 완료 상태를 반영한다.',
+                  'GitHub Actions에서 format, analyze, 전체 test와 Web build를 모두 통과했다. 상세 결과는 `docs/EPISODE_01_FULL_VALIDATION.md`에 기록했다.',
+                  1,
+              )
+              status_path.write_text(text, encoding='utf-8')
+
+          context_path = Path('PROJECT_CONTEXT.md')
+          context = context_path.read_text(encoding='utf-8')
+          heading = '## 22. Episode 1 본편 구현 및 자동 검증 완료 (2026-07-28)'
+          if heading not in context:
+              context = context.rstrip() + '''
+
+## 22. Episode 1 본편 구현 및 자동 검증 완료 (2026-07-28)
+
+### 구현 완료 범위
+
+- P0 떨어진 별조각 결합
+- P1 별받침대 별가루 12개를 4·4·4로 균등 분배
+- P2 시계꽃 숲의 4칸·6칸 주기와 첫 공통 개화 12번째 칸
+- P3 연못 기억거울의 젖은 발자국 순서 추적
+- P4 분수대 바람바퀴·돌·별열쇠·관리 상자 연쇄 장치
+- P5 온실의 별 18개와 달 24개를 6개 화단에 최대 균등 분배
+- 핵심 증거 3개를 연결하는 최종 추리
+- 포포가 씨앗을 보호했다는 결말
+- 씨앗 귀환과 별빛 꽃 개화 연출
+- `ProgressStore.completeAdventure(earnedExperience: 110)`을 통한 경험치와 완료 횟수 저장
+- 저장 실패 재시도와 Home 화면 복귀
+
+### 자동 검증
+
+다음 항목을 모두 통과했다.
+
+- `flutter pub get`
+- `dart format`
+- `flutter analyze`
+- `flutter test`
+- `flutter build web --release --base-href /Rumi/ --pwa-strategy=none`
+
+상세 결과는 `docs/EPISODE_01_FULL_VALIDATION.md`에 기록했다.
+
+### 남은 확인
+
+1. Galaxy 태블릿에서 Episode 1 처음부터 끝까지 실제 플레이
+2. 터치 영역, SafeArea, 스크롤과 화면 겹침 확인
+3. 애니메이션 속도와 건너뛰기 동작 확인
+4. 경험치 +110, 완료 횟수와 꽃숲 성장 반영 확인
+5. 초등학교 5학년 대상 10분 사용자 테스트
+6. 사용자 피드백에 따른 난이도·힌트·문구 조정
+
+### 다음 개발 단계
+
+자동 검증 이후에는 신규 기능을 바로 추가하지 않고 실기기 전체 플레이와 사용자 테스트를 먼저 진행한다.
+'''
+              context_path.write_text(context, encoding='utf-8')
+          PY
+          fi
+
+          echo "$ALL_SUCCESS" > /tmp/all-success
+
+      - name: Commit validation result and remove temporary workflow
+        shell: bash
+        run: |
+          rm .github/workflows/validate-episode-one-complete.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'test: validate complete episode one implementation'
+          git push origin HEAD:main
+
+      - name: Fail workflow when validation failed
+        shell: bash
+        run: |
+          if [ "$(cat /tmp/all-success)" != "1" ]; then
+            exit 1
+          fi
