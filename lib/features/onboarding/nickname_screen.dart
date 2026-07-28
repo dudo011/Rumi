@@ -165,9 +165,13 @@ class _NicknameScreenState extends State<NicknameScreen> {
                                   : null,
                               style: FilledButton.styleFrom(
                                 backgroundColor: const Color(0xFF7657B5),
-                                disabledBackgroundColor: const Color(0xFFE4DDEB),
+                                disabledBackgroundColor: const Color(
+                                  0xFFE4DDEB,
+                                ),
                                 foregroundColor: Colors.white,
-                                disabledForegroundColor: const Color(0xFFAAA1B2),
+                                disabledForegroundColor: const Color(
+                                  0xFFAAA1B2,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(18),
                                 ),
@@ -217,11 +221,7 @@ class _WelcomeIcon extends StatelessWidget {
           colors: [Color(0xFFFFE4B8), Color(0xFFF4B8D2)],
         ),
         boxShadow: [
-          BoxShadow(
-            color: Color(0x4DF2B4C9),
-            blurRadius: 22,
-            spreadRadius: 3,
-          ),
+          BoxShadow(color: Color(0x4DF2B4C9), blurRadius: 22, spreadRadius: 3),
         ],
       ),
       child: const Icon(
@@ -244,11 +244,7 @@ class _GardenBackground extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFF3E9FF),
-            Color(0xFFFFF5F3),
-            Color(0xFFE9F3EC),
-          ],
+          colors: [Color(0xFFF3E9FF), Color(0xFFFFF5F3), Color(0xFFE9F3EC)],
         ),
       ),
     );

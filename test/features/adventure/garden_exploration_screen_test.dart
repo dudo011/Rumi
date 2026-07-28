@@ -4,9 +4,7 @@ import 'package:rumi/features/adventure/garden_exploration_screen.dart';
 
 void main() {
   Widget buildScreen() {
-    return MaterialApp(
-      home: GardenExplorationScreen(onContinue: (_) {}),
-    );
+    return MaterialApp(home: GardenExplorationScreen(onContinue: (_) {}));
   }
 
   Future<void> start(WidgetTester tester) async {
@@ -27,7 +25,10 @@ void main() {
     await tester.tap(find.byKey(const Key('pedestal-hotspot')));
     await tester.pump(const Duration(milliseconds: 600));
 
-    expect(find.byKey(const Key('pedestal-investigation-scene')), findsOneWidget);
+    expect(
+      find.byKey(const Key('pedestal-investigation-scene')),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('inspect-empty-spot')), findsOneWidget);
     expect(find.byKey(const Key('inspect-scratch-mark')), findsOneWidget);
     expect(find.byKey(const Key('inspect-star-dust')), findsOneWidget);

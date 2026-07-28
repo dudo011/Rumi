@@ -93,10 +93,7 @@ class _Header extends StatelessWidget {
         const CircleAvatar(
           radius: 27,
           backgroundColor: Color(0xFFFFD8E8),
-          child: Icon(
-            Icons.local_florist_rounded,
-            color: Color(0xFF72509B),
-          ),
+          child: Icon(Icons.local_florist_rounded, color: Color(0xFF72509B)),
         ),
         const SizedBox(width: 14),
         Expanded(

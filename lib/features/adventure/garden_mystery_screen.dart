@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
 
-enum _MysteryScene { opening, garden, pedestal, trail, chest, deduction, solved }
+enum _MysteryScene {
+  opening,
+  garden,
+  pedestal,
+  trail,
+  chest,
+  deduction,
+  solved,
+}
+
 enum _Evidence { scratch, footprints, fiber }
 
 class GardenMysteryScreen extends StatefulWidget {
@@ -207,7 +216,9 @@ class _GardenMysteryScreenState extends State<GardenMysteryScreen> {
           onInspect: _inspectChest,
           onMoveStone: _moveStone,
           onToggleFactor: (value) => setState(() {
-            _factors.contains(value) ? _factors.remove(value) : _factors.add(value);
+            _factors.contains(value)
+                ? _factors.remove(value)
+                : _factors.add(value);
             _feedback = null;
           }),
           onCheck: _solveChest,
@@ -258,7 +269,11 @@ class _MissionHeader extends StatelessWidget {
               const Expanded(
                 child: Text(
                   '사라진 별빛 씨앗',
-                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
               Chip(
@@ -278,7 +293,11 @@ class _MissionHeader extends StatelessWidget {
             child: Text(
               '현재 목표 · $objective',
               key: const Key('current-objective'),
-              style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w800),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
         ],
@@ -308,20 +327,35 @@ class _OpeningScene extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 620),
             child: Column(
               children: [
-                const Icon(Icons.auto_awesome_rounded, size: 88, color: Color(0xFFFFDB72)),
+                const Icon(
+                  Icons.auto_awesome_rounded,
+                  size: 88,
+                  color: Color(0xFFFFDB72),
+                ),
                 const SizedBox(height: 18),
                 const Text(
                   '별빛 씨앗이 사라졌어요!',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
                 const SizedBox(height: 18),
                 Container(
                   padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
                   child: const Text(
                     '꽃루미: 조금 전까지 받침대 위에 있던 씨앗이 없어졌어.\n\n누가 가져간 걸까, 아니면 바람에 밀려난 걸까? 정원의 변화를 직접 살펴보고 무슨 일이 있었는지 밝혀줘!',
-                    style: TextStyle(color: Color(0xFF473A54), height: 1.55, fontSize: 16),
+                    style: TextStyle(
+                      color: Color(0xFF473A54),
+                      height: 1.55,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -557,7 +591,9 @@ class _ChestScene extends StatelessWidget {
             children: [
               _ObjectTile(
                 key: const Key('inspect-lock'),
-                icon: inspected ? Icons.lock_outline_rounded : Icons.lock_rounded,
+                icon: inspected
+                    ? Icons.lock_outline_rounded
+                    : Icons.lock_rounded,
                 label: inspected ? '별 모양 열쇠구멍' : '상자 잠금장치',
                 onTap: onInspect,
               ),
@@ -566,7 +602,9 @@ class _ChestScene extends StatelessWidget {
                 offset: stoneMoved ? const Offset(24, 0) : Offset.zero,
                 child: _ObjectTile(
                   key: const Key('move-stone'),
-                  icon: stoneMoved ? Icons.key_rounded : Icons.landscape_rounded,
+                  icon: stoneMoved
+                      ? Icons.key_rounded
+                      : Icons.landscape_rounded,
                   label: stoneMoved ? '별열쇠 발견' : '긁힌 작은 돌',
                   onTap: onMoveStone,
                 ),
@@ -643,7 +681,9 @@ class _DeductionScene extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        gradient: LinearGradient(colors: [Color(0xFF2E2547), Color(0xFF253D46)]),
+        gradient: LinearGradient(
+          colors: [Color(0xFF2E2547), Color(0xFF253D46)],
+        ),
       ),
       child: Center(
         child: SingleChildScrollView(
@@ -656,7 +696,13 @@ class _DeductionScene extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text('추리 보드', style: TextStyle(fontSize: 25, fontWeight: FontWeight.w900)),
+                    const Text(
+                      '추리 보드',
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
                     const SizedBox(height: 14),
                     const _EvidenceBoard(),
                     const SizedBox(height: 16),
@@ -665,7 +711,10 @@ class _DeductionScene extends StatelessWidget {
                         padding: const EdgeInsets.only(bottom: 9),
                         child: ChoiceChip(
                           key: Key('deduction-option-$index'),
-                          label: SizedBox(width: double.infinity, child: Text(options[index])),
+                          label: SizedBox(
+                            width: double.infinity,
+                            child: Text(options[index]),
+                          ),
                           selected: selected == index,
                           onSelected: (_) => onSelect(index),
                         ),
@@ -712,26 +761,47 @@ class _SolvedScene extends StatelessWidget {
                 const Stack(
                   alignment: Alignment.center,
                   children: [
-                    Icon(Icons.wb_sunny_rounded, size: 150, color: Color(0x44FFE67F)),
+                    Icon(
+                      Icons.wb_sunny_rounded,
+                      size: 150,
+                      color: Color(0x44FFE67F),
+                    ),
                     CircleAvatar(
                       radius: 52,
                       backgroundColor: Color(0xFFEEE6FF),
-                      child: Icon(Icons.pets_rounded, size: 58, color: Color(0xFF755C91)),
+                      child: Icon(
+                        Icons.pets_rounded,
+                        size: 58,
+                        color: Color(0xFF755C91),
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 20),
-                const Text('사건 해결!', style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w900)),
+                const Text(
+                  '사건 해결!',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 30,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
                 const SizedBox(height: 14),
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Color(0xFFFFF0B5), Color(0xFFFFD2E5)]),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFFF0B5), Color(0xFFFFD2E5)],
+                    ),
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: const Text(
                     '포포: 훔친 게 아니야! 바람에 밀려온 씨앗이 연못에 빠질까 봐 상자에 넣어 두었어.\n\n꽃루미: 포포가 씨앗을 지켜준 거였구나. 별지기님이 흔적을 잘 연결해 준 덕분이야!',
-                    style: TextStyle(color: Color(0xFF4A3042), height: 1.55, fontSize: 16),
+                    style: TextStyle(
+                      color: Color(0xFF4A3042),
+                      height: 1.55,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 18),
@@ -751,7 +821,12 @@ class _SolvedScene extends StatelessWidget {
 }
 
 class _CloseUpShell extends StatelessWidget {
-  const _CloseUpShell({required this.title, required this.subtitle, required this.icon, required this.child});
+  const _CloseUpShell({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.child,
+  });
 
   final String title;
   final String subtitle;
@@ -762,7 +837,11 @@ class _CloseUpShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF30264B), Color(0xFF1E4B4A)]),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF30264B), Color(0xFF1E4B4A)],
+        ),
       ),
       child: Center(
         child: SingleChildScrollView(
@@ -771,16 +850,40 @@ class _CloseUpShell extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 680),
             child: Card(
               elevation: 8,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(22),
                 child: Column(
                   children: [
-                    CircleAvatar(radius: 35, backgroundColor: const Color(0xFFFFE6A3), child: Icon(icon, size: 38, color: const Color(0xFF654D78))),
+                    CircleAvatar(
+                      radius: 35,
+                      backgroundColor: const Color(0xFFFFE6A3),
+                      child: Icon(
+                        icon,
+                        size: 38,
+                        color: const Color(0xFF654D78),
+                      ),
+                    ),
                     const SizedBox(height: 12),
-                    Text(title, textAlign: TextAlign.center, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
+                    Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
                     const SizedBox(height: 6),
-                    Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF6F6478), height: 1.4)),
+                    Text(
+                      subtitle,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Color(0xFF6F6478),
+                        height: 1.4,
+                      ),
+                    ),
                     const SizedBox(height: 20),
                     child,
                   ],
@@ -795,7 +898,13 @@ class _CloseUpShell extends StatelessWidget {
 }
 
 class _SceneButton extends StatelessWidget {
-  const _SceneButton({required this.label, required this.icon, required this.emphasized, required this.onPressed, super.key});
+  const _SceneButton({
+    required this.label,
+    required this.icon,
+    required this.emphasized,
+    required this.onPressed,
+    super.key,
+  });
   final String label;
   final IconData icon;
   final bool emphasized;
@@ -812,7 +921,15 @@ class _SceneButton extends StatelessWidget {
         child: InkResponse(
           onTap: onPressed,
           radius: 40,
-          child: SizedBox(width: 64, height: 64, child: Icon(icon, color: const Color(0xFFFFDD7D), size: emphasized ? 37 : 31)),
+          child: SizedBox(
+            width: 64,
+            height: 64,
+            child: Icon(
+              icon,
+              color: const Color(0xFFFFDD7D),
+              size: emphasized ? 37 : 31,
+            ),
+          ),
         ),
       ),
     );
@@ -826,17 +943,31 @@ class _SceneCaption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: BoxDecoration(color: const Color(0xCC211A32), borderRadius: BorderRadius.circular(18)),
+      decoration: BoxDecoration(
+        color: const Color(0xCC211A32),
+        borderRadius: BorderRadius.circular(18),
+      ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
       ),
     );
   }
 }
 
 class _ChoiceRow extends StatelessWidget {
-  const _ChoiceRow({required this.values, required this.selected, required this.keyPrefix, required this.onSelect});
+  const _ChoiceRow({
+    required this.values,
+    required this.selected,
+    required this.keyPrefix,
+    required this.onSelect,
+  });
   final List<int> values;
   final int? selected;
   final String keyPrefix;
@@ -873,14 +1004,29 @@ class _Feedback extends StatelessWidget {
       key: const Key('scene-feedback'),
       margin: const EdgeInsets.only(top: 10),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: const Color(0xFFF4ECF7), borderRadius: BorderRadius.circular(14)),
-      child: Text(text!, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF65486E), fontWeight: FontWeight.w700)),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF4ECF7),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Text(
+        text!,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: Color(0xFF65486E),
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
   }
 }
 
 class _ObjectTile extends StatelessWidget {
-  const _ObjectTile({required this.icon, required this.label, required this.onTap, super.key});
+  const _ObjectTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    super.key,
+  });
   final IconData icon;
   final String label;
   final VoidCallback onTap;
@@ -893,8 +1039,22 @@ class _ObjectTile extends StatelessWidget {
       child: Container(
         width: 130,
         padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(color: const Color(0xFFF3EDF7), borderRadius: BorderRadius.circular(22), border: Border.all(color: const Color(0xFFD9CBE3))),
-        child: Column(children: [Icon(icon, size: 48, color: const Color(0xFF76558C)), const SizedBox(height: 8), Text(label, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w800))]),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF3EDF7),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: const Color(0xFFD9CBE3)),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 48, color: const Color(0xFF76558C)),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -913,8 +1073,18 @@ class _StarGroups extends StatelessWidget {
         4,
         (group) => Container(
           padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(color: const Color(0xFFFFF4C9), borderRadius: BorderRadius.circular(16)),
-          child: const Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.star_rounded, color: Color(0xFFFFC53D)), Icon(Icons.star_rounded, color: Color(0xFFFFC53D)), Icon(Icons.star_rounded, color: Color(0xFFFFC53D))]),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF4C9),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.star_rounded, color: Color(0xFFFFC53D)),
+              Icon(Icons.star_rounded, color: Color(0xFFFFC53D)),
+              Icon(Icons.star_rounded, color: Color(0xFFFFC53D)),
+            ],
+          ),
         ),
       ),
     );
@@ -928,12 +1098,19 @@ class _TrailTracks extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: const Color(0xFFF1EBDD), borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1EBDD),
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Column(
         children: [
           _MarkerTrack(label: '발자국', interval: 4, icon: Icons.pets_rounded),
           const SizedBox(height: 12),
-          _MarkerTrack(label: '별가루', interval: 6, icon: Icons.auto_awesome_rounded),
+          _MarkerTrack(
+            label: '별가루',
+            interval: 6,
+            icon: Icons.auto_awesome_rounded,
+          ),
         ],
       ),
     );
@@ -941,7 +1118,11 @@ class _TrailTracks extends StatelessWidget {
 }
 
 class _MarkerTrack extends StatelessWidget {
-  const _MarkerTrack({required this.label, required this.interval, required this.icon});
+  const _MarkerTrack({
+    required this.label,
+    required this.interval,
+    required this.icon,
+  });
   final String label;
   final int interval;
   final IconData icon;
@@ -950,13 +1131,25 @@ class _MarkerTrack extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SizedBox(width: 52, child: Text(label, style: const TextStyle(fontWeight: FontWeight.w800))),
+        SizedBox(
+          width: 52,
+          child: Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.w800),
+          ),
+        ),
         Expanded(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(
               12,
-              (index) => Icon((index + 1) % interval == 0 ? icon : Icons.circle, size: (index + 1) % interval == 0 ? 19 : 5, color: (index + 1) % interval == 0 ? const Color(0xFF76558C) : const Color(0xFFBDB2A5)),
+              (index) => Icon(
+                (index + 1) % interval == 0 ? icon : Icons.circle,
+                size: (index + 1) % interval == 0 ? 19 : 5,
+                color: (index + 1) % interval == 0
+                    ? const Color(0xFF76558C)
+                    : const Color(0xFFBDB2A5),
+              ),
             ),
           ),
         ),
@@ -972,7 +1165,10 @@ class _EvidenceBoard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: const Color(0xFFF4ECF7), borderRadius: BorderRadius.circular(18)),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF4ECF7),
+        borderRadius: BorderRadius.circular(18),
+      ),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1003,27 +1199,65 @@ class _GardenPainter extends CustomPainter {
           colors: [Color(0xFF31264E), Color(0xFF24584B), Color(0xFF183C32)],
         ).createShader(rect),
     );
-    final pathPaint = Paint()..color = const Color(0x558FE0C0)..strokeWidth = 26..style = PaintingStyle.stroke..strokeCap = StrokeCap.round;
-    final path = Path()..moveTo(size.width * 0.5, size.height * 0.46)..quadraticBezierTo(size.width * 0.72, size.height * 0.55, size.width * 0.78, size.height * 0.8);
+    final pathPaint = Paint()
+      ..color = const Color(0x558FE0C0)
+      ..strokeWidth = 26
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+    final path = Path()
+      ..moveTo(size.width * 0.5, size.height * 0.46)
+      ..quadraticBezierTo(
+        size.width * 0.72,
+        size.height * 0.55,
+        size.width * 0.78,
+        size.height * 0.8,
+      );
     canvas.drawPath(path, pathPaint);
-    canvas.drawCircle(Offset(size.width * 0.18, size.height * 0.7), size.shortestSide * 0.13, Paint()..color = const Color(0xAA55B7C9));
-    canvas.drawCircle(Offset(size.width * 0.48, size.height * 0.39), 34, Paint()..color = const Color(0xFFBBA36A));
+    canvas.drawCircle(
+      Offset(size.width * 0.18, size.height * 0.7),
+      size.shortestSide * 0.13,
+      Paint()..color = const Color(0xAA55B7C9),
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.48, size.height * 0.39),
+      34,
+      Paint()..color = const Color(0xFFBBA36A),
+    );
     if (evidence.contains(_Evidence.scratch)) {
-      final cluePaint = Paint()..color = const Color(0xFFFFD66F)..strokeWidth = 4..strokeCap = StrokeCap.round;
+      final cluePaint = Paint()
+        ..color = const Color(0xFFFFD66F)
+        ..strokeWidth = 4
+        ..strokeCap = StrokeCap.round;
       for (var i = 0; i < 4; i++) {
-        canvas.drawLine(Offset(size.width * 0.5 + i * 5, size.height * 0.39), Offset(size.width * 0.6 + i * 5, size.height * 0.43), cluePaint);
+        canvas.drawLine(
+          Offset(size.width * 0.5 + i * 5, size.height * 0.39),
+          Offset(size.width * 0.6 + i * 5, size.height * 0.43),
+          cluePaint,
+        );
       }
     }
     if (evidence.contains(_Evidence.footprints)) {
       final printPaint = Paint()..color = const Color(0xFFEAB4DB);
       for (var i = 0; i < 5; i++) {
-        canvas.drawCircle(Offset(size.width * (0.58 + i * 0.045), size.height * (0.5 + i * 0.045)), 7, printPaint);
+        canvas.drawCircle(
+          Offset(
+            size.width * (0.58 + i * 0.045),
+            size.height * (0.5 + i * 0.045),
+          ),
+          7,
+          printPaint,
+        );
       }
     }
   }
 
   @override
-  bool shouldRepaint(covariant _GardenPainter oldDelegate) => oldDelegate.evidence.length != evidence.length;
+  bool shouldRepaint(covariant _GardenPainter oldDelegate) =>
+      oldDelegate.evidence.length != evidence.length;
 }
 
-const _questionStyle = TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: Color(0xFF45364F));
+const _questionStyle = TextStyle(
+  fontSize: 17,
+  fontWeight: FontWeight.w900,
+  color: Color(0xFF45364F),
+);

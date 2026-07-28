@@ -36,12 +36,13 @@ class ProgressStore {
     await preferences.setString(_nicknameKey, nickname.trim());
   }
 
-  Future<PlayerProgress> completeAdventure({required int earnedExperience}) async {
+  Future<PlayerProgress> completeAdventure({
+    required int earnedExperience,
+  }) async {
     final preferences = await SharedPreferences.getInstance();
     final experience =
         (preferences.getInt(_experienceKey) ?? 0) + earnedExperience;
-    final completed =
-        (preferences.getInt(_completedAdventuresKey) ?? 0) + 1;
+    final completed = (preferences.getInt(_completedAdventuresKey) ?? 0) + 1;
     await preferences.setInt(_experienceKey, experience);
     await preferences.setInt(_completedAdventuresKey, completed);
     return PlayerProgress(

@@ -49,9 +49,7 @@ void main() {
   });
 
   testWidgets('올바른 닉네임을 입력하면 꽃루미를 만난다', (tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(home: NicknameScreen()),
-    );
+    await tester.pumpWidget(const MaterialApp(home: NicknameScreen()));
 
     final button = find.widgetWithText(FilledButton, '별지기 시작하기');
     expect(tester.widget<FilledButton>(button).onPressed, isNull);

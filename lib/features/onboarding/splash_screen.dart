@@ -136,9 +136,9 @@ class _SplashScreenState extends State<SplashScreen>
                             '마음속 작은 용기가 별이 되는 곳',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: const Color(0xFFFFE8F2).withValues(
-                                alpha: 0.9,
-                              ),
+                              color: const Color(
+                                0xFFFFE8F2,
+                              ).withValues(alpha: 0.9),
                               fontSize: compact ? 15 : 17,
                               fontWeight: FontWeight.w500,
                               letterSpacing: 0.2,

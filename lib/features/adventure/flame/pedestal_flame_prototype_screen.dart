@@ -114,18 +114,15 @@ class _PedestalWorld extends PositionComponent
   double _successPulse = 0;
 
   Rect get _pedestalRect => Rect.fromCenter(
-        center: Offset(size.x * 0.53, size.y * 0.55),
-        width: math.min(size.x * 0.30, 220),
-        height: math.min(size.y * 0.24, 190),
-      );
+    center: Offset(size.x * 0.53, size.y * 0.55),
+    width: math.min(size.x * 0.30, 220),
+    height: math.min(size.y * 0.24, 190),
+  );
 
   List<Offset> get _groupCenters {
     final width = size.x;
     final y = size.y * 0.76;
-    return List.generate(
-      4,
-      (index) => Offset(width * (0.2 + index * 0.2), y),
-    );
+    return List.generate(4, (index) => Offset(width * (0.2 + index * 0.2), y));
   }
 
   @override
@@ -238,10 +235,9 @@ class _PedestalWorld extends PositionComponent
     int? targetGroup;
     var bestDistance = double.infinity;
     for (var group = 0; group < centers.length; group++) {
-      final distance = piece.position.distanceTo(Vector2(
-        centers[group].dx,
-        centers[group].dy,
-      ));
+      final distance = piece.position.distanceTo(
+        Vector2(centers[group].dx, centers[group].dy),
+      );
       if (distance < 74 && distance < bestDistance) {
         targetGroup = group;
         bestDistance = distance;
@@ -266,11 +262,7 @@ class _PedestalWorld extends PositionComponent
     if (_dust.every((dust) => dust.group != null)) {
       _phase = _PrototypePhase.solved;
       for (var index = 0; index < 90; index++) {
-        _burst(
-          Vector2(size.x * 0.5, size.y * 0.47),
-          count: 1,
-          strong: true,
-        );
+        _burst(Vector2(size.x * 0.5, size.y * 0.47), count: 1, strong: true);
       }
     }
   }
@@ -379,8 +371,16 @@ class _PedestalWorld extends PositionComponent
       );
       canvas.drawCircle(lumi, 40, Paint()..color = const Color(0x44E8D6FF));
       canvas.drawCircle(lumi, 26, Paint()..color = const Color(0xFFDCCBFF));
-      canvas.drawCircle(lumi + const Offset(-8, -3), 3, Paint()..color = const Color(0xFF433554));
-      canvas.drawCircle(lumi + const Offset(8, -3), 3, Paint()..color = const Color(0xFF433554));
+      canvas.drawCircle(
+        lumi + const Offset(-8, -3),
+        3,
+        Paint()..color = const Color(0xFF433554),
+      );
+      canvas.drawCircle(
+        lumi + const Offset(8, -3),
+        3,
+        Paint()..color = const Color(0xFF433554),
+      );
     }
   }
 
@@ -438,12 +438,7 @@ class _PedestalWorld extends PositionComponent
 
   void _drawGroupingLayer(Canvas canvas) {
     final panel = RRect.fromRectAndRadius(
-      Rect.fromLTWH(
-        size.x * 0.08,
-        size.y * 0.35,
-        size.x * 0.84,
-        size.y * 0.51,
-      ),
+      Rect.fromLTWH(size.x * 0.08, size.y * 0.35, size.x * 0.84, size.y * 0.51),
       const Radius.circular(30),
     );
     canvas.drawRRect(panel, Paint()..color = const Color(0xD91A1930));
@@ -472,9 +467,7 @@ class _PedestalWorld extends PositionComponent
         center,
         47,
         Paint()
-          ..color = complete
-              ? const Color(0xFF8DE8B8)
-              : const Color(0xFF6D6385)
+          ..color = complete ? const Color(0xFF8DE8B8) : const Color(0xFF6D6385)
           ..style = PaintingStyle.stroke
           ..strokeWidth = complete ? 5 : 3,
       );
@@ -489,14 +482,14 @@ class _PedestalWorld extends PositionComponent
     }
 
     for (final piece in _dust) {
-      final pulse = piece.dragging ? 1.25 : 1 + math.sin(_time * 3 + piece.home.x) * 0.04;
+      final pulse = piece.dragging
+          ? 1.25
+          : 1 + math.sin(_time * 3 + piece.home.x) * 0.04;
       _drawStar(
         canvas,
         piece.position.toOffset(),
         17 * pulse,
-        piece.group == null
-            ? const Color(0xFFFFD968)
-            : const Color(0xFFA7F3C4),
+        piece.group == null ? const Color(0xFFFFD968) : const Color(0xFFA7F3C4),
       );
     }
   }
