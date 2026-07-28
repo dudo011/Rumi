@@ -1,6 +1,8 @@
 name: Validate complete Episode 1
 
 on:
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
     paths:
