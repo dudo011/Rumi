@@ -36,4 +36,19 @@ void main() {
     expect(updated.levelExperience, 30);
     expect(updated.completedAdventures, 2);
   });
+
+  test('Episode 1 v3 대형 퍼즐 체크포인트를 저장하고 지운다', () async {
+    const store = ProgressStore();
+
+    expect(await store.loadEpisodeOneV3Checkpoint(), 0);
+
+    await store.saveEpisodeOneV3Checkpoint(2);
+    expect(await store.loadEpisodeOneV3Checkpoint(), 2);
+
+    await store.saveEpisodeOneV3Checkpoint(9);
+    expect(await store.loadEpisodeOneV3Checkpoint(), 3);
+
+    await store.clearEpisodeOneV3Checkpoint();
+    expect(await store.loadEpisodeOneV3Checkpoint(), 0);
+  });
 }
