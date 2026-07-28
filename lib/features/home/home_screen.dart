@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/storage/progress_store.dart';
-import '../adventure/escape/episode_one_v2/episode_one_redesign_screen.dart';
+import '../adventure/escape/episode_one_v3/episode_one_v3_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, this.store = const ProgressStore()});
@@ -31,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _startAdventure() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => EpisodeOneRedesignScreen(store: widget.store),
+        builder: (_) => EpisodeOneV3Screen(store: widget.store),
       ),
     );
     await _loadProgress();
@@ -245,7 +245,7 @@ class _AdventureCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             const Text(
-              '별빛 씨앗이 사라진 순서를 밝히기 위해 중앙 정원의 물건을 조사하고 약수 규칙으로 흔적을 해석하세요.',
+              '흩어진 흔적을 복원하고 약수 규칙을 장치에 적용해, 겹쳐진 발자국 중 사건과 맞는 경로를 찾아보세요.',
               style: TextStyle(color: Color(0xFF6F6478), height: 1.5),
             ),
             const SizedBox(height: 16),
@@ -254,8 +254,8 @@ class _AdventureCard extends StatelessWidget {
               runSpacing: 8,
               children: [
                 _Tag(icon: Icons.calculate_rounded, label: '약수'),
-                _Tag(icon: Icons.schedule_rounded, label: '15~18분'),
-                _Tag(icon: Icons.search_rounded, label: '단서 6개'),
+                _Tag(icon: Icons.schedule_rounded, label: '20~25분'),
+                _Tag(icon: Icons.extension_rounded, label: '연쇄 퍼즐 4개'),
               ],
             ),
             const SizedBox(height: 18),
