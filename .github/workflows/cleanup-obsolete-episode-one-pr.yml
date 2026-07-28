@@ -1,0 +1,224 @@
+name: Validate legacy Episode 1 cleanup
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Remove obsolete code and update direct navigation
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from textwrap import dedent
+
+          home_path = Path('lib/features/home/home_screen.dart')
+          home = home_path.read_text(encoding='utf-8')
+          home = home.replace(
+              "import '../adventure/garden_exploration_screen.dart';\nimport '../adventure/starlight_seed_episode_screen.dart';",
+              "import '../adventure/escape/episode_one/episode_one_escape_screen.dart';",
+          )
+          start = home.index('  Future<void> _startAdventure() async {')
+          end = home.index('\n  @override', start)
+          replacement = '''  Future<void> _startAdventure() async {
+            await Navigator.of(context).push<void>(
+              MaterialPageRoute<void>(
+                builder: (_) => EpisodeOneEscapeScreen(store: widget.store),
+              ),
+            );
+            await _loadProgress();
+          }'''
+          home_path.write_text(home[:start] + replacement + '\n' + home[end:], encoding='utf-8')
+
+          obsolete_sources = [
+              'lib/features/adventure/garden_exploration_screen.dart',
+              'lib/features/adventure/garden_mystery_v2_screen.dart',
+              'lib/features/adventure/starlight_seed_episode_screen.dart',
+              'lib/features/adventure/flame/episode_1_flame_screen.dart',
+              'lib/features/adventure/flame/escape_feasibility_screen.dart',
+          ]
+          removed_sources = []
+          for raw in obsolete_sources:
+              path = Path(raw)
+              if path.exists():
+                  path.unlink()
+                  removed_sources.append(raw)
+
+          patterns = (
+              'GardenExplorationScreen', 'GardenMysteryV2Screen',
+              'StarlightSeedEpisodeScreen', 'EpisodeOneFlameScreen',
+              'EscapeFeasibilityScreen', 'garden_exploration_screen.dart',
+              'garden_mystery_v2_screen.dart', 'starlight_seed_episode_screen.dart',
+              'episode_1_flame_screen.dart', 'escape_feasibility_screen.dart',
+              'open-development-preview-menu', 'open-flame-episode-one',
+              'open-flame-feasibility-lab',
+          )
+          removed_tests = []
+          for path in sorted(Path('test').rglob('*.dart')):
+              text = path.read_text(encoding='utf-8')
+              if any(pattern in text for pattern in patterns):
+                  removed_tests.append(path.as_posix())
+                  path.unlink()
+
+          math_question = Path('lib/features/adventure/math_question.dart')
+          if math_question.exists() and not any(
+              'math_question.dart' in path.read_text(encoding='utf-8')
+              for path in Path('lib').rglob('*.dart')
+              if path != math_question
+          ):
+              math_question.unlink()
+              removed_sources.append(math_question.as_posix())
+
+          uses_audio = any(
+              'package:flame_audio/' in path.read_text(encoding='utf-8')
+              for root in (Path('lib'), Path('test'))
+              for path in root.rglob('*.dart')
+          )
+          if not uses_audio:
+              pubspec_path = Path('pubspec.yaml')
+              pubspec_path.write_text(
+                  pubspec_path.read_text(encoding='utf-8').replace('  flame_audio: ^2.12.2\n', ''),
+                  encoding='utf-8',
+              )
+
+          Path('/tmp/removed_sources.txt').write_text('\n'.join(removed_sources), encoding='utf-8')
+          Path('/tmp/removed_tests.txt').write_text('\n'.join(removed_tests), encoding='utf-8')
+
+          Path('test/home_episode_one_navigation_test.dart').write_text(dedent('''
+              import 'package:flutter/material.dart';
+              import 'package:flutter_test/flutter_test.dart';
+              import 'package:shared_preferences/shared_preferences.dart';
+
+              import 'package:rumi/features/home/home_screen.dart';
+
+              void main() {
+                testWidgets('메인 화면에서 최종 Episode 1로 직접 이동한다', (tester) async {
+                  SharedPreferences.setMockInitialValues({'player_nickname': '루나'});
+
+                  await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
+                  await tester.pumpAndSettle();
+                  await tester.tap(find.text('사건 조사하기'));
+                  await tester.pump();
+                  await tester.pump(const Duration(milliseconds: 500));
+
+                  expect(
+                    find.byKey(const Key('episode-one-foundation-back')),
+                    findsOneWidget,
+                  );
+                  expect(find.text('새 방탈출 Episode 1 전체 체험'), findsNothing);
+                  expect(tester.takeException(), isNull);
+                  await tester.pumpWidget(const SizedBox.shrink());
+                });
+              }
+          ''').lstrip(), encoding='utf-8')
+          PY
+
+          if grep -R -n -E 'GardenExplorationScreen|GardenMysteryV2Screen|StarlightSeedEpisodeScreen|EpisodeOneFlameScreen|EscapeFeasibilityScreen|garden_exploration_screen|garden_mystery_v2_screen|starlight_seed_episode_screen|episode_1_flame_screen|escape_feasibility_screen' lib test; then
+            echo 'Obsolete reference remains.' >&2
+            exit 1
+          fi
+
+      - name: Validate cleaned project
+        shell: bash
+        run: |
+          flutter pub get
+          dart format lib/features/home/home_screen.dart test/home_episode_one_navigation_test.dart
+          dart format --output=none --set-exit-if-changed lib/features/home/home_screen.dart test/home_episode_one_navigation_test.dart
+          flutter analyze
+          flutter test
+          flutter build web --release --base-href /Rumi/ --pwa-strategy=none
+
+      - name: Record cleanup result
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          sources = [line for line in Path('/tmp/removed_sources.txt').read_text(encoding='utf-8').splitlines() if line]
+          tests = [line for line in Path('/tmp/removed_tests.txt').read_text(encoding='utf-8').splitlines() if line]
+          lines = [
+              '# Episode 1 이전 버전 정리 및 자동 검증', '',
+              '- 최종 Episode 1 단일 실행 경로 전환: 성공',
+              '- 이전 실행 코드와 전용 테스트 제거: 성공',
+              '- `flutter pub get`: 성공', '- `dart format`: 성공',
+              '- `flutter analyze`: 성공', '- `flutter test`: 성공',
+              '- `flutter build web --release --base-href /Rumi/ --pwa-strategy=none`: 성공',
+              '', '## 제거한 실행 코드', '',
+              *[f'- `{path}`' for path in sources],
+              '', '## 제거한 이전 버전 전용 테스트', '',
+              *([f'- `{path}`' for path in tests] if tests else ['- 별도 파일 없음']),
+              '', '## 유지한 항목', '',
+              '- `lib/features/adventure/escape/episode_one/` 최종 Episode 1',
+              '- 분석·설계·검증 문서', '- 최종 Episode 1 자동 테스트',
+              '- 경험치와 완료 횟수 저장 기능',
+          ]
+          Path('docs/EPISODE_01_LEGACY_CLEANUP_VALIDATION.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+
+          context_path = Path('PROJECT_CONTEXT.md')
+          context = context_path.read_text(encoding='utf-8')
+          heading = '## 22. Episode 1 단일 실행 버전 전환 및 구버전 정리 (2026-07-28)'
+          if heading not in context:
+              context += f'''\n\n{heading}
+
+### 실행 경로 변경
+
+```text
+Home → 사건 조사하기 → 최종 Episode 1 「사라진 별빛 씨앗」
+```
+
+Home 화면은 중간 개발 메뉴 없이 `EpisodeOneEscapeScreen`을 직접 실행한다.
+
+### 제거 범위
+
+- 기존 정원 조사 화면과 퀴즈형 Episode 화면
+- 초기 Flame Episode 프로토타입과 기술 검증용 실행 화면
+- 위 화면만 대상으로 하는 이전 테스트
+- 다른 소스에서 사용하지 않는 `math_question.dart`
+- 실제 코드에서 사용하지 않게 된 `flame_audio` 의존성
+
+분석 보고서, 디자인 바이블, 상세 설계서와 검증 문서는 유지보수 근거로 보존한다.
+
+### 자동 검증
+
+`flutter pub get`, `dart format`, `flutter analyze`, `flutter test`, Web release 빌드를 모두 통과했다.
+상세 결과는 `docs/EPISODE_01_LEGACY_CLEANUP_VALIDATION.md`에 기록했다.
+
+### 다음 작업
+
+1. 사용자 테스트에서 확인된 시각 완성도 문제 정리
+2. Episode 1 비주얼 디자인 시스템과 정식 아트 방향 확정
+3. 배경·캐릭터·UI·애니메이션·오디오 개선
+4. 전체 자동 검증과 Galaxy 태블릿 재검증
+'''
+          context_path.write_text(context, encoding='utf-8')
+          PY
+
+      - name: Commit validated cleanup to main
+        shell: bash
+        run: |
+          rm -f .github/workflows/cleanup-obsolete-episode-one.yml
+          rm -f .github/workflows/cleanup-obsolete-episode-one-v2.yml
+          rm -f .github/workflows/cleanup-obsolete-episode-one-pr.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'chore: remove obsolete episode one prototypes'
+          git push origin HEAD:main
