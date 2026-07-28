@@ -49,6 +49,7 @@ void main() {
       find.byKey(const Key('episode-one-hypothesis-0')),
     );
     await tester.tap(find.byKey(const Key('episode-one-hypothesis-0')));
+    await tester.pump();
     await tester.ensureVisible(
       find.byKey(const Key('episode-one-deduction-action')),
     );
@@ -98,6 +99,7 @@ void main() {
       find.byKey(const Key('episode-one-hypothesis-1')),
     );
     await tester.tap(find.byKey(const Key('episode-one-hypothesis-1')));
+    await tester.pump();
     await tester.ensureVisible(
       find.byKey(const Key('episode-one-deduction-action')),
     );
@@ -167,6 +169,7 @@ void main() {
       find.byKey(const Key('episode-one-hypothesis-1')),
     );
     await tester.tap(find.byKey(const Key('episode-one-hypothesis-1')));
+    await tester.pump();
     await tester.ensureVisible(
       find.byKey(const Key('episode-one-deduction-action')),
     );

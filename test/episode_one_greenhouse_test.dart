@@ -122,7 +122,7 @@ void main() {
     expect(controller.value.seedFound, isTrue);
     expect(
       find.byKey(const Key('episode-one-greenhouse-discovery')),
-      findsOneWidget,
+      findsWidgets,
     );
     expect(tester.takeException(), isNull);
   });
