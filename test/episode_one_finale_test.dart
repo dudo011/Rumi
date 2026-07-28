@@ -23,6 +23,10 @@ void main() {
       ),
     );
     await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(
+      find.byKey(const Key('episode-one-start-final-deduction')),
+    );
+    await tester.pump();
 
     expect(
       find.byKey(const Key('episode-one-final-deduction')),
@@ -41,7 +45,13 @@ void main() {
       findsOneWidget,
     );
 
+    await tester.ensureVisible(
+      find.byKey(const Key('episode-one-hypothesis-0')),
+    );
     await tester.tap(find.byKey(const Key('episode-one-hypothesis-0')));
+    await tester.ensureVisible(
+      find.byKey(const Key('episode-one-deduction-action')),
+    );
     await tester.tap(find.byKey(const Key('episode-one-deduction-action')));
     await tester.pump();
 
@@ -52,6 +62,9 @@ void main() {
     expect(find.textContaining('바람이 분 뒤'), findsOneWidget);
     expect(store.completeCalls, 0);
 
+    await tester.ensureVisible(
+      find.byKey(const Key('episode-one-deduction-action')),
+    );
     await tester.tap(find.byKey(const Key('episode-one-deduction-action')));
     await tester.pump();
 
@@ -76,8 +89,18 @@ void main() {
       ),
     );
     await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(
+      find.byKey(const Key('episode-one-start-final-deduction')),
+    );
+    await tester.pump();
 
+    await tester.ensureVisible(
+      find.byKey(const Key('episode-one-hypothesis-1')),
+    );
     await tester.tap(find.byKey(const Key('episode-one-hypothesis-1')));
+    await tester.ensureVisible(
+      find.byKey(const Key('episode-one-deduction-action')),
+    );
     await tester.tap(find.byKey(const Key('episode-one-deduction-action')));
     await tester.pump();
 
@@ -87,6 +110,9 @@ void main() {
     );
     expect(find.textContaining('포포는 차가워진 씨앗'), findsOneWidget);
 
+    await tester.ensureVisible(
+      find.byKey(const Key('episode-one-deduction-action')),
+    );
     await tester.tap(find.byKey(const Key('episode-one-deduction-action')));
     await tester.pump();
 
@@ -132,10 +158,23 @@ void main() {
       ),
     );
     await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(
+      find.byKey(const Key('episode-one-start-final-deduction')),
+    );
+    await tester.pump();
 
+    await tester.ensureVisible(
+      find.byKey(const Key('episode-one-hypothesis-1')),
+    );
     await tester.tap(find.byKey(const Key('episode-one-hypothesis-1')));
+    await tester.ensureVisible(
+      find.byKey(const Key('episode-one-deduction-action')),
+    );
     await tester.tap(find.byKey(const Key('episode-one-deduction-action')));
     await tester.pump();
+    await tester.ensureVisible(
+      find.byKey(const Key('episode-one-deduction-action')),
+    );
     await tester.tap(find.byKey(const Key('episode-one-deduction-action')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 3400));
@@ -175,6 +214,10 @@ void main() {
       ),
     );
     await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(
+      find.byKey(const Key('episode-one-start-final-deduction')),
+    );
+    await tester.pump();
 
     expect(find.byKey(const Key('episode-one-finale-overlay')), findsOneWidget);
     expect(

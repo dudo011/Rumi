@@ -32,6 +32,7 @@ class _EpisodeOneFinaleOverlayState extends State<EpisodeOneFinaleOverlay> {
   ];
 
   _FinaleStage _stage = _FinaleStage.deduction;
+  bool _finaleStarted = false;
   int? _selectedHypothesis;
   bool _checked = false;
   bool _saving = false;
@@ -145,6 +146,11 @@ class _EpisodeOneFinaleOverlayState extends State<EpisodeOneFinaleOverlay> {
       valueListenable: widget.controller,
       builder: (context, snapshot, _) {
         if (!snapshot.seedFound) return const SizedBox.shrink();
+        if (!_finaleStarted) {
+          return _FinaleStartPrompt(
+            onPressed: () => setState(() => _finaleStarted = true),
+          );
+        }
 
         return Material(
           key: const Key('episode-one-finale-overlay'),
@@ -588,6 +594,84 @@ class _EpisodeOneFinaleOverlayState extends State<EpisodeOneFinaleOverlay> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _FinaleStartPrompt extends StatelessWidget {
+  const _FinaleStartPrompt({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned(
+          left: 12,
+          right: 12,
+          bottom: 148,
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xF04F3D6C), Color(0xF023594B)],
+                ),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: const Color(0xFFFFE39A), width: 2),
+                boxShadow: const [
+                  BoxShadow(color: Colors.black45, blurRadius: 16),
+                ],
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.psychology_alt_rounded,
+                    color: Color(0xFFFFE39A),
+                    size: 30,
+                  ),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '핵심 증거 3개를 모두 찾았어요',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        SizedBox(height: 3),
+                        Text(
+                          '씨앗과 포포를 확인한 뒤 준비되면 사건의 진실을 추리하세요.',
+                          style: TextStyle(
+                            color: Color(0xFFDCE9E5),
+                            fontSize: 11,
+                            height: 1.35,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  FilledButton(
+                    key: Key('episode-one-start-final-deduction'),
+                    onPressed: onPressed,
+                    child: const Text(
+                      '사건 해결하기',
+                      style: TextStyle(fontWeight: FontWeight.w900),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
