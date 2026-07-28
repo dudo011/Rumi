@@ -275,9 +275,12 @@ class _EpisodeOneV3ScreenState extends State<EpisodeOneV3Screen> {
                               padding: const EdgeInsets.only(bottom: 8),
                               child: Center(
                                 child: ConstrainedBox(
-                                  constraints: const BoxConstraints(maxWidth: 780),
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 780,
+                                  ),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
                                     children: [
                                       _InvestigationScene(
                                         snapshot: snapshot,
@@ -293,8 +296,9 @@ class _EpisodeOneV3ScreenState extends State<EpisodeOneV3Screen> {
                                         rewardSaved: _rewardSaved,
                                         rewardError: _rewardError,
                                         onRetryReward: _saveReward,
-                                        onReturnHome: () => Navigator.of(context)
-                                            .popUntil((route) => route.isFirst),
+                                        onReturnHome: () => Navigator.of(
+                                          context,
+                                        ).popUntil((route) => route.isFirst),
                                       ),
                                     ],
                                   ),
@@ -449,7 +453,10 @@ class _TopBar extends StatelessWidget {
                 foregroundColor: const Color(0xFF302440),
                 child: Text(
                   '${snapshot.clues.length}',
-                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
             ),
@@ -485,8 +492,10 @@ class _InvestigationScene extends StatelessWidget {
       _ => Icons.water_drop_rounded,
     };
     final description = switch (snapshot.macroPuzzleIndex) {
-      1 => '받침대의 장치는 별가루가 남는지에 따라 다른 별자리 문양을 밝힙니다. 벽화와 회전판은 서로 다른 정보의 일부만 보여줍니다.',
-      2 => '긁힘은 화분 테두리, 흙과 바닥에 나뉘어 있습니다. 복원한 수와 바람 방향을 함께 사용해야 숨은 화분을 열 수 있습니다.',
+      1 =>
+        '받침대의 장치는 별가루가 남는지에 따라 다른 별자리 문양을 밝힙니다. 벽화와 회전판은 서로 다른 정보의 일부만 보여줍니다.',
+      2 =>
+        '긁힘은 화분 테두리, 흙과 바닥에 나뉘어 있습니다. 복원한 수와 바람 방향을 함께 사용해야 숨은 화분을 열 수 있습니다.',
       3 => '씨앗 배열은 잠금핀과 문양 암호로 변환됩니다. 이전 장소에서 얻은 읽는 방향이 문을 여는 순서를 결정합니다.',
       _ => '씨앗 이동선, 젖은 발자국과 장화 자국이 겹쳐 있습니다. 도구, 시작점, 간격과 방향을 모두 확인해야 합니다.',
     };
@@ -497,7 +506,13 @@ class _InvestigationScene extends StatelessWidget {
         color: const Color(0xD91A2B35),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: const Color(0x5578DFC3)),
-        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 14, offset: Offset(0, 8))],
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 14,
+            offset: Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -545,11 +560,19 @@ class _InvestigationScene extends StatelessWidget {
               children: snapshot.inventory
                   .map(
                     (item) => Chip(
-                      avatar: const Icon(Icons.category_rounded, size: 16, color: Color(0xFFFFD96A)),
+                      avatar: const Icon(
+                        Icons.category_rounded,
+                        size: 16,
+                        color: Color(0xFFFFD96A),
+                      ),
                       label: Text(item.label),
                       backgroundColor: const Color(0x33243C45),
                       side: const BorderSide(color: Color(0x4459CDB1)),
-                      labelStyle: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700),
+                      labelStyle: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   )
                   .toList(),
@@ -609,7 +632,11 @@ class _PuzzlePanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _StageContent(controller: controller, snapshot: snapshot, compact: compact),
+          _StageContent(
+            controller: controller,
+            snapshot: snapshot,
+            compact: compact,
+          ),
           const SizedBox(height: 14),
           Row(
             children: [
@@ -618,7 +645,11 @@ class _PuzzlePanel extends StatelessWidget {
                   key: const Key('episode-one-v3-hint'),
                   onPressed: controller.requestHint,
                   icon: const Icon(Icons.lightbulb_outline_rounded),
-                  label: Text(snapshot.hintLevel == 0 ? '꽃루미에게 힌트' : '다음 힌트 ${snapshot.hintLevel}/3'),
+                  label: Text(
+                    snapshot.hintLevel == 0
+                        ? '꽃루미에게 힌트'
+                        : '다음 힌트 ${snapshot.hintLevel}/3',
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -638,7 +669,11 @@ class _PuzzlePanel extends StatelessWidget {
             const Text(
               '여러 번 시도한 활동이에요. 힌트를 사용해도 경험치와 보상은 줄지 않아요.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Color(0xFF725A3D), fontSize: 11, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                color: Color(0xFF725A3D),
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ],
         ],
@@ -648,7 +683,11 @@ class _PuzzlePanel extends StatelessWidget {
 }
 
 class _StageContent extends StatelessWidget {
-  const _StageContent({required this.controller, required this.snapshot, required this.compact});
+  const _StageContent({
+    required this.controller,
+    required this.snapshot,
+    required this.compact,
+  });
 
   final EpisodeOneV3Controller controller;
   final EpisodeOneV3Snapshot snapshot;
@@ -658,47 +697,145 @@ class _StageContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return switch (snapshot.stage) {
       EpisodeOneV3Stage.identifyFragment => _textGrid(const [
-          _TextOption('crescent', '반달 별조각', '오른쪽 가장자리에 길게 긁힌 자국이 있다.', Icons.nightlight_round),
-          _TextOption('pottery', '화분 조각', '흙이 묻어 있고 홈보다 두껍다.', Icons.local_florist_rounded),
-          _TextOption('button', '은빛 단추', '둥글고 작은 구멍이 두 개 있다.', Icons.radio_button_checked),
-          _TextOption('glass', '유리 파편', '빛을 반사하지만 삼각형에 가깝다.', Icons.change_history_rounded),
-        ]),
-      EpisodeOneV3Stage.testTwelveGroups => _experimentButtons(const [2, 3, 4, 5], total: 12, unit: '개씩'),
-      EpisodeOneV3Stage.revealTwelveDivisors => _numberGrid(const [1, 2, 3, 4, 5, 6, 8, 12]),
-      EpisodeOneV3Stage.pairTwelveFactors => _simpleTextChoices(const ['1×12', '2×6', '3×4', '1×11', '2×5', '4×4']),
-      EpisodeOneV3Stage.orderTwelveDivisors => _orderedNumberStage(const [1, 2, 3, 4, 5, 6, 8, 12]),
-      EpisodeOneV3Stage.identifyFlowerpot => _textGrid(const [
-          _TextOption('pot1', '1번 화분', '잎 문양 3개', Icons.local_florist),
-          _TextOption('pot2', '2번 화분', '잎 문양 4개', Icons.local_florist),
-          _TextOption('pot3', '3번 화분', '잎 문양 5개', Icons.local_florist),
-          _TextOption('pot4', '4번 화분', '잎 문양 8개', Icons.local_florist),
-          _TextOption('pot5', '5번 화분', '잎 문양 7개', Icons.local_florist),
-          _TextOption('pot6', '6번 화분', '잎 문양 6개', Icons.local_florist),
-        ]),
-      EpisodeOneV3Stage.assembleScratches => _textGrid(const [
-          _TextOption('rim7', '화분 테두리', '짧은 긁힘 7개', Icons.circle_outlined),
-          _TextOption('soil5', '흙 위', '눌린 긁힘 5개', Icons.grass_rounded),
-          _TextOption('tile6', '바닥 타일', '빛에 비치는 긁힘 6개', Icons.grid_4x4_rounded),
-          _TextOption('wind4', '바람종', '금속 긁힘 4개, 방향이 다름', Icons.notifications_none_rounded),
-        ]),
-      EpisodeOneV3Stage.arrangeEighteen => _numberGrid(const [1, 2, 3, 4, 6, 9, 12, 18]),
-      EpisodeOneV3Stage.removeDuplicateEighteen => _simpleTextChoices(const ['18×1', '9×2', '6×3', '1×17', '4×4', '5×3']),
-      EpisodeOneV3Stage.findMissingEighteen => Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const _RecordStrip(text: '1 — 18    2 — 9    3 — □'),
-            const SizedBox(height: 10),
-            _numberGrid(const [4, 5, 6, 7]),
-          ],
+        _TextOption(
+          'crescent',
+          '반달 별조각',
+          '오른쪽 가장자리에 길게 긁힌 자국이 있다.',
+          Icons.nightlight_round,
         ),
-      EpisodeOneV3Stage.rejectNonDivisorEighteen => _numberGrid(const [2, 3, 4, 6, 9]),
-      EpisodeOneV3Stage.arrangeTwentyFour => _simpleTextChoices(const ['1×24', '2×12', '3×8', '4×6', '5×5', '6×5']),
-      EpisodeOneV3Stage.mapTwentyFourPins => _numberGrid(const [1, 2, 3, 4, 5, 6, 8, 10, 12, 24]),
+        _TextOption(
+          'pottery',
+          '화분 조각',
+          '흙이 묻어 있고 홈보다 두껍다.',
+          Icons.local_florist_rounded,
+        ),
+        _TextOption(
+          'button',
+          '은빛 단추',
+          '둥글고 작은 구멍이 두 개 있다.',
+          Icons.radio_button_checked,
+        ),
+        _TextOption(
+          'glass',
+          '유리 파편',
+          '빛을 반사하지만 삼각형에 가깝다.',
+          Icons.change_history_rounded,
+        ),
+      ]),
+      EpisodeOneV3Stage.testTwelveGroups => _experimentButtons(
+        const [2, 3, 4, 5],
+        total: 12,
+        unit: '개씩',
+      ),
+      EpisodeOneV3Stage.revealTwelveDivisors => _numberGrid(const [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        8,
+        12,
+      ]),
+      EpisodeOneV3Stage.pairTwelveFactors => _simpleTextChoices(const [
+        '1×12',
+        '2×6',
+        '3×4',
+        '1×11',
+        '2×5',
+        '4×4',
+      ]),
+      EpisodeOneV3Stage.orderTwelveDivisors => _orderedNumberStage(const [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        8,
+        12,
+      ]),
+      EpisodeOneV3Stage.identifyFlowerpot => _textGrid(const [
+        _TextOption('pot1', '1번 화분', '잎 문양 3개', Icons.local_florist),
+        _TextOption('pot2', '2번 화분', '잎 문양 4개', Icons.local_florist),
+        _TextOption('pot3', '3번 화분', '잎 문양 5개', Icons.local_florist),
+        _TextOption('pot4', '4번 화분', '잎 문양 8개', Icons.local_florist),
+        _TextOption('pot5', '5번 화분', '잎 문양 7개', Icons.local_florist),
+        _TextOption('pot6', '6번 화분', '잎 문양 6개', Icons.local_florist),
+      ]),
+      EpisodeOneV3Stage.assembleScratches => _textGrid(const [
+        _TextOption('rim7', '화분 테두리', '짧은 긁힘 7개', Icons.circle_outlined),
+        _TextOption('soil5', '흙 위', '눌린 긁힘 5개', Icons.grass_rounded),
+        _TextOption('tile6', '바닥 타일', '빛에 비치는 긁힘 6개', Icons.grid_4x4_rounded),
+        _TextOption(
+          'wind4',
+          '바람종',
+          '금속 긁힘 4개, 방향이 다름',
+          Icons.notifications_none_rounded,
+        ),
+      ]),
+      EpisodeOneV3Stage.arrangeEighteen => _numberGrid(const [
+        1,
+        2,
+        3,
+        4,
+        6,
+        9,
+        12,
+        18,
+      ]),
+      EpisodeOneV3Stage.removeDuplicateEighteen => _simpleTextChoices(const [
+        '18×1',
+        '9×2',
+        '6×3',
+        '1×17',
+        '4×4',
+        '5×3',
+      ]),
+      EpisodeOneV3Stage.findMissingEighteen => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const _RecordStrip(text: '1 — 18    2 — 9    3 — □'),
+          const SizedBox(height: 10),
+          _numberGrid(const [4, 5, 6, 7]),
+        ],
+      ),
+      EpisodeOneV3Stage.rejectNonDivisorEighteen => _numberGrid(const [
+        2,
+        3,
+        4,
+        6,
+        9,
+      ]),
+      EpisodeOneV3Stage.arrangeTwentyFour => _simpleTextChoices(const [
+        '1×24',
+        '2×12',
+        '3×8',
+        '4×6',
+        '5×5',
+        '6×5',
+      ]),
+      EpisodeOneV3Stage.mapTwentyFourPins => _numberGrid(const [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        8,
+        10,
+        12,
+        24,
+      ]),
       EpisodeOneV3Stage.orderStorageGlyphs => _orderedGlyphStage(),
       EpisodeOneV3Stage.rejectFalseRecord => _falseRecordStage(),
       EpisodeOneV3Stage.useTraceFilters => _filterStage(),
       EpisodeOneV3Stage.chooseTrackStart => _trackStartStage(),
-      EpisodeOneV3Stage.testTrackIntervals => _experimentButtons(const [4, 5, 6], total: 24, unit: '칸'),
+      EpisodeOneV3Stage.testTrackIntervals => _experimentButtons(
+        const [4, 5, 6],
+        total: 24,
+        unit: '칸',
+      ),
       EpisodeOneV3Stage.connectFootprints => _trackNodeStage(),
       EpisodeOneV3Stage.orderEvidence => _evidenceStage(),
       EpisodeOneV3Stage.chooseConclusion => _conclusionStage(),
@@ -717,7 +854,10 @@ class _StageContent extends StatelessWidget {
           selected: selected,
           onSelected: (_) => controller.toggleNumber(number),
           label: Text('$number'),
-          avatar: Icon(selected ? Icons.auto_awesome : Icons.circle_outlined, size: 17),
+          avatar: Icon(
+            selected ? Icons.auto_awesome : Icons.circle_outlined,
+            size: 17,
+          ),
         );
       }).toList(),
     );
@@ -734,7 +874,10 @@ class _StageContent extends StatelessWidget {
           selected: selected,
           onSelected: (_) => controller.toggleText(choice),
           label: Text(choice),
-          avatar: Icon(selected ? Icons.link_rounded : Icons.link_off_rounded, size: 17),
+          avatar: Icon(
+            selected ? Icons.link_rounded : Icons.link_off_rounded,
+            size: 17,
+          ),
         );
       }).toList(),
     );
@@ -762,21 +905,46 @@ class _StageContent extends StatelessWidget {
             duration: const Duration(milliseconds: 180),
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: selected ? const Color(0xFFFFE8A8) : const Color(0xFFFFFFFF),
+              color: selected
+                  ? const Color(0xFFFFE8A8)
+                  : const Color(0xFFFFFFFF),
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
-                color: selected ? const Color(0xFF8D6B1E) : const Color(0xFFD8D2C4),
+                color: selected
+                    ? const Color(0xFF8D6B1E)
+                    : const Color(0xFFD8D2C4),
                 width: selected ? 2 : 1,
               ),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(option.icon, color: const Color(0xFF5B4C78), size: compact ? 25 : 29),
+                Icon(
+                  option.icon,
+                  color: const Color(0xFF5B4C78),
+                  size: compact ? 25 : 29,
+                ),
                 const SizedBox(height: 6),
-                Text(option.label, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF3D3350), fontWeight: FontWeight.w900)),
+                Text(
+                  option.label,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color(0xFF3D3350),
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
                 const SizedBox(height: 3),
-                Text(option.detail, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF6D6475), fontSize: 10.5, height: 1.2)),
+                Text(
+                  option.detail,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color(0xFF6D6475),
+                    fontSize: 10.5,
+                    height: 1.2,
+                  ),
+                ),
               ],
             ),
           ),
@@ -785,7 +953,11 @@ class _StageContent extends StatelessWidget {
     );
   }
 
-  Widget _experimentButtons(List<int> values, {required int total, required String unit}) {
+  Widget _experimentButtons(
+    List<int> values, {
+    required int total,
+    required String unit,
+  }) {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -796,7 +968,11 @@ class _StageContent extends StatelessWidget {
           key: Key('episode-one-v3-test-$valueToTest'),
           onPressed: () => controller.testValue(valueToTest),
           icon: Icon(tested ? Icons.science_rounded : Icons.science_outlined),
-          label: Text(tested ? '$valueToTest$unit · ${remainder == 0 ? '남지 않음' : '$remainder 남음'}' : '$valueToTest$unit 시험'),
+          label: Text(
+            tested
+                ? '$valueToTest$unit · ${remainder == 0 ? '남지 않음' : '$remainder 남음'}'
+                : '$valueToTest$unit 시험',
+          ),
         );
       }).toList(),
     );
@@ -806,17 +982,24 @@ class _StageContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _SequenceDisplay(values: snapshot.orderedNumbers.map((value) => '$value').toList(), emptyText: '아직 놓은 별자리 조각이 없어요.'),
+        _SequenceDisplay(
+          values: snapshot.orderedNumbers.map((value) => '$value').toList(),
+          emptyText: '아직 놓은 별자리 조각이 없어요.',
+        ),
         const SizedBox(height: 10),
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: candidates.map((number) => ActionChip(
-            key: Key('episode-one-v3-order-number-$number'),
-            avatar: const Icon(Icons.auto_awesome_rounded, size: 17),
-            label: Text('$number'),
-            onPressed: () => controller.selectOrderedNumber(number),
-          )).toList(),
+          children: candidates
+              .map(
+                (number) => ActionChip(
+                  key: Key('episode-one-v3-order-number-$number'),
+                  avatar: const Icon(Icons.auto_awesome_rounded, size: 17),
+                  label: Text('$number'),
+                  onPressed: () => controller.selectOrderedNumber(number),
+                ),
+              )
+              .toList(),
         ),
       ],
     );
@@ -832,29 +1015,53 @@ class _StageContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _SequenceDisplay(values: snapshot.orderedTexts.map((code) => _glyphLabel(code)).toList(), emptyText: '문양의 입력 순서를 찾아야 해요.'),
+        _SequenceDisplay(
+          values: snapshot.orderedTexts
+              .map((code) => _glyphLabel(code))
+              .toList(),
+          emptyText: '문양의 입력 순서를 찾아야 해요.',
+        ),
         const SizedBox(height: 10),
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: glyphs.map((glyph) => ActionChip(
-            key: Key('episode-one-v3-glyph-${glyph.$1}'),
-            avatar: Icon(glyph.$3, size: 18),
-            label: Text(glyph.$2),
-            onPressed: () => controller.selectOrderedText(glyph.$1),
-          )).toList(),
+          children: glyphs
+              .map(
+                (glyph) => ActionChip(
+                  key: Key('episode-one-v3-glyph-${glyph.$1}'),
+                  avatar: Icon(glyph.$3, size: 18),
+                  label: Text(glyph.$2),
+                  onPressed: () => controller.selectOrderedText(glyph.$1),
+                ),
+              )
+              .toList(),
         ),
       ],
     );
   }
 
-  String _glyphLabel(String code) => switch (code) {'star' => '별', 'moon' => '달', 'leaf' => '잎', _ => '물방울'};
+  String _glyphLabel(String code) => switch (code) {
+    'star' => '별',
+    'moon' => '달',
+    'leaf' => '잎',
+    _ => '물방울',
+  };
 
   Widget _falseRecordStage() {
     const records = [
-      _TextOption('A', '기록 A', '3개씩 놓으면 24개가 남지 않는다.', Icons.description_rounded),
+      _TextOption(
+        'A',
+        '기록 A',
+        '3개씩 놓으면 24개가 남지 않는다.',
+        Icons.description_rounded,
+      ),
       _TextOption('B', '기록 B', '3과 8을 곱하면 24가 된다.', Icons.description_rounded),
-      _TextOption('C', '기록 C', '5는 24보다 작으므로 잠금핀에 사용할 수 있다.', Icons.warning_amber_rounded),
+      _TextOption(
+        'C',
+        '기록 C',
+        '5는 24보다 작으므로 잠금핀에 사용할 수 있다.',
+        Icons.warning_amber_rounded,
+      ),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -864,8 +1071,16 @@ class _StageContent extends StatelessWidget {
         OutlinedButton.icon(
           key: const Key('episode-one-v3-five-board'),
           onPressed: () => controller.testValue(5),
-          icon: Icon(snapshot.testedValues.contains(5) ? Icons.check_circle_rounded : Icons.grid_view_rounded),
-          label: Text(snapshot.testedValues.contains(5) ? '5칸 시험판: 씨앗 4개가 남음' : '선택한 기록을 5칸 시험판으로 검증'),
+          icon: Icon(
+            snapshot.testedValues.contains(5)
+                ? Icons.check_circle_rounded
+                : Icons.grid_view_rounded,
+          ),
+          label: Text(
+            snapshot.testedValues.contains(5)
+                ? '5칸 시험판: 씨앗 4개가 남음'
+                : '선택한 기록을 5칸 시험판으로 검증',
+          ),
         ),
       ],
     );
@@ -874,8 +1089,18 @@ class _StageContent extends StatelessWidget {
   Widget _filterStage() {
     const tools = [
       _TextOption('dew', '물방울 렌즈', '젖은 흔적만 밝힌다.', Icons.water_drop_rounded),
-      _TextOption('stencil', '잎사귀 흔적틀', '발자국의 크기와 밑창을 비교한다.', Icons.filter_alt_rounded),
-      _TextOption('starlight', '별가루 조명', '오래된 씨앗 이동선을 드러낸다.', Icons.flashlight_on_rounded),
+      _TextOption(
+        'stencil',
+        '잎사귀 흔적틀',
+        '발자국의 크기와 밑창을 비교한다.',
+        Icons.filter_alt_rounded,
+      ),
+      _TextOption(
+        'starlight',
+        '별가루 조명',
+        '오래된 씨앗 이동선을 드러낸다.',
+        Icons.flashlight_on_rounded,
+      ),
     ];
     return Wrap(
       spacing: 8,
@@ -903,16 +1128,20 @@ class _StageContent extends StatelessWidget {
       (3, '정원사 보관소 앞', '큰 장화 밑창 문양만 이어진다.'),
     ];
     return Column(
-      children: starts.map((start) => Padding(
-        padding: const EdgeInsets.only(bottom: 7),
-        child: _SingleChoiceCard(
-          key: Key('episode-one-v3-start-${start.$1}'),
-          selected: snapshot.selectedNumbers.contains(start.$1),
-          title: start.$2,
-          subtitle: start.$3,
-          onTap: () => controller.toggleNumber(start.$1),
-        ),
-      )).toList(),
+      children: starts
+          .map(
+            (start) => Padding(
+              padding: const EdgeInsets.only(bottom: 7),
+              child: _SingleChoiceCard(
+                key: Key('episode-one-v3-start-${start.$1}'),
+                selected: snapshot.selectedNumbers.contains(start.$1),
+                title: start.$2,
+                subtitle: start.$3,
+                onTap: () => controller.toggleNumber(start.$1),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 
@@ -921,7 +1150,10 @@ class _StageContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _SequenceDisplay(values: snapshot.trackPath.map((value) => '$value번 돌').toList(), emptyText: '시작점부터 발자국을 하나씩 연결하세요.'),
+        _SequenceDisplay(
+          values: snapshot.trackPath.map((value) => '$value번 돌').toList(),
+          emptyText: '시작점부터 발자국을 하나씩 연결하세요.',
+        ),
         const SizedBox(height: 10),
         Wrap(
           spacing: 8,
@@ -931,7 +1163,14 @@ class _StageContent extends StatelessWidget {
             final wet = const {0, 6, 12, 18, 24}.contains(node);
             return ActionChip(
               key: Key('episode-one-v3-track-node-$node'),
-              avatar: Icon(connected ? Icons.pets_rounded : wet ? Icons.water_drop_rounded : Icons.circle_outlined, size: 18),
+              avatar: Icon(
+                connected
+                    ? Icons.pets_rounded
+                    : wet
+                    ? Icons.water_drop_rounded
+                    : Icons.circle_outlined,
+                size: 18,
+              ),
               label: Text('$node번 ${wet ? '젖은 돌' : '마른 돌'}'),
               onPressed: () => controller.selectTrackNode(node),
             );
@@ -953,19 +1192,28 @@ class _StageContent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _SequenceDisplay(
-          values: snapshot.evidenceOrder.map((code) => cards.firstWhere((card) => card.$1 == code).$2).toList(),
+          values: snapshot.evidenceOrder
+              .map((code) => cards.firstWhere((card) => card.$1 == code).$2)
+              .toList(),
           emptyText: '원인이 되는 장면부터 카드를 놓으세요.',
         ),
         const SizedBox(height: 10),
-        ...cards.map((card) => Padding(
-          padding: const EdgeInsets.only(bottom: 7),
-          child: OutlinedButton.icon(
-            key: Key('episode-one-v3-evidence-${card.$1}'),
-            onPressed: snapshot.evidenceOrder.contains(card.$1) ? null : () => controller.selectEvidenceCard(card.$1),
-            icon: const Icon(Icons.view_timeline_rounded),
-            label: Align(alignment: Alignment.centerLeft, child: Text(card.$2)),
+        ...cards.map(
+          (card) => Padding(
+            padding: const EdgeInsets.only(bottom: 7),
+            child: OutlinedButton.icon(
+              key: Key('episode-one-v3-evidence-${card.$1}'),
+              onPressed: snapshot.evidenceOrder.contains(card.$1)
+                  ? null
+                  : () => controller.selectEvidenceCard(card.$1),
+              icon: const Icon(Icons.view_timeline_rounded),
+              label: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(card.$2),
+              ),
+            ),
           ),
-        )),
+        ),
       ],
     );
   }
@@ -977,21 +1225,31 @@ class _StageContent extends StatelessWidget {
       ('C', '바람이 씨앗을 하늘로 날려 보냈다.'),
     ];
     return Column(
-      children: choices.map((choice) => Padding(
-        padding: const EdgeInsets.only(bottom: 7),
-        child: _SingleChoiceCard(
-          key: Key('episode-one-v3-conclusion-${choice.$1}'),
-          selected: snapshot.selectedTexts.contains(choice.$1),
-          title: '${choice.$1}. ${choice.$2}',
-          onTap: () => controller.toggleText(choice.$1),
-        ),
-      )).toList(),
+      children: choices
+          .map(
+            (choice) => Padding(
+              padding: const EdgeInsets.only(bottom: 7),
+              child: _SingleChoiceCard(
+                key: Key('episode-one-v3-conclusion-${choice.$1}'),
+                selected: snapshot.selectedTexts.contains(choice.$1),
+                title: '${choice.$1}. ${choice.$2}',
+                onTap: () => controller.toggleText(choice.$1),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 }
 
 class _SingleChoiceCard extends StatelessWidget {
-  const _SingleChoiceCard({super.key, required this.selected, required this.title, this.subtitle, required this.onTap});
+  const _SingleChoiceCard({
+    super.key,
+    required this.selected,
+    required this.title,
+    this.subtitle,
+    required this.onTap,
+  });
 
   final bool selected;
   final String title;
@@ -1009,21 +1267,42 @@ class _SingleChoiceCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected ? const Color(0xFFFFE8A8) : Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: selected ? const Color(0xFF8D6B1E) : const Color(0xFFD8D2C4), width: selected ? 2 : 1),
+          border: Border.all(
+            color: selected ? const Color(0xFF8D6B1E) : const Color(0xFFD8D2C4),
+            width: selected ? 2 : 1,
+          ),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(selected ? Icons.radio_button_checked_rounded : Icons.radio_button_unchecked_rounded, color: const Color(0xFF725A3D)),
+            Icon(
+              selected
+                  ? Icons.radio_button_checked_rounded
+                  : Icons.radio_button_unchecked_rounded,
+              color: const Color(0xFF725A3D),
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(color: Color(0xFF3D3350), fontWeight: FontWeight.w900)),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Color(0xFF3D3350),
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 3),
-                    Text(subtitle!, style: const TextStyle(color: Color(0xFF6D6475), fontSize: 11, height: 1.25)),
+                    Text(
+                      subtitle!,
+                      style: const TextStyle(
+                        color: Color(0xFF6D6475),
+                        fontSize: 11,
+                        height: 1.25,
+                      ),
+                    ),
                   ],
                 ],
               ),
@@ -1058,7 +1337,16 @@ class _RecordStrip extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFD4B96F)),
       ),
-      child: Text(text, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF54452E), fontSize: 17, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: Color(0xFF54452E),
+          fontSize: 17,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 1.2,
+        ),
+      ),
     );
   }
 }
@@ -1073,9 +1361,19 @@ class _SequenceDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: const Color(0xFFF0E9F7), borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0E9F7),
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: values.isEmpty
-          ? Text(emptyText, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF746982), fontWeight: FontWeight.w700))
+          ? Text(
+              emptyText,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF746982),
+                fontWeight: FontWeight.w700,
+              ),
+            )
           : Wrap(
               spacing: 6,
               runSpacing: 6,
@@ -1083,7 +1381,12 @@ class _SequenceDisplay extends StatelessWidget {
               children: [
                 for (var index = 0; index < values.length; index++) ...[
                   Chip(label: Text(values[index])),
-                  if (index < values.length - 1) const Icon(Icons.arrow_forward_rounded, size: 17, color: Color(0xFF806B9B)),
+                  if (index < values.length - 1)
+                    const Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 17,
+                      color: Color(0xFF806B9B),
+                    ),
                 ],
               ],
             ),
@@ -1101,7 +1404,10 @@ class _MessageBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: const Key('episode-one-v3-message-bar'),
-      padding: EdgeInsets.symmetric(horizontal: compact ? 11 : 14, vertical: compact ? 8 : 10),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 11 : 14,
+        vertical: compact ? 8 : 10,
+      ),
       decoration: BoxDecoration(
         color: const Color(0xEC223540),
         borderRadius: BorderRadius.circular(18),
@@ -1117,15 +1423,35 @@ class _MessageBar extends StatelessWidget {
               key: const Key('episode-one-v3-message'),
               maxLines: compact ? 2 : 3,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: Colors.white, fontSize: compact ? 11 : 12, height: 1.3, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: compact ? 11 : 12,
+                height: 1.3,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
           const SizedBox(width: 8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(snapshot.macroProgressLabel, style: const TextStyle(color: Color(0xFFD8F5EC), fontSize: 10, fontWeight: FontWeight.w900)),
-              Text(snapshot.learningProgressLabel, key: const Key('episode-one-v3-learning-progress'), style: const TextStyle(color: Color(0xFFFFE39A), fontSize: 9.5, fontWeight: FontWeight.w800)),
+              Text(
+                snapshot.macroProgressLabel,
+                style: const TextStyle(
+                  color: Color(0xFFD8F5EC),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              Text(
+                snapshot.learningProgressLabel,
+                key: const Key('episode-one-v3-learning-progress'),
+                style: const TextStyle(
+                  color: Color(0xFFFFE39A),
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
             ],
           ),
         ],
@@ -1159,15 +1485,29 @@ class _CompletionPanel extends StatelessWidget {
       key: const Key('episode-one-v3-completion'),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFFFFF0C8), Color(0xFFE5F5EA)]),
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFF0C8), Color(0xFFE5F5EA)],
+        ),
         borderRadius: BorderRadius.circular(26),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Icon(Icons.auto_awesome_rounded, size: 52, color: Color(0xFF80602B)),
+          const Icon(
+            Icons.auto_awesome_rounded,
+            size: 52,
+            color: Color(0xFF80602B),
+          ),
           const SizedBox(height: 10),
-          const Text('Episode 1 완료', textAlign: TextAlign.center, style: TextStyle(color: Color(0xFF3E3546), fontSize: 25, fontWeight: FontWeight.w900)),
+          const Text(
+            'Episode 1 완료',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Color(0xFF3E3546),
+              fontSize: 25,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
           const SizedBox(height: 8),
           const Text(
             '씨앗은 먼저 바람에 떨어졌고 작은 생물이 그 뒤를 따라 연못으로 이동했어요. 아직 범인이라고 단정할 수는 없어요.',
@@ -1177,17 +1517,34 @@ class _CompletionPanel extends StatelessWidget {
           const SizedBox(height: 14),
           const _RewardLine(icon: Icons.stars_rounded, text: '경험치 +60'),
           const _RewardLine(icon: Icons.menu_book_rounded, text: '핵심 단서 6개 기록'),
-          const _RewardLine(icon: Icons.lock_outline_rounded, text: 'Episode 2 · 연못의 잠긴 수문 예고'),
+          const _RewardLine(
+            icon: Icons.lock_outline_rounded,
+            text: 'Episode 2 · 연못의 잠긴 수문 예고',
+          ),
           if (savingReward) ...[
             const SizedBox(height: 12),
             const Center(child: CircularProgressIndicator()),
           ] else if (rewardError != null) ...[
             const SizedBox(height: 10),
-            Text(rewardError!, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF9B3F3F), fontWeight: FontWeight.w700)),
+            Text(
+              rewardError!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF9B3F3F),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
             TextButton(onPressed: onRetryReward, child: const Text('보상 다시 저장')),
           ] else if (rewardSaved) ...[
             const SizedBox(height: 8),
-            const Text('보상이 정원 기록에 저장됐어요.', textAlign: TextAlign.center, style: TextStyle(color: Color(0xFF3F7255), fontWeight: FontWeight.w800)),
+            const Text(
+              '보상이 정원 기록에 저장됐어요.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xFF3F7255),
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ],
           const SizedBox(height: 14),
           if (!snapshot.challengeCompleted && !snapshot.challengeOpen)
@@ -1199,14 +1556,23 @@ class _CompletionPanel extends StatelessWidget {
             ),
           if (snapshot.challengeOpen) ...[
             const SizedBox(height: 8),
-            const Text('30의 약수를 모두 선택하세요.', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w900)),
+            const Text(
+              '30의 약수를 모두 선택하세요.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontWeight: FontWeight.w900),
+            ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 7,
               runSpacing: 7,
               alignment: WrapAlignment.center,
               children: const [1, 2, 3, 4, 5, 6, 10, 12, 15, 30]
-                  .map((number) => _ChallengeNumber(number: number, controller: controller))
+                  .map(
+                    (number) => _ChallengeNumber(
+                      number: number,
+                      controller: controller,
+                    ),
+                  )
                   .toList(),
             ),
             const SizedBox(height: 8),
@@ -1218,7 +1584,14 @@ class _CompletionPanel extends StatelessWidget {
           ],
           if (snapshot.challengeCompleted) ...[
             const SizedBox(height: 8),
-            const Text('정원사의 별도장을 완성했어요!', textAlign: TextAlign.center, style: TextStyle(color: Color(0xFF765A23), fontWeight: FontWeight.w900)),
+            const Text(
+              '정원사의 별도장을 완성했어요!',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xFF765A23),
+                fontWeight: FontWeight.w900,
+              ),
+            ),
           ],
           const SizedBox(height: 12),
           FilledButton.icon(
@@ -1270,7 +1643,13 @@ class _RewardLine extends StatelessWidget {
         children: [
           Icon(icon, color: const Color(0xFF77602C), size: 20),
           const SizedBox(width: 8),
-          Text(text, style: const TextStyle(color: Color(0xFF53495B), fontWeight: FontWeight.w800)),
+          Text(
+            text,
+            style: const TextStyle(
+              color: Color(0xFF53495B),
+              fontWeight: FontWeight.w800,
+            ),
+          ),
         ],
       ),
     );
